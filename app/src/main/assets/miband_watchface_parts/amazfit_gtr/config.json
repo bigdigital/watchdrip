@@ -1,0 +1,92 @@
+{
+  "description": "Watchcface for Amazfit GTR47",
+  "use_custom_arrows": false,
+  "arrow_position": {
+    "x": 176,
+    "y": 71
+  },
+  "bg_value_text": {
+    "color_high": "#ffffa0a0",
+    "color_low": "#ff8bbbff",
+    "position": {
+      "x": 284,
+      "y": 107
+    },
+    "text_pattern": "$value",
+    "text_settings": {
+      "font_family": "sans-serif",
+      "font_size": 51,
+      "stroke_width": 2,
+      "text_align": "right",
+      "text_scale": 0.88,
+      "text_style": "bold"
+    }
+  },
+  "delta_text": {
+    "position": {
+      "x": 224,
+      "y": 87
+    },
+    "text_pattern": "$value at $time",
+    "outdated_text_pattern": "$value $time ago",
+    "text_settings": {
+      "font_size": 24,
+      "text_align": "left"
+    }
+  },
+  "graph": {
+    "bg_color": "#000000",
+    "height": 152,
+    "width": 422,
+    "position": {
+      "x":16,
+      "y":240
+    }
+  },
+  "iob_text": {
+    "position": {
+      "x": 0,
+      "y": 48
+    },
+    "text_pattern": "IoB: $value",
+    "text_settings": {
+	  "text_style": "bold",
+      "font_size": 25,
+      "text_align": "center"
+    }
+  },
+  "treatment_text": {
+    "position": {
+      "x": 238,
+      "y": 111
+    },
+    "text_pattern": "$value at $time",
+    "outdated_text_pattern": "$value $time ago",
+    "text_settings": {
+      "font_size": 24,
+      "text_align": "left"
+    }
+  },
+  "no_readings_text": {
+    "position": {
+      "x": 0,
+      "y": 70
+    },
+    "text_pattern": "No data",
+    "text_settings": {
+      "font_size": 30,
+      "text_align": "center"
+    }
+  },
+  "no_readings_time_text": {
+    "position": {
+      "x": 0,
+      "y": 133
+    },
+    "text_pattern": "at $time",
+    "text_settings": {
+      "font_size": 18,
+      "text_align": "right"
+    }
+  }
+}

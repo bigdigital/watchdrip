@@ -1,0 +1,106 @@
+<resources>
+    <string name="app_name">Huami xDrip</string>
+    <!-- Settings Activity Title -->
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+    <string name="unit_second">second</string>
+    <string name="unit_minute">minute</string>
+    <string name="unit_hour">hour</string>
+    <string name="unit_day">day"</string>
+    <string name="unit_week">week"</string>
+    <string name="unit_seconds">seconds</string>
+    <string name="unit_minutes">minutes</string>
+    <string name="unit_hours">hours</string>
+    <string name="unit_days">days"</string>
+    <string name="unit_weeks">weeks"</string>
+
+    <string name="title_miband">MiBand</string>
+    <string name="summary_miband_enable">Sync Data with MiBand fitness bands</string>
+    <string name="title_miband_enable">Use MiBand Band</string>
+    <string name="title_miband_screen_battery">Show Battery</string>
+    <string name="title_miband_show_date">Show date on the screen</string>
+    <string name="title_miband_visibility">MiBand visibility</string>
+    <string name="summary_miband_visibility">MiBand will be visible for other devices</string>
+    <string name="title_miband_switch_display_on_wrist">Switch display on wrist</string>
+    <string name="title_miband_units">Units</string>
+    <string name="summary_miband_units">Choose the distance unit used on band </string>
+    <string name="title_miband_goal_notification">Goal notification</string>
+    <string name="summary_miband_goal_notification">MiBand will vibrate when you reach a goal</string>
+    <string name="title_miband_locale_24_hour">24 Hour clock</string>
+    <string name="summary_miband_locale_24_hour">Show 24 Hour clock</string>
+
+    <string name="title_miband_nightmode_category">Night mode settings</string>
+    <string name="title_miband_nightmode_enabled">Enable night mode settings</string>
+    <string name="summary_miband_nightmode_enabled">Reduce band screen brightness during custom time</string>
+    <string name="title_miband_nightmode_start">Night mode start</string>
+    <string name="title_miband_nightmode_end">Night mode end</string>
+    <string name="title_miband_interval_in_nightmode">Interval</string>
+    <string name="summary_miband_interval_in_nightmode">Defines how often BG would be synchronized in the night mode</string>
+
+    <string name="title_miband_other_settings_category">Other settings</string>
+    <string name="title_miband_collect_heartrate">Collect HR</string>
+    <string name="summary_miband_collect_heartrate">Would collect heart rate data from band. Update interval can be configured in MiFit or any third-party application</string>
+    <string name="title_miband_collect_steps">Collect steps</string>
+    <string name="summary_miband_collect_steps">Would collect steps data from band. Update interval can be configured in MiFit or any third-party application</string>
+    <string name="title_miband_us_date_format">Date format</string>
+
+    <string name="title_miband_date_settings_category">Date settings</string>
+    <string name="summary_miband_us_date_format">Watchface date format. US(MM/dd),EU(dd/MM)</string>
+
+    <string name="title_miband_authkey">Auth Key</string>
+    <string name="summary_miband_authkey">Set the auth key for MiBand (To get auth key, follow the instructions on https://www.freemyband.com/)</string>
+    <string name="summary_miband_mac">Leave empty for auto search</string>
+    <string name="title_miband_vibrate_on_readings">Vibrate on readings</string>
+
+    <string name="title_miband_graph_category">Graph options</string>
+    <string name="title_miband_graph_treatment_enable">Show bolus</string>
+
+    <string name="title_miband_miband_graph_limit">Graph limit</string>
+    <string name="summary_miband_graph_limit">Defines the maximum BG value which would be visible on the graph</string>
+
+    <string name="title_miband_update_bg">Update BG manually</string>
+    <string name="title_miband_general_settings_category">General settings</string>
+
+    <string name="title_miband_screen_notifications">Show Notifications</string>
+    <string name="title_miband_screen_weather">Show Weather</string>
+    <string name="title_miband_screen_activity">Show Activity</string>
+    <string name="title_miband_screen_more">Show More</string>
+    <string name="title_miband_screen_status">Show Status</string>
+    <string name="title_miband_screen_heart_rate">Show Heart rate</string>
+    <string name="title_miband_screen_timer">Show Timer</string>
+    <string name="title_miband_screen_nfc">Show NFC (if available)</string>
+
+    <string name="summary_miband_send_alarms_other">Sends other alerts</string>
+    <string name="title_miband_send_alarms_other">Other Alerts (covers all xdrip alarms, except glucose hight/low alarms)</string>
+
+    <string name="miband_watchface_istall_success">MiBand watchface has been uploaded successfully!</string>
+    <string name="miband_watchface_istall_error">Error while uploading MiBand watchface</string>
+    <string name="miband_bg_dialog_title">Update bg data now?</string>
+    <string name="miband_alert_snooze_text">Alert %1$s snoozed for %2$d min until %3$s</string>
+    <string name="miband_alert_snooze_title_text">Alert snoozed</string>
+    <string name="miband_alert_missing_text">Missing alert: </string>
+    <string name="miband_alert_missing_title_text">Missing alert</string>
+
+    <string name="miband_search_text">Searching... Please keep the watch near your phone</string>
+    <string name="miband_search_found_text">Found %1$s, MAC address: %2$s</string>
+    <string name="miband_search_failed_text">Could not find the watch, please try again, or enter MAC address manually</string>
+    <string name="miband_success_auth_text">%s was successfully authenticated</string>
+    <string name="miband_error_auth_text">Cannot authorize %s, please recheck Auth code</string>
+    <string name="miband_wrong_auth_text">Wrong %s authorization key, please recheck a key and try to reconnect again</string>
+
+</resources>
