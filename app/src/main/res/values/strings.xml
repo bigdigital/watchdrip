@@ -1,23 +1,5 @@
 <resources>
     <string name="app_name">Huami xDrip</string>
-    <!-- Settings Activity Title -->
-    <string name="title_activity_settings">Settings</string>
-
-    <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
-
-    <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
-
-    <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
-
     <string name="unit_second">second</string>
     <string name="unit_minute">minute</string>
     <string name="unit_hour">hour</string>
@@ -30,6 +12,7 @@
     <string name="unit_weeks">weeks"</string>
 
     <string name="title_miband">MiBand</string>
+    <string name="title_miband_mac">MAC Adress</string>
     <string name="summary_miband_enable">Sync Data with MiBand fitness bands</string>
     <string name="title_miband_enable">Use MiBand Band</string>
     <string name="title_miband_screen_battery">Show Battery</string>
@@ -103,4 +86,17 @@
     <string name="miband_error_auth_text">Cannot authorize %s, please recheck Auth code</string>
     <string name="miband_wrong_auth_text">Wrong %s authorization key, please recheck a key and try to reconnect again</string>
 
+    <string name="please_allow_permission">Please Allow Permission</string>
+    <string name="without_location_scan_doesnt_work">Without Location permission Android Bluetooth scan doesn\'t work</string>
+    <string name="android_10_need_background_location">Android 10 and above need background location for Bluetooth to work</string>
+    <string name="without_location_permission_emergency_cannot_get_location">Without Location permission emergency messages cannot use location data</string>
+
+    <!-- Location Settings -->
+    <string name="location_not_found_title">Location Is Not Enabled</string>
+    <string name="location_not_found_message">For Bluetooth discovery to work on newer devices, location must be enabled. xDrip does not track your location except with the optional Emergency Message feature</string>
+    <string name="location_yes">Enable</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="no">No</string>
 </resources>

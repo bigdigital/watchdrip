@@ -180,10 +180,15 @@ public class MiBandService extends JamBaseBluetoothSequencer {
 
     @Override
     public void onCreate() {
+        UserError.Log.e("MiBandService", "Creating service ");
+        super.onCreate();
     }
 
     @Override
     public void onDestroy() {
+        UserError.Log.e("MiBandService", "Killing service ");
+
+        super.onDestroy();
     }
 
     private boolean readyToProcessCommand() {

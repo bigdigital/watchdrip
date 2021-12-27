@@ -22,7 +22,15 @@ import java.util.List;
  */
 
 @Table(name = "UserErrors", id = BaseColumns._ID)
-public class UserError extends Model {
+public class UserError extends PlusModel {
+
+    private static boolean patched = false;
+
+    private static final String schema[] = {
+            "CREATE TABLE UserErrors (_id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT, severity INTEGER, shortError TEXT, timestamp REAL)",
+            "CREATE INDEX index_UserErrors_timestamp on UserErrors(timestamp)",
+            "CREATE INDEX index_UserErrors_severity on UserErrors(severity)"
+    };
 
     private final static String TAG = UserError.class.getSimpleName();
 
@@ -115,6 +123,7 @@ public class UserError extends Model {
 
     // used in unit testing
     public static void cleanup(long timestamp) {
+        patched = fixUpTable(schema, patched);
         List<UserError> userErrors = new Select()
                 .from(UserError.class)
                 .where("timestamp < ?", timestamp)
