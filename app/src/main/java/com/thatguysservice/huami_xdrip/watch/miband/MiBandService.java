@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.PowerManager;
@@ -135,7 +136,8 @@ public class MiBandService extends JamBaseBluetoothSequencer {
 
     public byte[] sharedSessionKey;
     public int encryptedSequenceNr;
-    public byte handle;
+    public byte handle = 0;
+    private int ringerModeBackup;
 
     public byte getNextHandle() {
         return handle++;
@@ -463,8 +465,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
             case DeviceEvent.CALL_IGNORE:
                 UserError.Log.d(TAG, "call ignored");
                 if (I.state.equals(MiBandState.WAITING_USER_RESPONSE)) {
-                    startBgTimer();
-                    changeState(SLEEP);
+                    changeState(MiBandState.WAITING_MIFIT_SILENCE);
                 }
                 isWaitingCallResponse = false;
                 break;
@@ -707,6 +708,8 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 stopBgUpdateTimer();
                 bgServiceIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_BG_RETRY_ID, "after_alarm");
                 JoH.wakeUpIntent(HuamiXdrip.getAppContext(), CALL_ALERT_DELAY, bgServiceIntent);
+                AudioManager audioManager = (AudioManager)xdrip.getAppContext().getSystemService(Context.AUDIO_SERVICE);
+                ringerModeBackup = audioManager.getRingerMode();
                 break;
             case MIBAND_NOTIFY_TYPE_MESSAGE:
                 if (MiBand.getMibandType() == MiBandType.MI_BAND2) {
@@ -1139,7 +1142,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 case MiBandState.RESTORE_NIGHTMODE:
                     if (isNeedToRestoreNightMode) {
                         // do nothing because something happen with connection while sending nightmode
-                        extendWakeLock(RESTORE_NIGHT_MODE_DELAY + Constants.SECOND_IN_MS);
+                        extendWakeLock(RESTORE_NIGHT_MODE_DELAY * Constants.SECOND_IN_MS);
                         JoH.threadSleep(RESTORE_NIGHT_MODE_DELAY);
                         if (I.state.equals(CLOSED) || I.state.equals(CLOSE) || !I.isConnected)
                             break;
@@ -1162,6 +1165,15 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                     queueMessage();
                     break;
                 case MiBandState.WAITING_USER_RESPONSE:
+                    break;
+                case WAITING_MIFIT_SILENCE:
+                    //restore ringer mode because mifit won't restore it
+                    extendWakeLock(2 * Constants.SECOND_IN_MS);
+                    JoH.threadSleep((Constants.SECOND_IN_MS));
+                    AudioManager audioManager = (AudioManager)xdrip.getAppContext().getSystemService(Context.AUDIO_SERVICE);
+                    audioManager.setRingerMode(ringerModeBackup);
+                    startBgTimer();
+                    changeNextState();
                     break;
                 case MiBandState.AUTHORIZE_FAILED:
                     unsubscribeAuthSubscription();
@@ -1390,6 +1402,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         static final String SEND_SETTINGS = "Updating Settings";
         static final String QUEUE_MESSAGE = "Queue message";
         static final String WAITING_USER_RESPONSE = "WAITING_USER_RESPONSE";
+        static final String WAITING_MIFIT_SILENCE = "Waiting Mifit Silence";
         static final String AUTHENTICATE = "Authenticate";
         static final String AUTHORIZE = "Authorize phase";
         public static final String AUTHORIZE_FAILED = "Authorization failed handle";
@@ -1443,6 +1456,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
             sequence.add(QUEUE_MESSAGE);
             sequence.add(SEND_QUEUE);
             sequence.add(WAITING_USER_RESPONSE);
+            sequence.add(WAITING_MIFIT_SILENCE);
             sequence.add(SLEEP);
             sequence.add(AUTHORIZE_FAILED);
         }
