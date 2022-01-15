@@ -2,6 +2,9 @@ package com.thatguysservice.huami_xdrip;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,6 +13,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.thatguysservice.huami_xdrip.models.Constants;
+import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.utils.bt.LocationHelper;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
@@ -17,6 +21,11 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
+
+        findPreference(MiBandEntry.PREF_MIBAND_UPDATE_BG).setOnPreferenceClickListener(preference -> {
+            updateMiBandBG(preference.getContext());
+            return true;
+        });
 
         findPreference(MiBandEntry.PREF_MIBAND_ENABLED).setOnPreferenceChangeListener((preference, newValue) -> {
             if ((Boolean) newValue) {
@@ -27,6 +36,27 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
             return true;
         });
+    }
+
+    private void updateMiBandBG(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(HuamiXdrip.getAppContext().getResources().getString(R.string.miband_bg_dialog_title));
+        builder.setPositiveButton(HuamiXdrip.getAppContext().getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                BroadcastService.initialStartIfEnabled();
+            }
+        });
+
+        builder.setNegativeButton(HuamiXdrip.getAppContext().getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     public static void checkReadPermission(final Activity activity) {

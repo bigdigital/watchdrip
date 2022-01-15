@@ -16,6 +16,7 @@ import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.PREF_MIBA
  */
 
 public class MiBand {
+
     private static final String PREF_MIBAND_AUTH_MAC = "miband_auth_mac";
     private static final String PREF_MIBAND_PERSISTANT_AUTH_KEY = "miband_persist_authkey";
     private static final String PREF_MIBAND_MODEL = "miband_model_";
@@ -27,20 +28,6 @@ public class MiBand {
 
     public static boolean isAuthenticated() {
         return  MiBand.getPersistentAuthMac().isEmpty() ? false : true;
-    }
-
-    public static void sendCall(final String message_type, final String message) {
-        Inevitable.task("miband-send-alert-debounce", 3000, () -> JoH.startService(MiBandService.class, "function", "message",
-                "message", message,
-                "message_type", message_type));
-    }
-
-    // convert multi-line text to string for display constraints
-    public static void sendAlert(String alertType, String message) {
-        Inevitable.task("miband-send-alert-debounce", 100, () -> JoH.startService(MiBandService.class, "function", "alarm",
-                "message", message,
-                "title", alertType,
-                "message_type", MIBAND_NOTIFY_TYPE_ALARM));
     }
 
     public static String getMac() {

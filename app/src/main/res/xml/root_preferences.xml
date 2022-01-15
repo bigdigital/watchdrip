@@ -14,5 +14,9 @@
         app:key="miband_data_authkey"
         app:summary="@string/summary_miband_authkey"
         app:title="@string/title_miband_authkey" />
+    <Preference
+        app:key="update_miband_bg"
+        app:dependency="miband_enabled"
+        app:title="@string/title_miband_update_bg"></Preference>
 
 </PreferenceScreen>

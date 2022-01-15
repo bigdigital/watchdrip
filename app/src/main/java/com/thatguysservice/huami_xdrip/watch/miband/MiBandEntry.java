@@ -2,6 +2,7 @@ package com.thatguysservice.huami_xdrip.watch.miband;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.Preference;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -16,6 +17,9 @@ import com.thatguysservice.huami_xdrip.models.Pref;
 import com.thatguysservice.huami_xdrip.models.UserError;
 
 import java.util.Date;
+
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
+import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_ALARM;
 
 // very lightweight entry point class to avoid loader overhead when not in use
 
@@ -49,7 +53,7 @@ public class MiBandEntry {
         public boolean onPreferenceChange(Preference preference, Object value) {
             try {
                 String key = preference.getKey();
-                if (key.equals( MiBandEntry.PREF_MIBAND_NIGHTMODE_INTERVAL)) {
+                if (key.equals(MiBandEntry.PREF_MIBAND_NIGHTMODE_INTERVAL)) {
                     setNightModeInterval((int) value);
                     final String minutes = HuamiXdrip.gs(R.string.unit_minutes);
                     final String title_text = HuamiXdrip.gs(R.string.title_miband_interval_in_nightmode);
@@ -59,8 +63,7 @@ public class MiBandEntry {
                         preference.setTitle(String.format("%s (%s)", title_text, "live"));
                     else
                         preference.setTitle(String.format("%s (%d %s)", title_text, nightModeInterval, minutes));
-                }
-                else if (key.equals(MiBandEntry.PREF_MIBAND_GRAPH_LIMIT)) {
+                } else if (key.equals(MiBandEntry.PREF_MIBAND_GRAPH_LIMIT)) {
                     final int ivalue = (int) value;
                     setGraphLimit(ivalue);
                     final String title_text = HuamiXdrip.gs(R.string.title_miband_miband_graph_limit);
@@ -87,6 +90,9 @@ public class MiBandEntry {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
             if (key.startsWith("miband")) {
                 UserError.Log.d("miband", "Preference key: " + key);
+                if (key.equals(PREF_MIBAND_ENABLED)) {
+                    bgForce();
+                }
                 refresh();
             }
         }
@@ -137,10 +143,6 @@ public class MiBandEntry {
         Pref.setInt(PREF_MIBAND_NIGHTMODE_INTERVAL, val);
     }
 
-    public static void setGraphLimit(int val) {
-        Pref.setInt(PREF_MIBAND_GRAPH_LIMIT, val);
-    }
-
     public static boolean isTreatmentEnabled() {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_TREATMENT_ENBALE);
     }
@@ -151,6 +153,10 @@ public class MiBandEntry {
 
     public static int getGraphLimit() {
         return Pref.getInt(PREF_MIBAND_GRAPH_LIMIT, 16);
+    }
+
+    public static void setGraphLimit(int val) {
+        Pref.setInt(PREF_MIBAND_GRAPH_LIMIT, val);
     }
 
     public static boolean isNeedToDisableHightMTU() {
@@ -173,31 +179,31 @@ public class MiBandEntry {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_US_DATE_FORMAT);
     }
 
-    public static void initialStartIfEnabled() {
-        if (isEnabled()) {
-            Inevitable.task("mb-full-initial-start", 500, new Runnable() {
-                @Override
-                public void run() {
-                    showLatestBG();
-                }
-            });
-        }
-    }
-
     static void refresh() {
         Inevitable.task("miband-preference-changed", 1000, () -> JoH.startService(MiBandService.class, "function", "refresh"));
     }
 
-    public static void showLatestBG() {
+    public static void sendToService(String function, Bundle bundle) {
         if (isNeedSendReading()) {
-            JoH.startService(MiBandService.class, "function", "update_bg");
+            Intent serviceIntent = new Intent(HuamiXdrip.getAppContext(), MiBandService.class);
+            serviceIntent.putExtra("function", function);
+            serviceIntent.putExtras(bundle);
+            HuamiXdrip.getAppContext().startService(serviceIntent);
         }
     }
 
-    public static void forceShowLatestBG() {
-        if (isNeedSendReading()) {
-            JoH.startService(MiBandService.class, "function", "update_bg_force");
-        }
+    public static void sendCall(final String message_type, final String message) {
+        Inevitable.task("miband-send-alert-debounce", 3000, () -> JoH.startService(MiBandService.class, "function", "message",
+                "message", message,
+                "message_type", message_type));
+    }
+
+    // convert multi-line text to string for display constraints
+    public static void sendAlert(String alertType, String message) {
+        Inevitable.task("miband-send-alert-debounce", 100, () -> JoH.startService(MiBandService.class, "function", "alarm",
+                "message", message,
+                "title", alertType,
+                "message_type", MIBAND_NOTIFY_TYPE_ALARM));
     }
 
     public static void sendPrefIntent(MiBandService.MIBAND_INTEND_STATES state, Integer progress, String descrText) {

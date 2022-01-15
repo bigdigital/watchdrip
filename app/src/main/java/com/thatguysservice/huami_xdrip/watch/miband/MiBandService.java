@@ -28,6 +28,7 @@ import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.JoH;
 import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer;
 import com.thatguysservice.huami_xdrip.utils.Version;
 import com.thatguysservice.huami_xdrip.utils.bt.Subscription;
@@ -72,6 +73,9 @@ import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MINIMUM;
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_WRITE_MTU_OVERHEAD;
 import static com.thatguysservice.huami_xdrip.models.JoH.bytesToHex;
 import static com.thatguysservice.huami_xdrip.models.JoH.emptyString;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_HR;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_STEPS;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
 import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSE;
 import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSED;
 import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.INIT;
@@ -90,6 +94,7 @@ import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCode
  */
 
 public class MiBandService extends JamBaseBluetoothSequencer {
+
     static final List<UUID> huntCharacterstics = new ArrayList<>();
     private static final long RETRY_PERIOD_MS = Constants.SECOND_IN_MS * 30; // sleep for max ms if we have had no signal
     private static final long BG_UPDATE_NO_DATA_INTERVAL = 30 * Constants.MINUTE_IN_MS; //minutes
@@ -131,6 +136,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     public byte[] sharedSessionKey;
     public int encryptedSequenceNr;
     public byte handle;
+
     public byte getNextHandle() {
         return handle++;
     }
@@ -178,6 +184,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         if (this.mMTU < GATT_MTU_MINIMUM) this.mMTU = GATT_MTU_MINIMUM;
     }
 
+
     @Override
     public void onCreate() {
         UserError.Log.e("MiBandService", "Creating service ");
@@ -187,7 +194,6 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     @Override
     public void onDestroy() {
         UserError.Log.e("MiBandService", "Killing service ");
-
         super.onDestroy();
     }
 
@@ -211,8 +217,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         try {
             if (shouldServiceRun()) {
                 final String authMac = MiBand.getPersistentAuthMac();
-                String mac
-                        = MiBand.getMac();
+                String mac = MiBand.getMac();
                 MiBandType currDevice = MiBand.getMibandType();
                 if ((currDevice != prevDeviceType) && currDevice != MiBandType.UNKNOWN) {
                     prevDeviceType = currDevice;
@@ -237,8 +242,9 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                         final String function = intent.getStringExtra("function");
                         if (function != null) {
                             UserError.Log.d(TAG, "onStartCommand was called with function:" + function);
-
-                            String message_type = intent.getStringExtra("message_type");
+                            return START_STICKY;
+                            //TODO handle intents
+                           /* String message_type = intent.getStringExtra("message_type");
                             String message = intent.getStringExtra("message");
                             String title = intent.getStringExtra("title");
 
@@ -257,7 +263,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                                         handleCommand();
                                     }
                                 }
-                            }
+                            }*/
                         } else {
                             // no specific function
                         }
@@ -924,6 +930,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     private void handleHeartrate(byte[] value) {
         if (value.length == 2 && value[0] == 0) {
             int hrValue = (value[1] & 0xff);
+            HuamiXdrip.getAppContext().startService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class).putExtra(INTENT_FUNCTION_KEY, CMD_ADD_HR).putExtra("value", hrValue));
             //HeartRate.create(JoH.tsl(), hrValue, 1); // TODO send heart rate
         }
     }
@@ -935,6 +942,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         if (value.length == 13) {
             byte[] stepsValue = new byte[]{value[1], value[2]};
             int steps = FirmwareOperations.toUint16(stepsValue);
+            HuamiXdrip.getAppContext().startService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class).putExtra(INTENT_FUNCTION_KEY, CMD_ADD_STEPS).putExtra("value", steps));
             //StepCounter.createEfficientRecord(JoH.tsl(), steps);// TODO send steps
         } else {
             UserError.Log.d(TAG, "Unrecognized realtime steps value: " + bytesToHex(value));

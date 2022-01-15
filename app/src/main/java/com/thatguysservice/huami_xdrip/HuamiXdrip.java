@@ -6,6 +6,7 @@ import androidx.annotation.StringRes;
 import androidx.multidex.MultiDexApplication;
 
 import com.activeandroid.ActiveAndroid;
+import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 public class HuamiXdrip extends MultiDexApplication {
@@ -14,7 +15,7 @@ public class HuamiXdrip extends MultiDexApplication {
     @Override
     public void onCreate() {
         HuamiXdrip.context = getApplicationContext();
-        MiBandEntry.initialStartIfEnabled();
+        BroadcastService.initialStartIfEnabled();
         ActiveAndroid.initialize(this);
         super.onCreate();
     }

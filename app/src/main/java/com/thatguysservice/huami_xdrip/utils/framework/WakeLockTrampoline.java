@@ -32,7 +32,7 @@ public class WakeLockTrampoline extends BroadcastReceiver {
     private static final String SERVICE_PARAMETER = "SERVICE_PARAM";
     private static final HashMap<String, Class> cache = new HashMap<>();
     private static final SparseArray<String> collision = new SparseArray<>();
-    private static final boolean D = true;
+    private static final boolean D = false;
 
     /**
      * When we receive the broadcast callback we extract the required service and start it.
