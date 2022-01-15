@@ -4,7 +4,6 @@ import android.graphics.Color;
 
 public class LineSettings {
     public boolean display = true;
-    public Integer width;
     public Integer point_radius;
     public Integer text_size;
     public Boolean has_lines;

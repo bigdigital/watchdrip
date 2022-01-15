@@ -405,6 +405,7 @@ public class WatchFaceGenerator {
                                 .setBackgroundColor(config.graph.getBgColor());
                         bgGraph.setGraphSettings(config.graph);
                         bgGraph.setGraphLimit(data.getGraphLimit());
+
                         bgGraph.showTreatmentLine(data.isShowTreatment());
                         graphImage = bgGraph.build();*/ // TODO draw graph
                     } catch (Exception e) {
@@ -454,7 +455,7 @@ public class WatchFaceGenerator {
         data.drawFormattedTextOnCanvas(canvas, data.getTreatment(), config.treatmentText);
         //draw treatment time text if specified
         if (config.treatmentTimeText != null) {
-            data.drawFormattedTextOnCanvas(canvas, data.getUnitized_delta(), config.treatmentTimeText);
+            data.drawFormattedTextOnCanvas(canvas, data.getTreatment(), config.treatmentTimeText);
         }
 
         //draw battery level text if specified

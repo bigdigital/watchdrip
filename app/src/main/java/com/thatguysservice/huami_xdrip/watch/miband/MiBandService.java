@@ -140,7 +140,9 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     private int ringerModeBackup;
 
     public byte getNextHandle() {
-        return handle++;
+        handle++;
+        UserError.Log.e(TAG, "Handle number: " + handle);
+        return handle;
     }
 
     {
@@ -1199,6 +1201,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         isNeedToAuthenticate = true;
         isWaitingCallResponse = false;
         messageQueue.clear();
+        handle = 0;
         setRetryTimerReal(); // local retry strategy
     }
 

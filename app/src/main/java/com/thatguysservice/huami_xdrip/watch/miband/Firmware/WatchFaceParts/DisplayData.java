@@ -59,6 +59,10 @@ public class DisplayData {
         return unitizedDelta;
     }
 
+    public ValueTime getBatteryLevel(){
+        return new ValueTime(String.valueOf(batteryLevel));
+    }
+
     public ValueTime getNoReadings() {
         return new ValueTime(config.noReadingsText.textPattern, hourMinuteString(JoH.tsl()), false);
     }
