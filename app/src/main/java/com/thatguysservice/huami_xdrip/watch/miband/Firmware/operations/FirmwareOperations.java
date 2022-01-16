@@ -49,12 +49,13 @@ public class FirmwareOperations {
     RxBleConnection connection;
     private FirmwareType firmwareType = FirmwareType.WATCHFACE;
     private Subscription watchfaceSubscription;
+    private boolean fwSatateWasReseted;
 
     public FirmwareOperations(byte[] file, SequenceState sequenceState, MiBandService service) {
         fw = file;
         mState = sequenceState;
         this.service = service;
-
+        fwSatateWasReseted = false;
         connection = service.getConection();
     }
 
@@ -497,6 +498,9 @@ public class FirmwareOperations {
     }
 
     public void resetFirmwareState(Boolean result, String customText) {
+        if (fwSatateWasReseted) {
+            fwSatateWasReseted = true;
+        }
         if (watchfaceSubscription != null) {
             watchfaceSubscription.unsubscribe();
             watchfaceSubscription = null;

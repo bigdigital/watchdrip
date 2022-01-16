@@ -18,10 +18,9 @@ import com.thatguysservice.huami_xdrip.models.UserError;
 
 import java.util.Date;
 
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
 import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_ALARM;
-
-// very lightweight entry point class to avoid loader overhead when not in use
 
 public class MiBandEntry {
     public static final String PREF_MIBAND_ENABLED = "miband_enabled";
@@ -180,30 +179,16 @@ public class MiBandEntry {
     }
 
     static void refresh() {
-        Inevitable.task("miband-preference-changed", 1000, () -> JoH.startService(MiBandService.class, "function", "refresh"));
+        Inevitable.task("miband-preference-changed", 1000, () -> JoH.startService(MiBandService.class, INTENT_FUNCTION_KEY, "refresh"));
     }
 
     public static void sendToService(String function, Bundle bundle) {
         if (isNeedSendReading()) {
             Intent serviceIntent = new Intent(HuamiXdrip.getAppContext(), MiBandService.class);
-            serviceIntent.putExtra("function", function);
+            serviceIntent.putExtra(INTENT_FUNCTION_KEY, function);
             serviceIntent.putExtras(bundle);
             HuamiXdrip.getAppContext().startService(serviceIntent);
         }
-    }
-
-    public static void sendCall(final String message_type, final String message) {
-        Inevitable.task("miband-send-alert-debounce", 3000, () -> JoH.startService(MiBandService.class, "function", "message",
-                "message", message,
-                "message_type", message_type));
-    }
-
-    // convert multi-line text to string for display constraints
-    public static void sendAlert(String alertType, String message) {
-        Inevitable.task("miband-send-alert-debounce", 100, () -> JoH.startService(MiBandService.class, "function", "alarm",
-                "message", message,
-                "title", alertType,
-                "message_type", MIBAND_NOTIFY_TYPE_ALARM));
     }
 
     public static void sendPrefIntent(MiBandService.MIBAND_INTEND_STATES state, Integer progress, String descrText) {

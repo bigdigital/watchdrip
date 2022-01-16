@@ -1,5 +1,6 @@
 package com.thatguysservice.huami_xdrip.watch.miband;
 
+import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.utils.Version;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.AuthOperations;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.AuthOperations2021;
@@ -15,6 +16,7 @@ public enum MiBandType {
     AMAZFITGTR(Const.AMAZFITGTR_NAME),
     AMAZFITGTR_42(Const.AMAZFITGTR_42_NAME),
     AMAZFITGTS(Const.AMAZFITGTS_NAME),
+    AMAZFITGTS2_MINI(Const.AMAZFITGTS2_MINI_NAME),
     AMAZFITGTR_LITE(Const.AMAZFITGTR_LITE_NAME),
     AMAZFITGTS2E(Const.AMAZFITGTS2E_NAME),
     AMAZFITGTR2E(Const.AMAZFITGTR2E_NAME),
@@ -114,10 +116,15 @@ public enum MiBandType {
         return MiBandType.isVerge1(bandType) || MiBandType.isVerge2(bandType);
     }
 
+    public static boolean enableCompression(MiBandType bandType) {
+        return bandType != MiBandType.AMAZFITGTS2_MINI && MiBandType.isVerge(bandType);
+    }
+
     public static boolean isVerge1(MiBandType bandType) {
         return bandType == MiBandType.AMAZFITGTR ||
                 bandType == MiBandType.AMAZFITGTR_42 ||
                 bandType == MiBandType.AMAZFITGTS ||
+                bandType == MiBandType.AMAZFITGTS2_MINI ||
                 bandType == MiBandType.AMAZFITGTR_LITE ||
                 bandType == MiBandType.ZEPP_E;
     }
@@ -140,11 +147,16 @@ public enum MiBandType {
     }
 
     public static AuthOperations getAuthOperations(MiBandType bandType, MiBandService service) {
-        Version version = new Version(MiBand.getVersion());
-        if (bandType ==  MiBandType.MI_BAND6) {
-            if ((version.compareTo(new Version("1.0.4.1")) >= 0)) {
-                return new AuthOperations2021(bandType, service);
+        String versionString = MiBand.getVersion();
+        try {
+            Version version = new Version(versionString);
+            if (bandType == MiBandType.MI_BAND6) {
+                if ((version.compareTo(new Version("1.0.4.1")) >= 0)) {
+                    return new AuthOperations2021(bandType, service);
+                }
             }
+        } catch (IllegalArgumentException e) {
+            UserError.Log.e("MiBandService", e + "versionString : " + versionString );
         }
         return new AuthOperations(bandType, service);
     }

@@ -16,7 +16,12 @@ public class GraphSettings {
     public LineSettings low_val_line;
     public LineSettings high_val_line;
     public LineSettings predictive_line;
-    public LineSettings bolus_line;
+     public LineSettings iob_line;
+    public LineSettings annotations_line;
+    public LineSettings poly_predictive_line;
+    public LineSettings cob_vals_line;
+    public LineSettings bolus_line; //foreground
+
 
     @SerializedName("bg_color")
     private String bgColor = "#FFFFFF";

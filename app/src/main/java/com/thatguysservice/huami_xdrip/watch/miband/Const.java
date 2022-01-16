@@ -170,6 +170,7 @@ public class Const {
     public static final String AMAZFITGTR_NAME = "Amazfit GTR";
     public static final String AMAZFITGTR_42_NAME = "Amazfit GTR42";
     public static final String AMAZFITGTS_NAME = "Amazfit GTS";
+    public static final String AMAZFITGTS2_MINI_NAME = "Amazfit GTS2 mini";
     public static final String AMAZFITGTR_LITE_NAME = "Amazfit GTR L";
     public static final String AMAZFITGTS2E_NAME = "Amazfit GTS 2e";
     public static final String AMAZFITGTR2E_NAME = "Amazfit GTR 2e";

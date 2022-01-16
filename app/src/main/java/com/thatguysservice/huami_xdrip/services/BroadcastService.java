@@ -36,6 +36,7 @@ public class BroadcastService extends Service {
     public static final String CMD_START = "start";
     public static final String CMD_UPDATE_BG = "update_bg";
     public static final String CMD_REPLY_MSG = "reply_msg";
+    public static final String CMD_MESSAGE = "message";
     //send
     protected static final String ACTION_WATCH_COMMUNICATION_RECEIVER = "com.eveningoutpost.dexdrip.watch.wearintegration.WATCH_BROADCAST_RECEIVER";
     //listen

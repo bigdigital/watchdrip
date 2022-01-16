@@ -19,6 +19,7 @@ import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Imag
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Image.ImageInterface;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Image.ImageMiBandPalette;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Image.ImageRGB;
+import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Image.ImageRGB_GTS2Mini;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Image.ImageTransparentRGB;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Parameter;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Utils.QuickLZ;
@@ -38,6 +39,8 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+
+import lombok.NonNull;
 
 import static com.thatguysservice.huami_xdrip.models.JoH.threadSleep;
 import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
@@ -93,6 +96,8 @@ public class WatchFaceGenerator {
             filePrefix = "amazfit_gtr2";
         } else if ((bandType == MiBandType.AMAZFITGTS2 || bandType == MiBandType.AMAZFITGTS2E)) {
             filePrefix = "amazfit_gts2";
+        } else if (bandType == MiBandType.AMAZFITGTS2_MINI) {
+            filePrefix = "amazfit_gts2_mini";
         }
         if (MiBandEntry.isNeedToUseCustomWatchface()) {
             final String dir = getExternalDir();
@@ -170,7 +175,10 @@ public class WatchFaceGenerator {
         UserError.Log.d(TAG, "Reading parameter offsets...");
         //catch wrong parameter size
         if (header.getParametersSize() > 10000) {
-            throw new RuntimeException("Parameter size too big, check watcface");
+            throw new RuntimeException("Parameter size too big, check watchface");
+        }
+        if (header.getParametersSize() <= 0) {
+            throw new RuntimeException("Parameter size negative, check watchface");
         }
         byte[] bytes = new byte[header.getParametersSize()];
         fwFileStream.read(bytes, 0, bytes.length);
@@ -276,6 +284,8 @@ public class WatchFaceGenerator {
         ImageInterface encodedImage;
         if (MiBandType.isBip(bandType) || MiBandType.isBipS(bandType)) {
             encodedImage = new ImageBipPalette(imageByteArrayOutput);
+        } else if (MiBandType.AMAZFITGTS2_MINI == bandType) {
+            encodedImage = new ImageRGB_GTS2Mini(imageByteArrayOutput);
         } else if (MiBandType.isVerge1(bandType)) {
             encodedImage = new ImageRGB(imageByteArrayOutput);
         } else if (MiBandType.isVerge2(bandType)) {
@@ -309,7 +319,7 @@ public class WatchFaceGenerator {
         fwFileStream.close();
 
         //compress watchface if supported
-        if (MiBandType.isVerge(bandType)) {
+        if (MiBandType.enableCompression(bandType)) {
             if (debug) {
                 final String dir = getExternalDir();
                 byte[] firmwareData = firmwareWriteStream.toByteArray();
@@ -379,6 +389,8 @@ public class WatchFaceGenerator {
                 e.printStackTrace();
             }
         }
+        mainScreen.recycle();
+        resultImage.recycle();
         return firmwareData;
     }
 
@@ -460,7 +472,7 @@ public class WatchFaceGenerator {
 
         //draw battery level text if specified
         if (config.batteryLevel != null) {
-            data.drawFormattedTextOnCanvas(canvas, data.getUnitized_delta(), config.batteryLevel);
+            data.drawFormattedTextOnCanvas(canvas, data.getBatteryLevel(), config.batteryLevel);
         }
 
         return resultBitmap;
@@ -484,11 +496,11 @@ public class WatchFaceGenerator {
 
 class BufferedInputStreamPos extends BufferedInputStream {
 
-    public BufferedInputStreamPos(InputStream in) {
+    public BufferedInputStreamPos(@NonNull InputStream in) {
         super(in);
     }
 
-    public BufferedInputStreamPos(InputStream in, int size) {
+    public BufferedInputStreamPos(@NonNull InputStream in, int size) {
         super(in, size);
     }
 

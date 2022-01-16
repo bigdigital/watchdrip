@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PowerManager;
 
 import com.thatguysservice.huami_xdrip.BuildConfig;
 import com.thatguysservice.huami_xdrip.models.JoH;
@@ -21,19 +20,18 @@ public class xDripReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        UserError.Log.e(TAG, "got intent");
         try {
             String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
             String receiver = intent.getPackage();
+            UserError.Log.e(TAG, "got intent");
             UserError.Log.d(TAG, String.format("functionName: %s, receiver: %s", function, receiver));
-            PowerManager.WakeLock wl = JoH.getWakeLock(TAG, 1000);
-            Bundle extras = null;
+            JoH.getWakeLock(TAG, 1000);
             if (function.equals(CMD_START)) {
                 JoH.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
                 return;
             }
             if (!BuildConfig.APPLICATION_ID.equals(receiver)) return;
-            extras = intent.getExtras();
+            Bundle extras = intent.getExtras();
             MiBandEntry.sendToService(function, extras);
         } catch (Exception e) {
             UserError.Log.e(TAG, "onReceive Error: " + e.toString());

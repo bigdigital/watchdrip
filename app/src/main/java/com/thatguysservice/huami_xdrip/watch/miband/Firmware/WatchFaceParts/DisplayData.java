@@ -90,6 +90,7 @@ public class DisplayData {
                 }
             }
         }*/
+        //TODO fix this
         String treatmentText = "100";
         String timeStamp = "100";
         boolean isOld = false;
