@@ -53,6 +53,8 @@ public abstract class Header{
             header = new HeaderMiBand4();
         } else if (bandType == MiBandType.MI_BAND5 || bandType == MiBandType.AMAZFIT5 || bandType == MiBandType.MI_BAND6) {
             header = new HeaderMiBand5();
+        } else if (bandType == MiBandType.AMAZFITGTS2_MINI) {
+            header = new HeaderAmazfitGTS2Mini();
         } else if (MiBandType.isVerge1(bandType)) {
             header = new HeaderAmazfitVerge();
         } else if (MiBandType.isVerge2(bandType)) {

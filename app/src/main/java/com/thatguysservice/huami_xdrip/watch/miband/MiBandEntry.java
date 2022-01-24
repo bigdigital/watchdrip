@@ -18,9 +18,9 @@ import com.thatguysservice.huami_xdrip.models.UserError;
 
 import java.util.Date;
 
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
-import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_ALARM;
 
 public class MiBandEntry {
     public static final String PREF_MIBAND_ENABLED = "miband_enabled";
@@ -179,7 +179,7 @@ public class MiBandEntry {
     }
 
     static void refresh() {
-        Inevitable.task("miband-preference-changed", 1000, () -> JoH.startService(MiBandService.class, INTENT_FUNCTION_KEY, "refresh"));
+        Inevitable.task("miband-preference-changed", 1000, () -> JoH.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_REFRESH));
     }
 
     public static void sendToService(String function, Bundle bundle) {

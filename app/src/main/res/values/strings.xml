@@ -100,4 +100,5 @@
     <string name="cancel">Cancel</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
+    <string name="nav_menu_scan">Scan</string>
 </resources>

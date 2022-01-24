@@ -2,6 +2,8 @@ package com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Con
 
 import android.graphics.Color;
 
+import lecho.lib.hellocharts.model.ValueShape;
+
 public class LineSettings {
     public boolean display = true;
     public Integer point_radius;
@@ -9,7 +11,7 @@ public class LineSettings {
     public Integer text_size;
     public Boolean has_lines;
     public Boolean has_point;
-    //public ValueShape shape; //todo fix
+    public ValueShape shape;
     public Boolean has_labels;
     public Boolean is_filled;
     public Integer area_transparency;

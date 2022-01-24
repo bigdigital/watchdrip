@@ -7,7 +7,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Bundle;
 
+import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.JoH;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.Position;
@@ -15,51 +17,73 @@ import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Conf
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.TextSettings;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.WatchfaceConfig;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import static com.thatguysservice.huami_xdrip.models.JoH.hourMinuteString;
+import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
 
 public class DisplayData {
+    private Double bgDeltaMgdl;
     private ValueTime unitizedDelta;
-    private String bgValue;
+    private Double bgValueMgdl;
+    private String bgValueUnitized;
     private Bitmap arrowBitmap;
-    private boolean bgStrikeThrough = false;
+    private boolean bgIsStale = false;
+    private String pluginSource = "";
     private boolean isBgHigh = false;
     private boolean isBgLow = false;
+    private boolean doMgdl = true;
+    private ValueTime treatment;
 
-    private int graphHours = 6;
     private int graphLimit = 16;
     private boolean showTreatment = false;
-    private String iob = "";
-
+    private String pumpIoB = "";
+    private String pumpReservoir = "";
+    private String pumpBattery = "";
+    private Bundle bundle;
     private WatchfaceConfig config;
     private int batteryLevel;
 
-    public DisplayData(WatchfaceConfig config) {
+    public DisplayData(Bundle intent, WatchfaceConfig config) {
+        bundle = intent;
         this.config = config;
     }
 
+    public static Builder newBuilder(Bundle intent, AssetManager assetManager, WatchfaceConfig config) {
+        return new DisplayData(intent, config).new Builder(assetManager);
+    }
 
-    public static Builder newBuilder(AssetManager assetManager, WatchfaceConfig config) {
-        return new DisplayData(config).new Builder(assetManager);
+    public ValueTime getPumpReservoir() {
+        return new ValueTime(pumpReservoir);
+    }
+
+    public ValueTime getPumpBattery() {
+        return new ValueTime(pumpBattery);
+    }
+
+    public Bundle getBundle() {
+        return bundle;
     }
 
     public ValueTime getBgValue() {
-        return new ValueTime(bgValue);
+        return new ValueTime(bgValueUnitized);
     }
 
-    public ValueTime getIob() {
-        return new ValueTime(iob);
+    public ValueTime getPumpIoB() {
+        return new ValueTime(pumpIoB);
     }
 
     public ValueTime getUnitized_delta() {
         return unitizedDelta;
     }
 
-    public ValueTime getBatteryLevel(){
+    public ValueTime getBatteryLevel() {
         return new ValueTime(String.valueOf(batteryLevel));
     }
 
@@ -68,42 +92,15 @@ public class DisplayData {
     }
 
     public ValueTime getTreatment() {
-        /*Treatments treatment = Treatments.last();
-        String treatmentText = "";
-        String timeStamp = "";
-        boolean isOld = false;
-
-        if (treatment != null && treatment.hasContent() && !treatment.noteOnly()) {
-            if (treatment.insulin > 0) {
-                treatmentText = treatmentText + (JoH.qs(treatment.insulin, 2) + "u").replace(".0u", "u");
-            }
-            //if (treatment.carbs > 0) {
-            //    treatmentText = treatmentText + (JoH.qs(treatment.carbs, 1) + "g").replace(".0g", "g");
-           // }
-
-            if (treatmentText.length() > 0) {
-                if (treatment.timestamp > Constants.DAY_IN_MS) {
-                    timeStamp = hourMinuteString(treatment.timestamp);
-                } else {
-                    isOld = true;
-                    timeStamp = JoH.niceTimeScalar(JoH.msSince(treatment.timestamp));
-                }
-            }
-        }*/
-        //TODO fix this
-        String treatmentText = "100";
-        String timeStamp = "100";
-        boolean isOld = false;
-
-        return new ValueTime(treatmentText, timeStamp, isOld);
+        return treatment;
     }
 
     public Bitmap getArrowBitmap() {
         return arrowBitmap;
     }
 
-    public boolean isBgStrikeThrough() {
-        return bgStrikeThrough;
+    public boolean isBgIsStale() {
+        return bgIsStale;
     }
 
     public boolean isBgHigh() {
@@ -114,10 +111,10 @@ public class DisplayData {
         return isBgLow;
     }
 
-    public int getGraphHours() {
-        return graphHours;
+
+    public int getGraphLimit() {
+        return graphLimit;
     }
-    public int getGraphLimit() { return graphLimit; }
 
     public boolean isShowTreatment() {
         return showTreatment;
@@ -157,7 +154,7 @@ public class DisplayData {
         }
         canvas.save();
         canvas.translate(xOffset, 0);
-        canvas.rotate(position.rotate,0, position.y);
+        canvas.rotate(position.rotate, 0, position.y);
         canvas.drawText(text, 0, position.y, paint);
         canvas.restore();
         paint.setTextAlign(align);
@@ -247,14 +244,10 @@ public class DisplayData {
     public class Builder {
         private AssetManager assetManager;
 
-        public Builder(  AssetManager assetManager) {
+        public Builder(AssetManager assetManager) {
             this.assetManager = assetManager;
         }
 
-        public Builder setGraphHours(int graphHours) {
-            DisplayData.this.graphHours = graphHours;
-            return this;
-        }
 
         public Builder setShowTreatment(boolean showTreatment) {
             DisplayData.this.showTreatment = showTreatment;
@@ -274,32 +267,57 @@ public class DisplayData {
             return this;
         }
 
-        public Builder setIoB(String iob) {
-            DisplayData.this.iob = iob.replace(",", ".");
-
+        public Builder setPumpBattery(String pumpBattery) {
+            DisplayData.this.pumpBattery = pumpBattery;
             return this;
+        }
+
+        public Builder setPumpReservoir(String pumpReservoir) {
+            if (pumpReservoir.isEmpty()){
+                DisplayData.this.pumpReservoir = pumpReservoir;
+            }
+            pumpReservoir = pumpReservoir.replace(",", ".");
+            pumpReservoir = pumpReservoir + "u".replace(".0u", "u");
+            DisplayData.this.pumpReservoir = pumpReservoir;
+            return this;
+        }
+
+        public Builder setIoB(String iob) {
+            if (iob.isEmpty()){
+                DisplayData.this.pumpIoB = iob;
+                return this;
+            }
+            iob = iob.replace(",", ".");
+            iob = iob + "u".replace(".0u", "u");
+            DisplayData.this.pumpIoB = iob;
+            return this;
+        }
+
+        private String getEmptyIfNull(String s) {
+            return s == null ? "" : s;
+        }
+
+        private String getDouble(double v, int digits) {
+            return v > -1 ? JoH.qs(v, digits) : "";
         }
 
         public DisplayData build() throws IllegalArgumentException, IOException {
             String arrowImageName;
-            long timeStampVal = -1;
-            /*if (dg != null) {
-                arrowImageName = dg.delta_name + ".png";
-                //fill bg
-                bgValue = dg.unitized.replace(',', '.');
-                bgStrikeThrough = dg.isStale();
-                isBgHigh = dg.isHigh();
-                isBgLow = dg.isLow();
-                timeStampVal = dg.timestamp;
-            } else if (bgReading != null) {
-                arrowImageName = bgReading.getDg_deltaName() + ".png";
-                //fill bg
-                bgValue = bgReading.displayValue(null).replace(',', '.');
-                bgStrikeThrough = bgReading.isStale();
-                timeStampVal = bgReading.getEpochTimestamp();
-            } else {
+            bgValueMgdl = bundle.getDouble("bg.valueMgdl", -1000);
+            if (bgValueMgdl == -1000) {
                 throw new IllegalArgumentException("data info not provided");
             }
+
+            doMgdl = bundle.getBoolean("doMgdl", true);
+            arrowImageName = getEmptyIfNull(bundle.getString("bg.deltaName")) + ".png";
+            //fill bg
+            bgValueUnitized = com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder.unitized_string(bgValueMgdl, doMgdl).replace(',', '.');
+            isBgHigh = bundle.getBoolean("bg.isHigh", false);
+            isBgLow = bundle.getBoolean("bg.isLow", false);
+            long timeStampVal = bundle.getLong("bg.timeStamp", -1);
+            bgIsStale = bundle.getBoolean("bg.isStale", false);
+            pluginSource = getEmptyIfNull(bundle.getString("bg.plugin"));
+
             InputStream arrowStream = null;
             if (config.useCustomArrows) {
                 final String dir = getExternalDir();
@@ -313,18 +331,74 @@ public class DisplayData {
             }
             arrowBitmap = BitmapFactory.decodeStream(arrowStream);
             arrowStream.close();
-*/
+
 
             //fill delta
             boolean isOld = false;
-            String timeStamp = "";
+            String timeStampText = "";
             if (timeStampVal > Constants.DAY_IN_MS) {
-                timeStamp = hourMinuteString(timeStampVal);
+                timeStampText = hourMinuteString(timeStampVal);
             } else {
                 isOld = true;
-                timeStamp = JoH.niceTimeScalar(JoH.msSince(timeStampVal));
+                timeStampText = JoH.niceTimeScalar(JoH.msSince(timeStampVal));
             }
-            unitizedDelta = new ValueTime("tett", timeStamp, isOld);
+            bgDeltaMgdl = bundle.getDouble("bg.deltaValueMgdl", 0);
+            String unitized_delta = BgGraphBuilder.unitizedDeltaStringRaw(false, true, bgDeltaMgdl, doMgdl);
+            unitizedDelta = new ValueTime(unitized_delta, timeStampText, isOld);
+
+            String pumpJSON = bundle.getString("pumpJSON");
+            JSONObject json = null;
+            double pumpReservoir = -1;
+            double pumpIob = -1;
+            double pumpBattery = -1;
+            try {
+                json = new JSONObject(pumpJSON);
+            } catch (JSONException e) {
+            }
+            try {
+                pumpReservoir = json.getDouble("reservoir");
+            } catch (JSONException e) {
+            }
+            try {
+                pumpIob = json.getDouble("bolusiob");
+            } catch (JSONException e) {
+            }
+            try {
+                pumpBattery = (json.getDouble("battery"));
+            } catch (JSONException e) {
+            }
+
+            setIoB(getDouble(pumpIob, 2));
+            setPumpReservoir(getDouble(pumpReservoir, 1));
+            setPumpBattery(getDouble(pumpBattery, 0));
+
+            double insulin = bundle.getDouble("treatment.insulin", -1);
+            double carbs = bundle.getDouble("treatment.carbs", -1);
+            long timeStamp = bundle.getLong("treatment.timeStamp", -1);
+
+            timeStampText = "";
+            isOld = false;
+            String treatmentText = "";
+            if (insulin > 0) {
+                treatmentText = treatmentText + (JoH.qs(insulin, 2) + "u").replace(".0u", "u");
+            }
+            //if (carbs > 0) {
+            //    treatmentText = treatmentText + (JoH.qs(treatment.carbs, 1) + "g").replace(".0g", "g");
+            // }
+
+            if (treatmentText.length() > 0) {
+                if (timeStamp > Constants.HOUR_IN_MS * 6) {
+                    isOld = true;
+                    timeStampText = JoH.niceTimeScalar(JoH.msSince(timeStamp));
+                } else if (timeStamp > Constants.HOUR_IN_MS) {
+                    timeStampText = hourMinuteString(timeStamp);
+                } else {
+                    treatmentText = "";
+                    timeStampText = "";
+                }
+            }
+
+            treatment = new ValueTime(treatmentText, timeStampText, isOld);
 
             return DisplayData.this;
         }

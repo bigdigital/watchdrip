@@ -37,11 +37,13 @@ public class BroadcastService extends Service {
     public static final String CMD_UPDATE_BG = "update_bg";
     public static final String CMD_REPLY_MSG = "reply_msg";
     public static final String CMD_MESSAGE = "message";
+
+    public static final String CMD_LOCAL_REFRESH = "local_refresh";
+    public static final String CMD_LOCAL_AFTER_ALARM = "local_after_alarm";
     //send
     protected static final String ACTION_WATCH_COMMUNICATION_RECEIVER = "com.eveningoutpost.dexdrip.watch.wearintegration.WATCH_BROADCAST_RECEIVER";
     //listen
     protected static final String ACTION_WATCH_COMMUNICATION_SENDER = "com.eveningoutpost.dexdrip.watch.wearintegration.WATCH_BROADCAST_SENDER";
-    protected static final String REMOTE_PACKAGE = "com.eveningoutpost.dexdrip";
     protected String TAG = this.getClass().getSimpleName();
     private BroadcastReceiver newDataReceiver;
 
@@ -157,8 +159,10 @@ public class BroadcastService extends Service {
 
     public WatchSettings getSettings() {
         WatchSettings settings = new WatchSettings();
-        settings.setGraphSince(System.currentTimeMillis() - Constants.HOUR_IN_MS * MiBandEntry.getGraphHours());
+        settings.setGraphStart(JoH.tsl() - Constants.HOUR_IN_MS * MiBandEntry.getGraphHours());
+        settings.setGraphEnd(JoH.tsl() + Constants.MINUTE_IN_MS * 30);
         settings.setApkName(getString(R.string.app_name));
+        settings.setDisplayGraph(true);
         return settings;
     }
 

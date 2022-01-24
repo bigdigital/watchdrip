@@ -5,11 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Bundle;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
-import com.thatguysservice.huami_xdrip.models.Constants;
+import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder;
+import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphCompontens;
 import com.thatguysservice.huami_xdrip.models.JoH;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.WatchfaceConfig;
@@ -248,37 +250,24 @@ public class WatchFaceGenerator {
         }
     }
 
-    public byte[] genWatchFace(String iob) throws IOException {
+    public byte[] genWatchFace(Bundle bundle) throws IOException {
         Bitmap mainScreen;
         //send firmware without modification, uncomment when need to test only a watchface uploading process
        /* if (true) {
             return FirmwareOperations.readAll(fwFileStream, 10000000);
         }*/
         parseWatchfaceFile();
-        String sourceDebug = "NoData";
-      /*  BestGlucose.DisplayGlucose dg = BestGlucose.getDisplayGlucose();
-        BgReading bgReading = BgReading.last();
-
-        if (dg != null || bgReading != null) {
+        double bgValue = bundle.getDouble("bg.valueMgdl", -1000);
+        if (bgValue != -1000) {
             DisplayData.Builder displayDataBuilder = null;
-            if (dg != null) {
-                sourceDebug = "BestGlucose";
-                displayDataBuilder = DisplayData.newBuilder(dg, assetManager, watchfaceConfig);
-            } else {
-                sourceDebug = "BgReading";
-                displayDataBuilder = DisplayData.newBuilder(bgReading, assetManager, watchfaceConfig);
-            }
-            displayDataBuilder.setGraphHours(MiBandEntry.getGraphHours());
+            displayDataBuilder = DisplayData.newBuilder(bundle, assetManager, watchfaceConfig);
             displayDataBuilder.setShowTreatment(MiBandEntry.isTreatmentEnabled());
-            displayDataBuilder.setIoB(iob);
             displayDataBuilder.setGraphLimit(MiBandEntry.getGraphLimit());
-            displayDataBuilder.setBatteryLevel(PowerStateReceiver.getBatteryLevel(HuamiXdrip.getAppContext()));
             mainScreen = drawBitmap(displayDataBuilder.build());
-        } else*/ {
-            DisplayData displayData = new DisplayData(watchfaceConfig);
+        } else {
+            DisplayData displayData = new DisplayData(bundle, watchfaceConfig);
             mainScreen = drawNoDataBitmap(displayData);
         }
-        UserError.Log.d(TAG, sourceDebug + " source was used");
         UserError.Log.d(TAG, "Encoding main picture");
         ByteArrayOutputStream imageByteArrayOutput = new ByteArrayOutputStream();
         ImageInterface encodedImage;
@@ -402,16 +391,12 @@ public class WatchFaceGenerator {
         //draw graph
         if (config.graph != null) {
             drawMutex = true;
-            long startTime = System.currentTimeMillis() - Constants.HOUR_IN_MS * data.getGraphHours();
-            long endTime = System.currentTimeMillis() + Constants.MINUTE_IN_MS * 30;
             JoH.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        /*BgMibandSparklineBuilder bgGraph = (BgMibandSparklineBuilder) new BgMibandSparklineBuilder(xdrip.getAppContext())
-                                .setBgGraphBuilder(new BgGraphBuilder(xdrip.getAppContext(), startTime, endTime))
-                                .setStart(startTime)
-                                .setEnd(endTime)
+                        BgGraphBuilder bgGraph =  new BgGraphBuilder(HuamiXdrip.getAppContext())
+                                .setBgGraphCompontens(new BgGraphCompontens(data.getBundle(), HuamiXdrip.getAppContext()))
                                 .setWidthPx(config.graph.width + 16)
                                 .setHeightPx(config.graph.height)
                                 .setBackgroundColor(config.graph.getBgColor());
@@ -419,7 +404,7 @@ public class WatchFaceGenerator {
                         bgGraph.setGraphLimit(data.getGraphLimit());
 
                         bgGraph.showTreatmentLine(data.isShowTreatment());
-                        graphImage = bgGraph.build();*/ // TODO draw graph
+                        graphImage = bgGraph.build();
                     } catch (Exception e) {
                         UserError.Log.e(TAG, "Exception while generating: " + e );
                         e.printStackTrace();
@@ -439,8 +424,10 @@ public class WatchFaceGenerator {
                 canvas.restore();
             }
         }
-        //draw iob
-        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getIob(), config.iob), config.iob.position, data.getTextPaint(config.iob.textSettings));
+        //draw pump
+        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpIoB(), config.iob), config.iob.position, data.getTextPaint(config.iob.textSettings));
+        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpReservoir(), config.pumpReservoir), config.pumpReservoir.position, data.getTextPaint(config.pumpReservoir.textSettings));
+        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpBattery(), config.pumpBattery), config.pumpBattery.position, data.getTextPaint(config.pumpBattery.textSettings));
 
         //draw arrow
         canvas.save();
@@ -452,7 +439,7 @@ public class WatchFaceGenerator {
         Paint paint = data.getTextPaint(config.bgValue.textSettings);
         if (data.isBgHigh()) paint.setColor(config.bgValue.getColorHigh());
         if (data.isBgLow()) paint.setColor(config.bgValue.getColorLow());
-        paint.setStrikeThruText(data.isBgStrikeThrough());
+        paint.setStrikeThruText(data.isBgIsStale());
 
         data.drawTextOnCanvas(canvas, data.getFormattedText(data.getBgValue(), config.bgValue), config.bgValue.position, paint);
 

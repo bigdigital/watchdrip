@@ -11,6 +11,8 @@ import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_AFTER_ALARM;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_START;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
@@ -31,6 +33,8 @@ public class xDripReceiver extends BroadcastReceiver {
                 return;
             }
             if (!BuildConfig.APPLICATION_ID.equals(receiver)) return;
+            if (function.equals(CMD_LOCAL_REFRESH) || function.equals(CMD_LOCAL_AFTER_ALARM))
+                return; //do not allow to run local functions
             Bundle extras = intent.getExtras();
             MiBandEntry.sendToService(function, extras);
         } catch (Exception e) {

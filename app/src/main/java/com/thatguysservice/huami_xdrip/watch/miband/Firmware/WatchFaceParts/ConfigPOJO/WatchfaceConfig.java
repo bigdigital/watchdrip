@@ -21,6 +21,12 @@ public class WatchfaceConfig {
     @SerializedName("iob_text")
     public SimpleText iob = new SimpleText();
 
+    @SerializedName("pump_reservoir_text")
+    public SimpleText pumpReservoir = new SimpleText();
+
+    @SerializedName("pump_battery_text")
+    public SimpleText pumpBattery = new SimpleText();
+
     @SerializedName("delta_text")
     public SimpleText deltaText = new SimpleText();
 

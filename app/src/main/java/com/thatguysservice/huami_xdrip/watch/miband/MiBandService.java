@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.PowerManager;
 
 import androidx.annotation.RequiresApi;
@@ -66,7 +67,6 @@ import java.util.concurrent.TimeoutException;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import lombok.Getter;
-import lombok.Setter;
 
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MAXIMUM;
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MINIMUM;
@@ -76,7 +76,11 @@ import static com.thatguysservice.huami_xdrip.models.JoH.emptyString;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_HR;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_STEPS;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ALERT;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_AFTER_ALARM;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_MESSAGE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
 import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSE;
 import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSED;
@@ -96,9 +100,6 @@ import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCode
  */
 
 public class MiBandService extends JamBaseBluetoothSequencer {
-
-    public static final String CMD_LOCAL_REFRESH = "local_refresh";
-    private static final String CMD_LOCAL_AFTER_ALARM = "local_after_alarm";
 
     static final List<UUID> huntCharacterstics = new ArrayList<>();
     private static final long RETRY_PERIOD_MS = Constants.SECOND_IN_MS * 30; // sleep for max ms if we have had no signal
@@ -132,7 +133,6 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     private PendingIntent bgServiceIntent;
     private MiBandType prevDeviceType = MiBandType.UNKNOWN;
     private QueueMessage queueItem;
-    private String statusIOB = "";
     private boolean prevReadingStatusIsStale = false;
     private String activeAlertType;
     private String missingAlertMessage;
@@ -253,10 +253,10 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                                 return START_STICKY;
                             } else {
                                 if (function.equals(CMD_LOCAL_AFTER_ALARM)) {
-                                    messageQueue.addFirst(new QueueMessage(function, intent));
+                                    messageQueue.addFirst(new QueueMessage(function, intent.getExtras()));
                                     handleCommand();
                                 } else {
-                                    messageQueue.add(new QueueMessage(function, intent));
+                                    messageQueue.add(new QueueMessage(function, intent.getExtras()));
                                     if (readyToProcessCommand()) {
                                         handleCommand();
                                     }
@@ -314,7 +314,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 }
                 ((MiBandState) mState).setQueueSequence();
                 break;
-            case "update_bg":
+            case CMD_UPDATE_BG:
                 if (isNightMode) {
                     UserError.Log.d(TAG, "Skip bg update because of night mode");
                     return;
@@ -330,7 +330,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 startBgTimer();
                 ((MiBandState) mState).setSendReadingSequence();
                 break;
-            case "update_bg_force":
+            case CMD_UPDATE_BG_FORCE:
                 startBgTimer();
                 ((MiBandState) mState).setSendReadingSequence();
                 break;
@@ -346,9 +346,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     }
 
     private boolean isStaleReading() {
-      /*  BgReading last = BgReading.last();
-        return last == null || last.isStale();*/
-        return true;
+        return queueItem.bundle.getBoolean("bg.isStale", true);
     }
 
     private long whenToRetryNextBgTimer() {
@@ -677,7 +675,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     }
 
     private void queueMessage() {
-        String message = queueItem.intent.getStringExtra("message");
+        String message = queueItem.bundle.getString("message");
         AlertMessage alertMessage = new AlertMessage();
         String messageType = queueItem.getMessageType();
         switch (messageType != null ? messageType : "null") {
@@ -707,7 +705,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                         .expireInSeconds(QUEUE_EXPIRED_TIME)
                         .setDelayMs(QUEUE_DELAY)
                         .queue();
-                activeAlertType = queueItem.intent.getStringExtra("type");
+                activeAlertType = queueItem.bundle.getString("type");
                 missingAlertMessage = message;
                 stopBgUpdateTimer();
                 bgServiceIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_BG_RETRY_ID, CMD_LOCAL_AFTER_ALARM);
@@ -716,7 +714,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 ringerModeBackup = audioManager.getRingerMode();
                 break;
             case MIBAND_NOTIFY_TYPE_MESSAGE:
-                String title = queueItem.intent.getStringExtra("title");
+                String title = queueItem.bundle.getString("title");
                 message = message.replace("@", "");
                 UserError.Log.d(TAG, "Queuing message alert: " + message);
 
@@ -821,7 +819,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
             }
             WatchFaceGenerator wfGen = new WatchFaceGenerator(getBaseContext().getAssets(),
                     mibandType);
-            byte[] fwArray = wfGen.genWatchFace(statusIOB);
+            byte[] fwArray = wfGen.genWatchFace(queueItem.bundle);
             if (fwArray == null || fwArray.length == 0) {
                 resetFirmwareState(false, "Empty image");
                 return;
@@ -1488,10 +1486,10 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     }
 
     public QueueMessage getMessageQueue(String title, String message){
-        Intent intent = new Intent();
-        intent.putExtra("title", title);
-        intent.putExtra("message", message);
-        QueueMessage msg = new QueueMessage( CMD_MESSAGE, intent);
+        Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        bundle.putString("message", message);
+        QueueMessage msg = new QueueMessage( CMD_MESSAGE, bundle);
         msg.setMessageType(MIBAND_NOTIFY_TYPE_MESSAGE);
 
         return msg;
@@ -1514,16 +1512,16 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         private long expireAt;
 
         @Getter
-        private Intent intent;
+        private Bundle bundle;
 
         public QueueMessage(String functionName) {
             this.functionName = functionName;
             setExpire();
         }
 
-        public QueueMessage(String functionName, Intent intent) {
+        public QueueMessage(String functionName, Bundle bundle) {
             this.functionName = functionName;
-            this.intent = intent;
+            this.bundle = bundle;
             setExpire();
         }
 

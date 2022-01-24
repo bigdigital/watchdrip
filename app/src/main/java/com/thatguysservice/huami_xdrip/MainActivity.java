@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -49,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         activityVisible = true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // If you don't have res/menu, just create a directory named "menu" inside res
+       /* getMenuInflater().inflate(R.menu.mymenu, menu);*/
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
