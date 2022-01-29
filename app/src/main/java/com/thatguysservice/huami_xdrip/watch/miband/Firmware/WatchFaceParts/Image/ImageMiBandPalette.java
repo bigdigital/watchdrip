@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperations.fromUint16;
+import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew.fromUint16;
 
 public class ImageMiBandPalette extends ImageInterface {
 

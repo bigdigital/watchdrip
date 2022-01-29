@@ -34,26 +34,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Huamixdrip">
-        <service
-            android:name=".services.BroadcastService"
-            android:enabled="true"
-            android:exported="true"></service>
-
-        <receiver android:name=".receivers.AutoStart">
+        <activity android:name=".SendFeedBack"></activity>
+        <activity android:name=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </receiver>
-        <!--
-<receiver
-            android:name=".receivers.xDripReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
-            </intent-filter>
-        </receiver>
-        -->
+        </activity>
         <meta-data
             android:name="AA_DB_NAME"
             android:value="HuamiXdrip.db" />
@@ -71,14 +58,13 @@
             android:exported="false" />
 
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:name=".PreferenceActivity"
+            android:label="@string/app_name" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <service
+            android:name=".services.BroadcastService"
+            android:enabled="true"
+            android:exported="true" />
 
         <receiver android:name=".utils.bt.ConnectReceiver">
             <intent-filter>
@@ -88,6 +74,11 @@
         <receiver android:name=".utils.bt.DisconnectReceiver">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receivers.AutoStart">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
         <receiver android:name=".utils.bt.BackgroundScanReceiver" />

@@ -6,7 +6,7 @@ import android.os.Environment;
 import com.polidea.rxandroidble2.RxBleConnection;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.utils.HexDump;
 import com.thatguysservice.huami_xdrip.utils.chiper.CipherUtils;
@@ -120,7 +120,7 @@ public class AuthOperations extends BaseMessage {
                     authKey = getAuthCodeFromFilesSystem(MiBand.getMac());
                 }
                 if (!isValidAuthKey(authKey)) {
-                    JoH.static_toast_long(String.format(HuamiXdrip.getAppContext().getString(R.string.miband_wrong_auth_text), MiBand.getMibandType()));
+                    Helper.static_toast_long(String.format(HuamiXdrip.getAppContext().getString(R.string.miband_wrong_auth_text), MiBand.getMibandType()));
                     return false;
                 } else {
                     MiBand.setAuthKey(authKey);
@@ -143,7 +143,7 @@ public class AuthOperations extends BaseMessage {
                 (value[2] & 0x0f) == AUTH_SUCCESS) {
             connection.writeCharacteristic(getCharacteristicUUID(), getAuthKeyRequest()) //get random key from band
                     .subscribe(val -> {
-                        UserError.Log.d(TAG, "Wrote OPCODE_AUTH_REQ1: " + JoH.bytesToHex(val));
+                        UserError.Log.d(TAG, "Wrote OPCODE_AUTH_REQ1: " + Helper.bytesToHex(val));
                     }, throwable -> {
                         UserError.Log.e(TAG, "Could not write OPCODE_AUTH_REQ1: " + throwable);
                     });
@@ -155,12 +155,12 @@ public class AuthOperations extends BaseMessage {
                 byte[] authReply = calculateAuthReply(tmpValue);
                 connection.writeCharacteristic(getCharacteristicUUID(), authReply) //get random key from band
                         .subscribe(val -> {
-                            UserError.Log.d(TAG, "Wrote OPCODE_AUTH_REQ2: " + JoH.bytesToHex(val));
+                            UserError.Log.d(TAG, "Wrote OPCODE_AUTH_REQ2: " + Helper.bytesToHex(val));
                         }, throwable -> {
                             UserError.Log.e(TAG, "Could not write OPCODE_AUTH_REQ2: " + throwable);
                         });
             } catch (Exception e) {
-                JoH.static_toast_long(e.getMessage());
+                Helper.static_toast_long(e.getMessage());
                 UserError.Log.e(TAG, (e.getMessage()));
                 service.changeState(MiBandService.MiBandState.AUTHORIZE_FAILED);
             }
@@ -169,9 +169,9 @@ public class AuthOperations extends BaseMessage {
                 value[2] == AUTH_SUCCESS) {
             if (MiBand.getPersistentAuthMac().isEmpty()) {
                 MiBand.setPersistentAuthMac(MiBand.getMac());
-                MiBand.setPersistentAuthKey(JoH.bytesToHex(getLocalKey()), MiBand.getPersistentAuthMac());
+                MiBand.setPersistentAuthKey(Helper.bytesToHex(getLocalKey()), MiBand.getPersistentAuthMac());
                 String msg = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_success_auth_text), MiBand.getMibandType());
-                JoH.static_toast_long(msg);
+                Helper.static_toast_long(msg);
                 UserError.Log.e(TAG, msg);
             }
             service.changeNextState();
@@ -179,7 +179,7 @@ public class AuthOperations extends BaseMessage {
                 (((value[2] & 0x0f) == AUTH_FAIL) || (value[2] == AUTH_MIBAND4_FAIL) || (value[2] == AUTH_MIBAND4_CODE_FAIL))) {
             MiBand.setPersistentAuthKey("", MiBand.getPersistentAuthMac());
             String msg = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_error_auth_text), MiBand.getMibandType());
-            JoH.static_toast_long(msg);
+            Helper.static_toast_long(msg);
             UserError.Log.e(TAG, msg);
             service.changeState(MiBandService.MiBandState.AUTHORIZE_FAILED);
         }
@@ -190,14 +190,14 @@ public class AuthOperations extends BaseMessage {
         if (MiBand.isAuthenticated()) {
             connection.writeCharacteristic(getCharacteristicUUID(), getAuthKeyRequest()) //get random key from band
                     .subscribe(val -> {
-                        UserError.Log.d(TAG, "Wrote getAuthKeyRequest: " + JoH.bytesToHex(val));
+                        UserError.Log.d(TAG, "Wrote getAuthKeyRequest: " + Helper.bytesToHex(val));
                     }, throwable -> {
                         UserError.Log.e(TAG, "Could not getAuthKeyRequest: " + throwable);
                     });
         } else {
             connection.writeCharacteristic(getCharacteristicUUID(), getAuthCommand())
                     .subscribe(characteristicValue -> {
-                                UserError.Log.d(TAG, "Wrote getAuthCommand, got: " + JoH.bytesToHex(characteristicValue));
+                                UserError.Log.d(TAG, "Wrote getAuthCommand, got: " + Helper.bytesToHex(characteristicValue));
                             },
                             throwable -> {
                                 UserError.Log.e(TAG, "Could not write getAuthCommand: " + throwable);
@@ -223,7 +223,7 @@ public class AuthOperations extends BaseMessage {
             System.arraycopy(srcBytes, 0, localKey, 0, Math.min(srcBytes.length, 16));
         }
 
-        UserError.Log.d(TAG, "localKey: " + JoH.bytesToHex(localKey));
+        UserError.Log.d(TAG, "localKey: " + Helper.bytesToHex(localKey));
     }
 
     // write key to device
@@ -252,10 +252,10 @@ public class AuthOperations extends BaseMessage {
     }
 
     private byte[] calculateAuthReply(byte[] responseAuthKey) {
-        UserError.Log.d(TAG, "Calculating localKey reply for: " + JoH.bytesToHex(getLocalKey()));
+        UserError.Log.d(TAG, "Calculating localKey reply for: " + Helper.bytesToHex(getLocalKey()));
         final byte[] result = encryptAES(responseAuthKey, getLocalKey());
         if (result == null) throw new RuntimeException("Cannot calculate auth reply");
-        UserError.Log.d(TAG, "Derived: " + JoH.bytesToHex(result));
+        UserError.Log.d(TAG, "Derived: " + Helper.bytesToHex(result));
         init(18);
         putData((byte) (AUTH_SEND_ENCRYPTED_AUTH_NUMBER | cryptFlags));
         putData(authFlags);

@@ -23,11 +23,11 @@ public class Pref {
         if (prefs == null) {
             if (HuamiXdrip.getAppContext() != null) {
                 prefs = PreferenceManager.getDefaultSharedPreferences(HuamiXdrip.getAppContext());
-                if ((prefs == null) && (JoH.ratelimit("prefs-failure1", 20))) {
+                if ((prefs == null) && (Helper.ratelimit("prefs-failure1", 20))) {
                     UserError.Log.wtf(TAG, "Could not initialize preferences due to init failure!!");
                 }
             } else {
-                if (JoH.ratelimit("prefs-failure2", 20)) {
+                if (Helper.ratelimit("prefs-failure2", 20)) {
                     UserError.Log.wtf(TAG, "Could not initialize preferences due to missing context!!");
                 }
             }
@@ -129,7 +129,7 @@ public class Pref {
 
     public static double getStringToDouble(final String pref, final double defaultValue) {
         try {
-            return JoH.tolerantParseDouble(getString(pref, Double.toString(defaultValue)), defaultValue);
+            return Helper.tolerantParseDouble(getString(pref, Double.toString(defaultValue)), defaultValue);
         } catch (Exception e) {
             return defaultValue;
         }

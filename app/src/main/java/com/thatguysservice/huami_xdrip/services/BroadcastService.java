@@ -13,7 +13,7 @@ import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.Constants;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.receivers.xDripReceiver;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
@@ -63,7 +63,7 @@ public class BroadcastService extends Service {
     }
 
     public static void bgForce() {
-        JoH.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
+        Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class BroadcastService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        final PowerManager.WakeLock wl = JoH.getWakeLock("Miband service", 60000);
+        final PowerManager.WakeLock wl = Helper.getWakeLock("Miband service", 60000);
         try {
             if (shouldServiceRun()) {
                 if (intent != null) {
@@ -122,7 +122,7 @@ public class BroadcastService extends Service {
                 return START_NOT_STICKY;
             }
         } finally {
-            JoH.releaseWakeLock(wl);
+            Helper.releaseWakeLock(wl);
         }
     }
 
@@ -139,12 +139,12 @@ public class BroadcastService extends Service {
                 break;
             case CMD_ADD_STEPS:
                 value = intentIn.getIntExtra("value", 0);
-                intent.putExtra("timeStamp", JoH.tsl());
+                intent.putExtra("timeStamp", Helper.tsl());
                 intent.putExtra("value", value);
                 break;
             case CMD_ADD_HR:
                 value = intentIn.getIntExtra("value", 0);
-                intent.putExtra("timeStamp", JoH.tsl());
+                intent.putExtra("timeStamp", Helper.tsl());
                 intent.putExtra("value", value);
                 break;
             case CMD_REPLY_MSG:
@@ -159,8 +159,8 @@ public class BroadcastService extends Service {
 
     public WatchSettings getSettings() {
         WatchSettings settings = new WatchSettings();
-        settings.setGraphStart(JoH.tsl() - Constants.HOUR_IN_MS * MiBandEntry.getGraphHours());
-        settings.setGraphEnd(JoH.tsl() + Constants.MINUTE_IN_MS * 30);
+        settings.setGraphStart(Helper.tsl() - Constants.HOUR_IN_MS * MiBandEntry.getGraphHours());
+        settings.setGraphEnd(Helper.tsl() + Constants.MINUTE_IN_MS * 30);
         settings.setApkName(getString(R.string.app_name));
         settings.setDisplayGraph(true);
         return settings;

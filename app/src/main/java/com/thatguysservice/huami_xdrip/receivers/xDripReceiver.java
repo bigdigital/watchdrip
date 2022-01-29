@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.thatguysservice.huami_xdrip.BuildConfig;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
@@ -27,9 +27,9 @@ public class xDripReceiver extends BroadcastReceiver {
             String receiver = intent.getPackage();
             UserError.Log.e(TAG, "got intent");
             UserError.Log.d(TAG, String.format("functionName: %s, receiver: %s", function, receiver));
-            JoH.getWakeLock(TAG, 1000);
+            Helper.getWakeLock(TAG, 1000);
             if (function.equals(CMD_START)) {
-                JoH.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
+                Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
                 return;
             }
             if (!BuildConfig.APPLICATION_ID.equals(receiver)) return;

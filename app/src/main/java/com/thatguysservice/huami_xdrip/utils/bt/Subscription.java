@@ -1,6 +1,6 @@
 package com.thatguysservice.huami_xdrip.utils.bt;
 
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 
 import io.reactivex.disposables.Disposable;
@@ -47,7 +47,7 @@ public class Subscription implements Disposable {
                     UserError.Log.e(TAG, "RxJavaError: " + e.getMessage());
                 }
             } else {
-                UserError.Log.wtf(TAG, "RxJavaError2:" + e.getClass().getCanonicalName() + " " + e.getMessage() + " " + JoH.backTrace(3));
+                UserError.Log.wtf(TAG, "RxJavaError2:" + e.getClass().getCanonicalName() + " " + e.getMessage() + " " + Helper.backTrace(3));
             }
         });
     }

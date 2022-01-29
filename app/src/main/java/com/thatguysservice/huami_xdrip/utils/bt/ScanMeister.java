@@ -15,7 +15,7 @@ import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.UtilityModels.RxBleProvider;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.HandleBleScanException;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import lombok.NoArgsConstructor;
 
-import static com.thatguysservice.huami_xdrip.models.JoH.ratelimit;
+import static com.thatguysservice.huami_xdrip.models.Helper.ratelimit;
 
 
 // jamorham
@@ -50,7 +50,7 @@ public class ScanMeister {
     protected final RxBleClient rxBleClient = RxBleProvider.getSingleton();
     private final ConcurrentHashMap<String, BtCallBack> callbacks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, BtCallBack2> callbacks2 = new ConcurrentHashMap<>();
-    private final PowerManager.WakeLock wl = JoH.getWakeLock("jam-bluetooth-meister", 1000);
+    private final PowerManager.WakeLock wl = Helper.getWakeLock("jam-bluetooth-meister", 1000);
     protected int scanSeconds = DEFAULT_SCAN_SECONDS;
     protected volatile boolean stopOnFirstMatch = true;
     protected volatile String address;
@@ -253,12 +253,12 @@ public class ScanMeister {
             final boolean matches = (customFilter != null)
                     || ((address != null && address.equalsIgnoreCase(this_address))
                     || (name != null && this_name != null && name.contains(this_name)));
-            if (matches || JoH.quietratelimit("scanmeister-show-result", 2)) {
+            if (matches || Helper.quietratelimit("scanmeister-show-result", 2)) {
                 UserError.Log.d(TAG, "Found a device: " + this_address + " " + this_name + " rssi: " + rssi + "  " + (matches ? "-> MATCH" : ""));
             }
             if (matches && stopOnFirstMatch) {
                 stopScan("Got match");
-                JoH.threadSleep(500);
+                Helper.threadSleep(500);
                 processCallBacks(this_address, SCAN_FOUND_CALLBACK, this_name, null);
                 releaseWakeLock();
             }
@@ -268,7 +268,7 @@ public class ScanMeister {
             }
 
         } else {
-            if (JoH.quietratelimit("log-low-rssi", 2)) {
+            if (Helper.quietratelimit("log-low-rssi", 2)) {
                 UserError.Log.d(TAG, "Low rssi device: " + bleScanResult.getBleDevice().getMacAddress() + " rssi: " + rssi);
             }
         }
@@ -289,9 +289,9 @@ public class ScanMeister {
                 // Attempt to turn bluetooth on
                 if (ratelimit("bluetooth_toggle_on", 30)) {
                     UserError.Log.d(TAG, "Pause before Turn Bluetooth on");
-                    JoH.threadSleep(2000);
+                    Helper.threadSleep(2000);
                     UserError.Log.e(TAG, "Trying to Turn Bluetooth on");
-                    JoH.setBluetoothEnabled(HuamiXdrip.getAppContext(), true);
+                    Helper.setBluetoothEnabled(HuamiXdrip.getAppContext(), true);
                 }
             }
             processCallBacks(address, SCAN_FAILED_CALLBACK);
@@ -306,12 +306,12 @@ public class ScanMeister {
 
 
     protected synchronized void extendWakeLock(long ms) {
-        JoH.releaseWakeLock(wl); // lets not get too messy
+        Helper.releaseWakeLock(wl); // lets not get too messy
         wl.acquire(ms);
     }
 
     protected void releaseWakeLock() {
-        JoH.releaseWakeLock(wl);
+        Helper.releaseWakeLock(wl);
     }
 
 }

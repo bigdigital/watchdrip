@@ -1,11 +1,7 @@
 package com.thatguysservice.huami_xdrip.utils.chiper;
 
-import android.util.Base64;
 import android.util.Log;
 
-import com.thatguysservice.huami_xdrip.models.JoH;
-
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

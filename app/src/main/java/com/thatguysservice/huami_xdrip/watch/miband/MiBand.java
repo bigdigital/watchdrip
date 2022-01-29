@@ -1,11 +1,8 @@
 package com.thatguysservice.huami_xdrip.watch.miband;
 
-import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
-import com.thatguysservice.huami_xdrip.models.JoH;
 import com.thatguysservice.huami_xdrip.models.PersistentStore;
 import com.thatguysservice.huami_xdrip.models.Pref;
 
-import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_ALARM;
 import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.PREF_MIBAND_AUTH_KEY;
 import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.PREF_MIBAND_MAC;
 

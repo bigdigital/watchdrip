@@ -15,7 +15,7 @@ import java.util.UUID;
 
 import lombok.Getter;
 
-import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperations.fromUint8;
+import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew.fromUint8;
 
 public class AlertMessage extends BaseMessage {
 

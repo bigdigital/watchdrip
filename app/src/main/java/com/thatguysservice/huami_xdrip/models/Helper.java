@@ -20,11 +20,7 @@ import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,11 +40,9 @@ import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.activeandroid.ActiveAndroid;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
-import com.thatguysservice.huami_xdrip.MainActivity;
+import com.thatguysservice.huami_xdrip.PreferenceActivity;
 import com.thatguysservice.huami_xdrip.R;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -57,25 +51,16 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import java.util.zip.Deflater;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.Inflater;
 
 import static android.content.Context.ALARM_SERVICE;
 
@@ -84,14 +69,16 @@ import static android.content.Context.ALARM_SERVICE;
  * <p>
  * lazy helper class for utilities
  */
-public class JoH {
+public class Helper {
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    private final static String TAG = "jamorham JoH";
+    private final static String TAG = "Helper";
     private final static boolean debug_wakelocks = false;
     private static final Map<String, Long> rateLimits = new HashMap<>();
     // singletons to avoid repeated allocation
     private static DecimalFormatSymbols dfs;
     private static DecimalFormat df;
+
+    public static boolean buggy_samsung = false; // flag set when we detect samsung devices which do not perform to android specifications
 
     public static void startService(final Class c, final String... args) {
         startService(c, null, args);
@@ -324,7 +311,7 @@ public class JoH {
     // return true if below rate limit (persistent version)
     public static synchronized boolean pratelimit(String name, int seconds) {
         // check if over limit
-        final long time_now = JoH.tsl();
+        final long time_now = Helper.tsl();
         final long rate_time;
         if (!rateLimits.containsKey(name)) {
             rate_time = PersistentStore.getLong(name); // 0 if undef
@@ -344,35 +331,35 @@ public class JoH {
     // return true if below rate limit
     public static synchronized boolean ratelimit(String name, int seconds) {
         // check if over limit
-        if ((rateLimits.containsKey(name)) && (JoH.tsl() - rateLimits.get(name) < (seconds * 1000L))) {
+        if ((rateLimits.containsKey(name)) && (Helper.tsl() - rateLimits.get(name) < (seconds * 1000L))) {
             Log.d(TAG, name + " rate limited: " + seconds + " seconds");
             return false;
         }
         // not over limit
-        rateLimits.put(name, JoH.tsl());
+        rateLimits.put(name, Helper.tsl());
         return true;
     }
 
     // return true if below rate limit
     public static synchronized boolean quietratelimit(String name, int seconds) {
         // check if over limit
-        if ((rateLimits.containsKey(name)) && (JoH.tsl() - rateLimits.get(name) < (seconds * 1000))) {
+        if ((rateLimits.containsKey(name)) && (Helper.tsl() - rateLimits.get(name) < (seconds * 1000))) {
             return false;
         }
         // not over limit
-        rateLimits.put(name, JoH.tsl());
+        rateLimits.put(name, Helper.tsl());
         return true;
     }
 
     // return true if below rate limit
     public static synchronized boolean ratelimitmilli(String name, int milliseconds) {
         // check if over limit
-        if ((rateLimits.containsKey(name)) && (JoH.tsl() - rateLimits.get(name) < (milliseconds))) {
+        if ((rateLimits.containsKey(name)) && (Helper.tsl() - rateLimits.get(name) < (milliseconds))) {
             Log.d(TAG, name + " rate limited: " + milliseconds + " milliseconds");
             return false;
         }
         // not over limit
-        rateLimits.put(name, JoH.tsl());
+        rateLimits.put(name, Helper.tsl());
         return true;
     }
 
@@ -410,7 +397,7 @@ public class JoH {
         // Date date = new Date();
         // SimpleDateFormat sd = new SimpleDateFormat("HH:mm");
         //  return sd.format(date);
-        return hourMinuteString(JoH.tsl());
+        return hourMinuteString(Helper.tsl());
     }
 
     public static String hourMinuteString(long timestamp) {
@@ -498,7 +485,7 @@ public class JoH {
         if (t > 3000000) t = t + 10000; // round up by 10 seconds if nearly an hour
         if ((t > Constants.DAY_IN_MS) && (t < Constants.WEEK_IN_MS * 2)) {
             final SimpleDateFormat df = new SimpleDateFormat("EEEE", Locale.getDefault());
-            final String day = df.format(new Date(JoH.tsl() + t));
+            final String day = df.format(new Date(Helper.tsl() + t));
             return ((t > Constants.WEEK_IN_MS) ? "next " : "") + day;
         } else {
             return niceTimeScalar(t);
@@ -686,16 +673,16 @@ public class JoH {
                         Log.i(TAG, "Displaying toast using fallback");
                     } catch (Exception e) {
                         Log.e(TAG, "Exception processing runnable toast ui thread: " + e);
-                        MainActivity.toastStatic(msg);
+                        PreferenceActivity.toastStatic(msg);
                     }
                 }
             })) {
                 Log.e(TAG, "Couldn't display toast via ui thread: " + msg);
-                MainActivity.toastStatic(msg);
+                PreferenceActivity.toastStatic(msg);
             }
         } catch (Exception e) {
             Log.e(TAG, "Couldn't display toast due to exception: " + msg + " e: " + e.toString());
-            MainActivity.toastStatic(msg);
+            PreferenceActivity.toastStatic(msg);
         }
     }
 
@@ -1037,7 +1024,7 @@ public class JoH {
     }
 
     public static long wakeUpIntent(Context context, long delayMs, PendingIntent pendingIntent) {
-        final long wakeTime = JoH.tsl() + delayMs;
+        final long wakeTime = Helper.tsl() + delayMs;
         if (pendingIntent != null) {
             Log.d(TAG, "Scheduling wakeup intent: " + dateTimeText(wakeTime));
             final AlarmManager alarm = (AlarmManager) context.getSystemService(ALARM_SERVICE);
@@ -1047,11 +1034,11 @@ public class JoH {
                 Log.e(TAG, "Exception cancelling alarm in wakeUpIntent: " + e);
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-               /* if (buggy_samsung && Pref.getBoolean("allow_samsung_workaround", true)) {
+                if (buggy_samsung && Pref.getBoolean("allow_samsung_workaround", true)) {
                     alarm.setAlarmClock(new AlarmManager.AlarmClockInfo(wakeTime, null), pendingIntent);
-                } else {*/
+                } else {
                     alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, wakeTime, pendingIntent);
-                //}
+                }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, pendingIntent);
             } else

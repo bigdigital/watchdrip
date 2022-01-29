@@ -3,7 +3,7 @@ package com.thatguysservice.huami_xdrip.UtilityModels;
 import android.os.PowerManager;
 
 import com.thatguysservice.huami_xdrip.models.Constants;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,18 +36,18 @@ public class Inevitable {
             task.extendTime(idle_for);
 
             if (d)
-                UserError.Log.d(TAG, "Extending time for: " + id + " to " + JoH.dateTimeText(task.when));
+                UserError.Log.d(TAG, "Extending time for: " + id + " to " + Helper.dateTimeText(task.when));
         } else {
             // otherwise create new task
             if (runnable == null) return; // extension only if already exists
             tasks.put(id, new Task(id, idle_for, runnable));
 
             if (d)
-                UserError.Log.d(TAG, "Creating task: " + id + " due: " + JoH.dateTimeText(tasks.get(id).when));
+                UserError.Log.d(TAG, "Creating task: " + id + " due: " + Helper.dateTimeText(tasks.get(id).when));
 
             // create a thread to wait and execute in background
             final Thread t = new Thread(() -> {
-                final PowerManager.WakeLock wl = JoH.getWakeLock(id, MAX_QUEUE_TIME + 5000);
+                final PowerManager.WakeLock wl = Helper.getWakeLock(id, MAX_QUEUE_TIME + 5000);
                 try {
                     boolean running = true;
                     // wait for task to be due or killed
@@ -55,13 +55,13 @@ public class Inevitable {
                         final Task thisTask1 = tasks.get(id);
                         if (thisTask1 == null || thisTask1.getWhen() > 0) {
                             // run instantly if we are set to offset of 0
-                            JoH.threadSleep(500); // Todo reduce this to reduce latency on tasks scheduled for <500ms? careful of timing implications
+                            Helper.threadSleep(500); // Todo reduce this to reduce latency on tasks scheduled for <500ms? careful of timing implications
                         }
                         final Task thisTask = tasks.get(id);
                         running = thisTask != null && !thisTask.poll();
                     }
                 } finally {
-                    JoH.releaseWakeLock(wl);
+                    Helper.releaseWakeLock(wl);
                 }
             });
             t.setPriority(Thread.MIN_PRIORITY);
@@ -104,11 +104,11 @@ public class Inevitable {
         }
 
         public void extendTime(long offset) {
-            this.when = JoH.tsl() + offset;
+            this.when = Helper.tsl() + offset;
         }
 
         public boolean poll() {
-            final long till = JoH.msTill(when);
+            final long till = Helper.msTill(when);
             if (till < 1) {
                 if (d) UserError.Log.d(TAG, "Executing task! " + this.id);
                 tasks.remove(this.id); // early remove to allow overlapping scheduling

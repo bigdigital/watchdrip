@@ -11,7 +11,7 @@ import android.os.Bundle;
 
 import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder;
 import com.thatguysservice.huami_xdrip.models.Constants;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.Position;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.SimpleText;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.TextSettings;
@@ -25,7 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.thatguysservice.huami_xdrip.models.JoH.hourMinuteString;
+import static com.thatguysservice.huami_xdrip.models.Helper.hourMinuteString;
 import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
 
 public class DisplayData {
@@ -88,7 +88,7 @@ public class DisplayData {
     }
 
     public ValueTime getNoReadings() {
-        return new ValueTime(config.noReadingsText.textPattern, hourMinuteString(JoH.tsl()), false);
+        return new ValueTime(config.noReadingsText.textPattern, hourMinuteString(Helper.tsl()), false);
     }
 
     public ValueTime getTreatment() {
@@ -298,7 +298,7 @@ public class DisplayData {
         }
 
         private String getDouble(double v, int digits) {
-            return v > -1 ? JoH.qs(v, digits) : "";
+            return v > -1 ? Helper.qs(v, digits) : "";
         }
 
         public DisplayData build() throws IllegalArgumentException, IOException {
@@ -340,7 +340,7 @@ public class DisplayData {
                 timeStampText = hourMinuteString(timeStampVal);
             } else {
                 isOld = true;
-                timeStampText = JoH.niceTimeScalar(JoH.msSince(timeStampVal));
+                timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStampVal));
             }
             bgDeltaMgdl = bundle.getDouble("bg.deltaValueMgdl", 0);
             String unitized_delta = BgGraphBuilder.unitizedDeltaStringRaw(false, true, bgDeltaMgdl, doMgdl);
@@ -380,7 +380,7 @@ public class DisplayData {
             isOld = false;
             String treatmentText = "";
             if (insulin > 0) {
-                treatmentText = treatmentText + (JoH.qs(insulin, 2) + "u").replace(".0u", "u");
+                treatmentText = treatmentText + (Helper.qs(insulin, 2) + "u").replace(".0u", "u");
             }
             //if (carbs > 0) {
             //    treatmentText = treatmentText + (JoH.qs(treatment.carbs, 1) + "g").replace(".0g", "g");
@@ -389,7 +389,7 @@ public class DisplayData {
             if (treatmentText.length() > 0) {
                 if (timeStamp > Constants.HOUR_IN_MS * 6) {
                     isOld = true;
-                    timeStampText = JoH.niceTimeScalar(JoH.msSince(timeStamp));
+                    timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStamp));
                 } else if (timeStamp > Constants.HOUR_IN_MS) {
                     timeStampText = hourMinuteString(timeStamp);
                 } else {

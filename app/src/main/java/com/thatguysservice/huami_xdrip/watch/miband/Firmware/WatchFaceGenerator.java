@@ -12,7 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder;
 import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphCompontens;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.WatchfaceConfig;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.DisplayData;
@@ -44,10 +44,10 @@ import java.util.ArrayList;
 
 import lombok.NonNull;
 
-import static com.thatguysservice.huami_xdrip.models.JoH.threadSleep;
+import static com.thatguysservice.huami_xdrip.models.Helper.threadSleep;
 import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
 import static com.thatguysservice.huami_xdrip.utils.FileUtils.makeSureDirectoryExists;
-import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperations.fromUint32;
+import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew.fromUint32;
 
 public class WatchFaceGenerator {
     public final static int VERGE2_HEADERLEN = 40;
@@ -391,7 +391,7 @@ public class WatchFaceGenerator {
         //draw graph
         if (config.graph != null) {
             drawMutex = true;
-            JoH.runOnUiThread(new Runnable() {
+            Helper.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {

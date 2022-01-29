@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sendLogsButton"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".SendFeedBack">
+
+    <TextView
+        android:id="@+id/contactTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Contact info (optional, to make it easier to contact you)" />
+
+    <EditText
+        android:id="@+id/contactTextField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/contactTextView"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:ems="10"
+        android:hint="@string/optional_contact_email"
+        android:inputType="textEmailAddress" />
+
+    <EditText
+        android:id="@+id/issueTextField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/uploadLogsTextView"
+        android:layout_below="@id/contactTextField"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:hint="@string/please_enter_your_question_or_comments_here"
+        android:inputType="textMultiLine"
+        android:maxLength="1000" />
+
+    <TextView
+        android:id="@+id/uploadLogsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/sendLogsCheckBox"
+        android:text="Upload log(optional, to help locate the issue)" />
+
+    <CheckBox
+        android:id="@+id/sendLogsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/button"
+        android:checked="true"
+        android:text="App log" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="sendFeedback"
+        android:text="@string/send_logs" />
+</RelativeLayout>

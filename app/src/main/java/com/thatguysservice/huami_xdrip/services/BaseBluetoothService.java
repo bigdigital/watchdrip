@@ -11,7 +11,7 @@ import com.polidea.rxandroidble2.RxBleCustomOperation;
 import com.polidea.rxandroidble2.exceptions.BleScanException;
 import com.polidea.rxandroidble2.internal.connection.RxBleGattCallback;
 import com.thatguysservice.huami_xdrip.models.HandleBleScanException;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.Pref;
 import com.thatguysservice.huami_xdrip.models.UserError;
 
@@ -26,9 +26,9 @@ import io.reactivex.schedulers.Schedulers;
 
 // jamorham base class for reactive bluetooth services
 
-public abstract class JamBaseBluetoothService extends Service {
+public abstract class BaseBluetoothService extends Service {
 
-    private final PowerManager.WakeLock wl = JoH.getWakeLock("jam-bluetooth-generic", 1000);
+    private final PowerManager.WakeLock wl = Helper.getWakeLock("jam-bluetooth-generic", 1000);
     protected String TAG = this.getClass().getSimpleName();
     private volatile boolean background_launch_waiting = false;
     protected static final long TOLERABLE_JITTER = 10000;
@@ -47,7 +47,7 @@ public abstract class JamBaseBluetoothService extends Service {
                     UserError.Log.e(TAG, "RxJavaError: " + e.getMessage());
                 }
             } else {
-                UserError.Log.wtf(TAG, "RxJavaError2:" + e.getClass().getCanonicalName() + " " + e.getMessage() + " " + JoH.backTrace(3));
+                UserError.Log.wtf(TAG, "RxJavaError2:" + e.getClass().getCanonicalName() + " " + e.getMessage() + " " + Helper.backTrace(3));
             }
         });
     }
@@ -61,13 +61,13 @@ public abstract class JamBaseBluetoothService extends Service {
             UserError.Log.d(TAG, "Blocked by existing background automata pending");
             return;
         }
-        final PowerManager.WakeLock wl = JoH.getWakeLock(TAG + "-background", timeout + 1000);
+        final PowerManager.WakeLock wl = Helper.getWakeLock(TAG + "-background", timeout + 1000);
         background_launch_waiting = true;
         new Thread(() -> {
-            JoH.threadSleep(timeout);
+            Helper.threadSleep(timeout);
             background_launch_waiting = false;
             automata();
-            JoH.releaseWakeLock(wl);
+            Helper.releaseWakeLock(wl);
         }).start();
     }
 
@@ -76,12 +76,12 @@ public abstract class JamBaseBluetoothService extends Service {
     }
 
     protected synchronized void extendWakeLock(long ms) {
-        JoH.releaseWakeLock(wl); // lets not get too messy
+        Helper.releaseWakeLock(wl); // lets not get too messy
         wl.acquire(ms);
     }
 
     protected synchronized void releaseWakeLock() {
-        JoH.releaseWakeLock(wl);
+        Helper.releaseWakeLock(wl);
     }
 
 
@@ -99,7 +99,7 @@ public abstract class JamBaseBluetoothService extends Service {
 
     public void tryGattRefresh(RxBleConnection connection) {
         if (connection == null) return;
-        if (JoH.ratelimit("gatt-refresh", 60)) {
+        if (Helper.ratelimit("gatt-refresh", 60)) {
             if (Pref.getBoolean("use_gatt_refresh", true)) {
                 try {
                     if (connection != null)
@@ -142,15 +142,15 @@ public abstract class JamBaseBluetoothService extends Service {
         }
 
         private Void refreshDeviceCache(final BluetoothGatt gatt) {
-            UserError.Log.d("BaseBluetooth", "Gatt Refresh " + (JoH.refreshDeviceCache("BaseBluetooth", gatt) ? "succeeded" : "failed"));
+            UserError.Log.d("BaseBluetooth", "Gatt Refresh " + (Helper.refreshDeviceCache("BaseBluetooth", gatt) ? "succeeded" : "failed"));
             return null;
         }
     }
 
     protected static byte[] nn(final byte[] array) {
         if (array == null) {
-            if (JoH.ratelimit("never-null", 60)) {
-                UserError.Log.wtf("NeverNull", "Attempt to pass null!!! " + JoH.backTrace());
+            if (Helper.ratelimit("never-null", 60)) {
+                UserError.Log.wtf("NeverNull", "Attempt to pass null!!! " + Helper.backTrace());
                 return new byte[1];
             }
         }

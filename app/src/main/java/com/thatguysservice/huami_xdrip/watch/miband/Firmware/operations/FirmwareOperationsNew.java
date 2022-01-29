@@ -2,122 +2,224 @@ package com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations;
 
 import android.annotation.SuppressLint;
 
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.polidea.rxandroidble2.RxBleConnection;
+import com.polidea.rxandroidble2.exceptions.BleCannotSetCharacteristicNotificationException;
+import com.polidea.rxandroidble2.exceptions.BleCharacteristicNotFoundException;
+import com.polidea.rxandroidble2.exceptions.BleDisconnectedException;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
-import com.thatguysservice.huami_xdrip.utils.chiper.CRC16;
+import com.thatguysservice.huami_xdrip.utils.bt.Subscription;
+import com.thatguysservice.huami_xdrip.watch.miband.Const;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceState;
+import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceStateMiBand5;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceStateVergeNew;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandService;
+import com.thatguysservice.huami_xdrip.watch.miband.message.AlertLevelMessage;
+import com.thatguysservice.huami_xdrip.watch.miband.message.DisplayControllMessage;
 import com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.SLEEP;
-import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_REBOOT;
+import static com.polidea.rxandroidble2.RxBleConnection.GATT_WRITE_MTU_OVERHEAD;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SLEEP;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.DisplayControllMessage.NightMode.Sheduled;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_CHECKSUM;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_INIT;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_START_DATA;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_UNKNOWN_MIBAND5;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_UPDATE_SYNC;
 
-public class FirmwareOperationsNew extends FirmwareOperations {
-
-    private final byte COMMAND_REQUEST_PARAMETERS = (byte) 0xd0;
-    private final byte COMMAND_SEND_FIRMWARE_INFO = (byte) 0xd2;
-    private final byte COMMAND_START_TRANSFER = (byte) 0xd3;
-    private final byte REPLY_UPDATE_PROGRESS = (byte) 0xd4;
-    private final byte COMMAND_COMPLETE_TRANSFER = (byte) 0xd5;
-    private final byte COMMAND_FINALIZE_UPDATE = (byte) 0xd6;
-
-
-    private int mChunkLength = -1;
+public class FirmwareOperationsNew {
+    public static final boolean d = true;
+    private static final long MAX_RETRIES = 5;
+    public static int FIRMWARE_SYNC_PACKET = 175;
+    protected String TAG = MiBandService.class.getSimpleName();
+    protected int retryCount = 0;
+    byte[] fw;
+    SequenceState mState;
+    MiBandService service;
+    RxBleConnection connection;
+    private FirmwareType firmwareType = FirmwareType.WATCHFACE;
+    private Subscription watchfaceSubscription;
+    private boolean fwSatateWasReseted;
 
     public FirmwareOperationsNew(byte[] file, SequenceState sequenceState, MiBandService service) {
-        super(file, sequenceState, service);
+        fw = file;
+        mState = sequenceState;
+        this.service = service;
+        fwSatateWasReseted = false;
+        connection = service.getConection();
     }
 
-    public byte[] getRequestParametersCommand() {
-        return new byte[]{COMMAND_REQUEST_PARAMETERS};
+    public static byte fromUint8(int value) {
+        return (byte) (value & 0xff);
     }
 
-    @SuppressLint("CheckResult")
-    @Override
-    public synchronized void processFirmwareOperationSequence() {
-        String seq = getSequence();
-        switch (seq) {
-            case SequenceStateVergeNew.REQUEST_PARAMETERS: {
-                nextSequence();
-                connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getRequestParametersCommand())
-                        .subscribe(val -> {
-                                    if (d)
-                                        UserError.Log.d(TAG, "Wrote getRequestParametersCommand: " + JoH.bytesToHex(val));
-                                },
-                                throwable -> {
-                                    UserError.Log.e(TAG, "Could not write getRequestParametersCommand: " + throwable);
-                                    resetFirmwareState(false);
-                                }
-                        );
-                break;
-            }
+    public static byte[] fromUint16(int value) {
+        return new byte[]{
+                (byte) (value & 0xff),
+                (byte) ((value >> 8) & 0xff),
+        };
+    }
 
-            default: {
-                super.processFirmwareOperationSequence();
+    public static byte[] fromUint24(int value) {
+        return new byte[]{
+                (byte) (value & 0xff),
+                (byte) ((value >> 8) & 0xff),
+                (byte) ((value >> 16) & 0xff),
+        };
+    }
+
+    public static byte[] fromUint32(int value) {
+        return new byte[]{
+                (byte) (value & 0xff),
+                (byte) ((value >> 8) & 0xff),
+                (byte) ((value >> 16) & 0xff),
+                (byte) ((value >> 24) & 0xff),
+        };
+    }
+
+    public static int toUint16(byte... bytes) {
+        return (bytes[0] & 0xff) | ((bytes[1] & 0xff) << 8);
+    }
+
+    public static byte[] readAll(InputStream in, long maxLen) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream(Math.max(8192, in.available()));
+        byte[] buf = new byte[8192];
+        int read;
+        long totalRead = 0;
+        while ((read = in.read(buf)) > 0) {
+            out.write(buf, 0, read);
+            totalRead += read;
+            if (totalRead > maxLen) {
+                throw new IOException("Too much data to read into memory. Got already " + totalRead);
             }
         }
+        return out.toByteArray();
     }
 
-    @Override
+    protected FirmwareType getFirmwareType() {
+        return firmwareType;
+    }
+
+    public byte[] getBytes() {
+        return fw;
+    }
+
+    protected int getPacketLength() {
+        return service.getMTU() - GATT_WRITE_MTU_OVERHEAD;
+    }
+
+    public String getSequence() {
+        return mState.getSequence();
+    }
+
+    public void nextSequence() {
+        String oldState = mState.getSequence();
+        String new_state = mState.next();
+        UserError.Log.d(TAG, "Changing firmware state from: " + oldState + " to " + new_state);
+    }
+
+    public int getSize() {
+        return fw.length;
+    }
+
+    protected byte[] getFwInfoCommand() {
+        int fwSize = getSize();
+        byte[] sizeBytes = fromUint32(fwSize);
+        byte[] bytes = new byte[10];
+        int i = 0;
+        bytes[i++] = COMMAND_FIRMWARE_INIT;
+        bytes[i++] = getFirmwareType().value;
+        bytes[i++] = sizeBytes[0];
+        bytes[i++] = sizeBytes[1];
+        bytes[i++] = sizeBytes[2];
+        bytes[i++] = sizeBytes[3];
+        int crc32 = (int) Helper.checksum(fw);
+        byte[] crcBytes = fromUint32(crc32);
+        bytes[i++] = crcBytes[0];
+        bytes[i++] = crcBytes[1];
+        bytes[i++] = crcBytes[2];
+        bytes[i] = crcBytes[3];
+        return bytes;
+    }
+
+    protected byte[] prepareFWUploadInitCommand() {
+        return new byte[]{COMMAND_FIRMWARE_INIT, (byte) 0xFF};
+    }
+
+    protected byte[] getChecksumCommand() {
+        return new byte[]{COMMAND_FIRMWARE_CHECKSUM};
+    }
+
+    protected byte[] getSyncCommand() {
+        return new byte[]{COMMAND_FIRMWARE_UPDATE_SYNC};
+    }
+
+    protected byte[] getFirmwareStartCommand() {
+        return new byte[]{COMMAND_FIRMWARE_START_DATA, (byte) 0x1};
+    }
+
+    protected byte[] getUnknownMiBand5Command() {
+        return new byte[]{COMMAND_FIRMWARE_UNKNOWN_MIBAND5};
+    }
+
+    protected UUID getFirmwareCharacteristicUUID() {
+        return Const.UUID_CHARACTERISTIC_FIRMWARE;
+    }
+
+    protected UUID getFirmwareDataCharacteristicUUID() {
+        return Const.UUID_CHARACTERISTIC_FIRMWARE_DATA;
+    }
+
     public void processFirmwareOperationNotifications(byte[] value) {
-        if (value.length != 3 && value.length != 6 && value.length != 11) {
-            UserError.Log.e(TAG, "Notifications should be 3, 6 or 11 bytes long.");
+        if (value.length != 3 && value.length != 11) {
+            UserError.Log.e(TAG, "Notifications should be 3 or 11 bytes long.");
             return;
         }
-
-        boolean success = (value[2] == OperationCodes.SUCCESS) || ((value[1] == REPLY_UPDATE_PROGRESS) && value.length == 6);
+        boolean success = value[2] == OperationCodes.SUCCESS;
         String seq = getSequence();
         if (value[0] == OperationCodes.RESPONSE && success) {
+
             try {
                 switch (value[1]) {
-                    case COMMAND_REQUEST_PARAMETERS: {
-                        if (seq.equals(SequenceStateVergeNew.WAITING_REQUEST_PARAMETERS_RESPONSE)) {
-                            mChunkLength = (value[4] & 0xff) | ((value[5] & 0xff) << 8);
-                            UserError.Log.d(TAG, ("got chunk length of " + mChunkLength));
-                            nextSequence();
-                            processFirmwareSequence();
-                        }
-                    }
-                    case COMMAND_SEND_FIRMWARE_INFO: {
-                        if (seq.equals(SequenceStateVergeNew.WAITING_TRANSFER_SEND_WF_INFO_RESPONSE)) {
+                    case OperationCodes.COMMAND_FIRMWARE_INIT: {
+                        if (seq.equals(SequenceState.WAITING_PREPARE_UPLOAD_RESPONSE) ||
+                                seq.equals(SequenceState.WAITING_TRANSFER_SEND_WF_INFO_RESPONSE)) {
                             nextSequence();
                             processFirmwareSequence();
                         }
                         break;
                     }
-                    case COMMAND_START_TRANSFER: {
-                        if (seq.equals(SequenceStateVergeNew.WAITING_TRANSFER_FW_START_RESPONSE)) {
-                            nextSequence();
-                            sendFirmwareDataChunk(0);
-                        }
+                    case OperationCodes.COMMAND_FIRMWARE_START_DATA: {
+                        sendFirmwareData();
                         break;
                     }
-                    case OperationCodes.COMMAND_FIRMWARE_START_DATA:
-                        sendChecksum();
-                        break;
-                    case REPLY_UPDATE_PROGRESS:
-                        int offset = (value[2] & 0xff) | ((value[3] & 0xff) << 8) | ((value[4] & 0xff) << 16) | ((value[5] & 0xff) << 24);
-                        if (d)
-                            UserError.Log.d(TAG, "update progress " + offset + " bytes");
-                        sendFirmwareDataChunk(offset);
-                        break;
-                    case COMMAND_COMPLETE_TRANSFER:
-                        sendFinalize();
-                        break;
-                    case COMMAND_FINALIZE_UPDATE: {
-                        if (seq.equals(SequenceStateVergeNew.WAITING_FINALIZE_FW_DATA)) {
-                            retryCount = 0;
+                    case OperationCodes.COMMAND_FIRMWARE_CHECKSUM: {
+                        if (seq.equals(SequenceState.WAITING_SEND_CHECKSUM_RESPONSE)) {
                             nextSequence();
                             processFirmwareSequence();
                         }
                         break;
                     }
-                    case COMMAND_FIRMWARE_REBOOT: {
+                    case OperationCodes.COMMAND_FIRMWARE_REBOOT: {
                         UserError.Log.e(TAG, "Reboot command successfully sent.");
                         resetFirmwareState(true);
+                        break;
+                    }
+                    case OperationCodes.COMMAND_FIRMWARE_UNKNOWN_MIBAND5: {
+                        if (seq.equals(SequenceStateMiBand5.WAITING_UNKNOWN_REQUEST_RESPONSE)) {
+                            nextSequence();
+                            processFirmwareSequence();
+                        }
                         break;
                     }
                     default: {
@@ -140,101 +242,202 @@ public class FirmwareOperationsNew extends FirmwareOperations {
             } else if (value[2] == OperationCodes.ON_CALL) {
                 errorMessage = "Cannot upload watchface, call in progress";
             } else {
-                errorMessage = "Unexpected notification during firmware update:" + JoH.bytesToHex(value);
+                errorMessage = "Unexpected notification during firmware update:" + Helper.bytesToHex(value);
             }
             resetFirmwareState(false, errorMessage);
             if (sendBGNotification) {
-                JoH.startService(MiBandService.class, "function", "update_bg_as_notification");
+                Helper.startService(MiBandService.class, "function", "update_bg_as_notification");
                 service.changeState(SLEEP);
             }
         }
     }
 
-    protected byte[] getWatcfaceIdCommand(){
-        int fwSize = getSize();
-        byte[] fwBytes = getBytes();
-        byte[] sizeBytes = fromUint32(fwSize);
-        return new byte[]{OperationCodes.COMMAND_WATCHFACE_UID, 0x00,
-                sizeBytes[0],
-                sizeBytes[1],
-                sizeBytes[2],
-                sizeBytes[3],
-                fwBytes[18],
-                fwBytes[19],
-                fwBytes[20],
-                fwBytes[21]
-        };
-    }
-
-    @Override
-    public byte[] getFwInfoCommand() {
-        int fwSize = getSize();
-        byte[] sizeBytes = fromUint32(fwSize);
-        int crc32 = (int) JoH.checksum(fw);
-        byte[] crcBytes = fromUint32(crc32);
-        byte[] chunkSizeBytes = fromUint16(mChunkLength);
-        byte[] bytes = new byte[]{
-                COMMAND_SEND_FIRMWARE_INFO,
-                getFirmwareType().value,
-                sizeBytes[0],
-                sizeBytes[1],
-                sizeBytes[2],
-                sizeBytes[3],
-                crcBytes[0],
-                crcBytes[1],
-                crcBytes[2],
-                crcBytes[3],
-                chunkSizeBytes[0],
-                chunkSizeBytes[1],
-                0, // ??
-                0, // index
-                1, // count
-                sizeBytes[0], // total size? right now it is equal to the size above
-                sizeBytes[1],
-                sizeBytes[2],
-                sizeBytes[3]
-        };
-        return bytes;
-    }
-
-    @Override
-    public byte[] getFirmwareStartCommand() {
-        return new byte[]{COMMAND_START_TRANSFER, (byte) 0x1};
-    }
-
-    @Override
-    public byte[] getChecksumCommand() {
-        byte[] bytes = CRC16.calculate(fw, 0, fw.length);
-        return new byte[]{
-                OperationCodes.COMMAND_FIRMWARE_CHECKSUM,
-                bytes[0],
-                bytes[1],
-        };
+    public synchronized void processFirmwareSequence() {
+        if (d)
+            UserError.Log.d(TAG, "processFirmwareSequence seq:" + getSequence().toString());
+        processFirmwareOperationSequence();
     }
 
     @SuppressLint("CheckResult")
-    private void sendFirmwareDataChunk(int offset) {
+    public synchronized void processFirmwareOperationSequence() {
+        switch (getSequence()) {
+            case SequenceState.SET_NIGHTMODE: {
+                service.isNeedToRestoreNightMode = true;
+                DisplayControllMessage dispControl = new DisplayControllMessage();
+                Calendar sheduledCalendar = Calendar.getInstance();
+                sheduledCalendar.set(Calendar.HOUR_OF_DAY, 0);
+                sheduledCalendar.set(Calendar.MINUTE, 0);
+                Date sheduledDate = sheduledCalendar.getTime();
+                service.writeToConfiguration(dispControl.setNightModeCmd(Sheduled, sheduledDate, sheduledDate));
+                nextSequence();
+                processFirmwareSequence();
+                break;
+            }
+
+            case SequenceState.PREPARE_UPLOAD: {
+                nextSequence();
+                connection.writeCharacteristic(getFirmwareCharacteristicUUID(), prepareFWUploadInitCommand())
+                        .subscribe(valB -> {
+                                    UserError.Log.d(TAG, "Wrote prepareFWUploadInitCommand: " + Helper.bytesToHex(valB));
+                                },
+                                throwable -> {
+                                    UserError.Log.e(TAG, "Could not write prepareFWUploadInitCommand: " + throwable);
+                                    resetFirmwareState(false);
+                                }
+                        );
+                break;
+            }
+
+            case SequenceState.TRANSFER_FW_START: {
+                nextSequence();
+                connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getFirmwareStartCommand())
+                        .subscribe(valB -> {
+                                    UserError.Log.d(TAG, "Wrote Start command: " + Helper.bytesToHex(valB));
+                                },
+                                throwable -> {
+                                    UserError.Log.e(TAG, "Could not write Start command: " + throwable);
+                                    resetFirmwareState(false);
+                                }
+                        );
+                break;
+            }
+            case SequenceState.TRANSFER_SEND_WF_INFO: {
+                nextSequence();
+                connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getFwInfoCommand())
+                        .subscribe(valB -> {
+                                    UserError.Log.d(TAG, "Wrote getFwInfoCommand: " + Helper.bytesToHex(valB));
+                                },
+                                throwable -> {
+                                    UserError.Log.e(TAG, "Could not write firmware info: " + throwable);
+                                    resetFirmwareState(false);
+                                }
+                        );
+                break;
+            }
+            case SequenceStateMiBand5.UNKNOWN_REQUEST: {
+                nextSequence();
+                connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getUnknownMiBand5Command())
+                        .subscribe(valB -> {
+                                    UserError.Log.d(TAG, "Wrote getUnknownMiBand5Command: " + Helper.bytesToHex(valB));
+                                },
+                                throwable -> {
+                                    UserError.Log.e(TAG, "Could not write getUnknownMiBand5Command: " + throwable);
+                                    resetFirmwareState(false);
+                                }
+                        );
+                break;
+            }
+            case SequenceState.TRANSFER_WF_ID: {
+                service.writeToConfiguration(getWatcfaceIdCommand());
+                nextSequence();
+                processFirmwareSequence();
+                break;
+            }
+            case SequenceState.NOTIFICATION_ENABLE: {
+                watchfaceSubscription = new Subscription(
+                        connection.setupNotification(getFirmwareCharacteristicUUID())
+                                .timeout(300, TimeUnit.SECONDS) // WARN
+                                .doOnNext(notificationObservable -> {
+                                            if (d)
+                                                UserError.Log.d(TAG, "Notification for firmware enabled");
+                                            nextSequence();
+                                            processFirmwareSequence();
+                                        }
+                                )
+                                .flatMap(notificationObservable -> notificationObservable)
+                                .subscribe(bytes -> {
+                                    // incoming notifications
+                                    if (d)
+                                        UserError.Log.d(TAG, "Received firmware notification bytes: " + Helper.bytesToHex(bytes));
+                                    processFirmwareOperationNotifications(bytes);
+                                }, throwable -> {
+                                    UserError.Log.d(TAG, "Throwable in firmware notification: " + throwable);
+                                    if (throwable instanceof BleCharacteristicNotFoundException) {
+                                        // maybe legacy - ignore for now but needs better handling
+                                        UserError.Log.d(TAG, "Characteristic not found for notification");
+                                    } else if (throwable instanceof BleCannotSetCharacteristicNotificationException) {
+                                        UserError.Log.e(TAG, "Problems setting notifications - disconnecting");
+                                    } else if (throwable instanceof BleDisconnectedException) {
+                                        UserError.Log.d(TAG, "Disconnected while enabling notifications");
+                                    } else if (throwable instanceof TimeoutException) {
+                                        UserError.Log.d(TAG, "Timeout");
+                                    }
+                                    resetFirmwareState(false);
+                                }));
+                break;
+            }
+            case SequenceState.CHECKSUM_VERIFIED: {
+                retryCount = 0;
+                nextSequence();
+                processFirmwareSequence();
+                break;
+            }
+            case SequenceState.FORCE_DISABLE_VIBRATION: {
+                forceDisableVibration();
+                break;
+            }
+            case SequenceState.FW_UPLOADING_FINISHED: {
+                if (getFirmwareType() == FirmwareType.FIRMWARE) {
+                    //send reboot for firmware
+                } else {
+                    UserError.Log.e(TAG, "Watch Face has been installed successfully");
+                    service.changeNextState();
+                    resetFirmwareState(true);
+                }
+                break;
+            }
+        }
+    }
+
+    protected byte[] getWatcfaceIdCommand() {
+        return OperationCodes.COMMAND_MIBAND5_UNKNOW_INIT;
+    }
+
+    @SuppressLint("CheckResult")
+    protected void forceDisableVibration() {
+        AlertLevelMessage message = new AlertLevelMessage();
+        connection.writeCharacteristic(message.getCharacteristicUUID(), message.getPeriodicVibrationMessage((byte) 1, (short) 0, (short) 50))
+                .subscribe(val -> {
+                            if (d)
+                                UserError.Log.d(TAG, "Wrote COMMAND_DISABLE_CALL: " + Helper.bytesToHex(val));
+                            if (retryCount >= MAX_RETRIES) {
+                                nextSequence();
+                                processFirmwareSequence();
+                            } else {
+                                //Thread.sleep(1);
+                                processFirmwareSequence();
+                            }
+                            if (getSequence().equals(SequenceStateVergeNew.FORCE_DISABLE_VIBRATION)) {
+                                retryCount++;
+                            }
+                        },
+                        throwable -> {
+                            if (d)
+                                UserError.Log.e(TAG, "Could not write COMMAND_DISABLE_CALL: " + throwable);
+                            service.changeNextState();
+                            resetFirmwareState(true);
+                        }
+                );
+    }
+
+    @SuppressLint("CheckResult")
+    protected void sendFirmwareData() {
         byte[] fwbytes = getBytes();
         int len = getSize();
-        int remaining = len - offset;
+
         final int packetLength = getPacketLength();
+        if (d)
+            UserError.Log.d(TAG, "Firmware packet lengh: " + packetLength);
+        int packets = len / packetLength;
 
-        int chunkLength = mChunkLength;
-        if (remaining < mChunkLength) {
-            chunkLength = remaining;
-        }
-
-        int packets = chunkLength / packetLength;
-        int chunkProgress = 0;
-
-        if (remaining <= 0) {
-            sendTransferComplete();
-            return;
-        }
+        // going from 0 to len
+        int firmwareProgress = 0;
         for (int i = 0; i < packets; i++) {
-            byte[] fwChunk = Arrays.copyOfRange(fwbytes, offset + i * packetLength, offset + i * packetLength + packetLength);
-            // int finalI = i;
+            byte[] fwChunk = Arrays.copyOfRange(fwbytes, i * packetLength, i * packetLength + packetLength);
+            int finalI = i;
             connection.writeCharacteristic(getFirmwareDataCharacteristicUUID(), fwChunk).subscribe(val -> {
+                        if (d)
+                            UserError.Log.d(TAG, "Wrote Chunk:" + finalI);
                     },
                     throwable -> {
                         if (d)
@@ -242,13 +445,27 @@ public class FirmwareOperationsNew extends FirmwareOperations {
                         resetFirmwareState(false);
                     }
             );
-            chunkProgress += packetLength;
+            firmwareProgress += packetLength;
+            int progressPercent = (int) ((((float) firmwareProgress) / len) * 100);
+            if ((i > 0) && (i % FirmwareOperationsNew.FIRMWARE_SYNC_PACKET == 0)) {
+                connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getSyncCommand()).subscribe(val -> {
+                            if (d)
+                                UserError.Log.d(TAG, "Wrote Sync" + progressPercent + "%");
+                        },
+                        throwable -> {
+                            if (d)
+                                UserError.Log.e(TAG, "Could not write Sync: " + throwable);
+                            resetFirmwareState(false);
+                        }
+                );
+            }
         }
-
-        if (chunkProgress < chunkLength) {
-            byte[] lastChunk = Arrays.copyOfRange(fwbytes, offset + packets * packetLength, offset + packets * packetLength + (chunkLength - chunkProgress));
-            connection.writeCharacteristic(getFirmwareDataCharacteristicUUID(), lastChunk)
+        if (firmwareProgress < len) { //last chunk
+            byte[] fwChunk = Arrays.copyOfRange(fwbytes, packets * packetLength, len);
+            connection.writeCharacteristic(getFirmwareDataCharacteristicUUID(), fwChunk)
                     .subscribe(val -> {
+                                if (d)
+                                    UserError.Log.d(TAG, "Wrote last fwChunk");
                             },
                             throwable -> {
                                 if (d)
@@ -257,46 +474,63 @@ public class FirmwareOperationsNew extends FirmwareOperations {
                             }
                     );
         }
-
-        int progressPercent = (int) ((((float) (offset + chunkLength)) / len) * 100);
-        if (d)
-            UserError.Log.d(TAG, "Uploading progress: " + progressPercent);
-    }
-
-    @SuppressLint("CheckResult")
-    protected void sendTransferComplete() {
-        if (d)
-            UserError.Log.d(TAG, "Transfer complete");
-
-        connection.writeCharacteristic(getFirmwareCharacteristicUUID(), new byte[]{
-                COMMAND_COMPLETE_TRANSFER})
-                .subscribe(val -> {
-
-                        },
-                        throwable -> {
-                            if (d)
-                                UserError.Log.e(TAG, "Could not write transfer complete cmd: " + throwable);
-                            resetFirmwareState(false);
-                        }
-                );
-    }
-
-    @SuppressLint("CheckResult")
-    protected void sendFinalize() {
-        if (d)
-            UserError.Log.d(TAG, "Finalize firmware");
         nextSequence();
-        connection.writeCharacteristic(getFirmwareCharacteristicUUID(), new byte[]{
-                COMMAND_FINALIZE_UPDATE})
+        sendChecksum();
+    }
+
+    protected void sendChecksum() {
+        connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getChecksumCommand())
                 .subscribe(val -> {
-                            processFirmwareSequence();
+                            if (d)
+                                UserError.Log.d(TAG, "Wrote getChecksumCommand");
+                            nextSequence();
                         },
                         throwable -> {
                             if (d)
-                                UserError.Log.e(TAG, "Could not write Finalize firmware cmd: " + throwable);
+                                UserError.Log.e(TAG, "Could not write getChecksumCommand: " + throwable);
                             resetFirmwareState(false);
                         }
                 );
     }
+
+    public void resetFirmwareState(Boolean result) {
+        resetFirmwareState(result, null);
+    }
+
+    public void resetFirmwareState(Boolean result, String customText) {
+        if (fwSatateWasReseted) {
+            fwSatateWasReseted = true;
+        }
+        if (watchfaceSubscription != null) {
+            watchfaceSubscription.unsubscribe();
+            watchfaceSubscription = null;
+        }
+        mState.setSequenceState(SLEEP);
+        service.resetFirmwareState(result, customText);
+    }
+
+    public enum FirmwareType {
+        FIRMWARE((byte) 0),
+        FONT((byte) 1),
+        RES((byte) 2),
+        RES_COMPRESSED((byte) 130),
+        GPS((byte) 3),
+        GPS_CEP((byte) 4),
+        GPS_ALMANAC((byte) 5),
+        WATCHFACE((byte) 8),
+        FONT_LATIN((byte) 11),
+        INVALID(Byte.MIN_VALUE);
+
+        public final byte value;
+
+        FirmwareType(byte value) {
+            this.value = value;
+        }
+
+        public byte getValue() {
+            return value;
+        }
+    }
+
 
 }

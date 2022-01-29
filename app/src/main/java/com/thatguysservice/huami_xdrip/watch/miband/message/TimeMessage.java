@@ -5,8 +5,8 @@ import com.thatguysservice.huami_xdrip.watch.miband.Const;
 import java.util.Calendar;
 import java.util.UUID;
 
-import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperations.fromUint16;
-import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperations.fromUint8;
+import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew.fromUint16;
+import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew.fromUint8;
 
 public class TimeMessage extends BaseMessage {
     public static byte[] calendarToRawBytes(Calendar timestamp) {

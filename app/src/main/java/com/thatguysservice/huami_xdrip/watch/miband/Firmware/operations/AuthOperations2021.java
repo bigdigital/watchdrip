@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.Const;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
@@ -55,8 +55,8 @@ public class AuthOperations2021 extends AuthOperations {
         byte[] sharedEC = ecdh_lib_get_shared_key(privateKey, remotePublicEC);
         //publicec_test = 541B584FB82A91086D7918CE0E35A0D42D95BEB1000000006B15CBBC7412B2465C0569E442AF30F8AD86909B04000000
         //sharedEC_test = 1B9C1215CD43BB55518487FF790134C6BB49F35C06000000AAD39AEC46BA13373D9768B1E56B91B6FF10B86200000000
-        UserError.Log.d(TAG, "publicEC:" + JoH.bytesToHex(publicEC));
-        UserError.Log.d(TAG, "sharedEC:" + JoH.bytesToHex(sharedEC));
+        UserError.Log.d(TAG, "publicEC:" + Helper.bytesToHex(publicEC));
+        UserError.Log.d(TAG, "sharedEC:" + Helper.bytesToHex(sharedEC));
     }
 
     private byte[] getAuthKeyRequest() {
@@ -98,9 +98,9 @@ public class AuthOperations2021 extends AuthOperations {
             } else if (value[9] == (byte) OperationCodes.CHUNKED_V2_ENDPOINT_AUTH && value[10] == 0x00 && value[11] == AUTH_RESPONSE && value[12] == 0x05 && value[13] == AUTH_SUCCESS) {
                 if (MiBand.getPersistentAuthMac().isEmpty()) {
                     MiBand.setPersistentAuthMac(MiBand.getMac());
-                    MiBand.setPersistentAuthKey(JoH.bytesToHex(getLocalKey()), MiBand.getPersistentAuthMac());
+                    MiBand.setPersistentAuthKey(Helper.bytesToHex(getLocalKey()), MiBand.getPersistentAuthMac());
                     String msg = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_success_auth_text), MiBand.getMibandType());
-                    JoH.static_toast_long(msg);
+                    Helper.static_toast_long(msg);
                     UserError.Log.e(TAG, msg);
                 }
                 service.changeNextState();

@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.provider.BaseColumns;
 
 import com.activeandroid.Cache;
-import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Delete;
@@ -58,7 +57,7 @@ public class UserError extends PlusModel {
 
     public String toString()
     {
-        return severity+" ^ "+JoH.dateTimeText((long)timestamp)+" ^ "+shortError+" ^ "+message;
+        return severity+" ^ "+ Helper.dateTimeText((long)timestamp)+" ^ "+shortError+" ^ "+message;
     }
 
     public UserError() {}
@@ -108,11 +107,11 @@ public class UserError extends PlusModel {
 
     // TODO move time calc stuff to JOH, wrap it here with our timestamp
     public String bestTime() {
-        final long since = JoH.msSince(timestamp);
+        final long since = Helper.msSince(timestamp);
         if (since < Constants.DAY_IN_MS) {
-            return JoH.hourMinuteString(timestamp);
+            return Helper.hourMinuteString(timestamp);
         } else {
-            return JoH.dateTimeText(timestamp);
+            return Helper.dateTimeText(timestamp);
         }
     }
 
@@ -141,7 +140,7 @@ public class UserError extends PlusModel {
     }
 
     public synchronized static void cleanupRaw() {
-        final long timestamp = JoH.tsl();
+        final long timestamp = Helper.tsl();
         cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS, "severity < 3");
         cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 3, "severity = 3");
         cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 7, "severity > 3");

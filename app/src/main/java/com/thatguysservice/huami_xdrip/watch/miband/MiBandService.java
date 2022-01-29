@@ -25,10 +25,10 @@ import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.Constants;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
-import com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer;
+import com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer;
 import com.thatguysservice.huami_xdrip.utils.Version;
 import com.thatguysservice.huami_xdrip.utils.bt.Subscription;
 import com.thatguysservice.huami_xdrip.utils.framework.PoorMansConcurrentLinkedDeque;
@@ -45,9 +45,9 @@ import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceSt
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceStateVergeOld;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceGenerator;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.AuthOperations;
-import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationOld;
-import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperations;
+import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperation;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew;
+import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperations2020;
 import com.thatguysservice.huami_xdrip.watch.miband.message.AlertLevelMessage;
 import com.thatguysservice.huami_xdrip.watch.miband.message.AlertMessage;
 import com.thatguysservice.huami_xdrip.watch.miband.message.DeviceEvent;
@@ -71,8 +71,8 @@ import lombok.Getter;
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MAXIMUM;
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MINIMUM;
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_WRITE_MTU_OVERHEAD;
-import static com.thatguysservice.huami_xdrip.models.JoH.bytesToHex;
-import static com.thatguysservice.huami_xdrip.models.JoH.emptyString;
+import static com.thatguysservice.huami_xdrip.models.Helper.bytesToHex;
+import static com.thatguysservice.huami_xdrip.models.Helper.emptyString;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_HR;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_STEPS;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ALERT;
@@ -82,10 +82,10 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_MESS
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSE;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSED;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.INIT;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.SLEEP;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSE;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSED;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.INIT;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SLEEP;
 import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_ALARM;
 import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_CALL;
 import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_CANCEL;
@@ -99,7 +99,7 @@ import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCode
  * Data communication with MiBand compatible bands/watches
  */
 
-public class MiBandService extends JamBaseBluetoothSequencer {
+public class MiBandService extends BaseBluetoothSequencer {
 
     static final List<UUID> huntCharacterstics = new ArrayList<>();
     private static final long RETRY_PERIOD_MS = Constants.SECOND_IN_MS * 30; // sleep for max ms if we have had no signal
@@ -219,7 +219,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        final PowerManager.WakeLock wl = JoH.getWakeLock("Miband service", 60000);
+        final PowerManager.WakeLock wl = Helper.getWakeLock("Miband service", 60000);
         try {
             if (shouldServiceRun()) {
                 final String authMac = MiBand.getPersistentAuthMac();
@@ -249,7 +249,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                         if (function != null) {
                             UserError.Log.d(TAG, "onStartCommand was called with function:" + function);
                             //TODO handle intents
-                            if (function.equals(CMD_LOCAL_REFRESH) && !JoH.pratelimit("miband-refresh-" + MiBand.getMac(), 5)) {
+                            if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + MiBand.getMac(), 5)) {
                                 return START_STICKY;
                             } else {
                                 if (function.equals(CMD_LOCAL_AFTER_ALARM)) {
@@ -278,7 +278,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 return START_NOT_STICKY;
             }
         } finally {
-            JoH.releaseWakeLock(wl);
+            Helper.releaseWakeLock(wl);
         }
     }
 
@@ -353,7 +353,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         final long bg_time;
 
         Calendar expireDate = Calendar.getInstance();
-        long currTimeMillis = JoH.tsl();
+        long currTimeMillis = Helper.tsl();
         expireDate.setTimeInMillis(System.currentTimeMillis() + BG_UPDATE_NO_DATA_INTERVAL);
         isNightMode = false;
         if (MiBandEntry.isNightModeEnabled()) {
@@ -386,7 +386,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
     }
 
     private void stopBgUpdateTimer() {
-        JoH.cancelAlarm(HuamiXdrip.getAppContext(), bgServiceIntent);
+        Helper.cancelAlarm(HuamiXdrip.getAppContext(), bgServiceIntent);
         bgWakeupTime = 0;
         isNightMode = false;
     }
@@ -395,10 +395,10 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         stopBgUpdateTimer();
         if (shouldServiceRun() && MiBand.isAuthenticated() && !MiBandEntry.isNeedSendReadingAsNotification()) {
             final long retry_in = whenToRetryNextBgTimer();
-            UserError.Log.d(TAG, "Scheduling next BgTimer in: " + JoH.niceTimeScalar(retry_in) + " @ " + JoH.dateTimeText(retry_in + JoH.tsl()));
+            UserError.Log.d(TAG, "Scheduling next BgTimer in: " + Helper.niceTimeScalar(retry_in) + " @ " + Helper.dateTimeText(retry_in + Helper.tsl()));
             bgServiceIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_BG_RETRY_ID, "update_bg_force");
-            JoH.wakeUpIntent(HuamiXdrip.getAppContext(), retry_in, bgServiceIntent);
-            bgWakeupTime = JoH.tsl() + retry_in;
+            Helper.wakeUpIntent(HuamiXdrip.getAppContext(), retry_in, bgServiceIntent);
+            bgWakeupTime = Helper.tsl() + retry_in;
         } else {
             UserError.Log.d(TAG, "Retry timer was not sheduled");
         }
@@ -425,7 +425,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                     String alertName = "";
                     int snoozeMinutes = 0;
                     String msgText = "";
-                    double next_alert_at = JoH.ts();
+                    double next_alert_at = Helper.ts();
                     if (activeAlertType.equals(Const.BG_ALERT_TYPE)) {
                        /* if (ActiveBgAlert.currentlyAlerting()) {
                             ActiveBgAlert activeBgAlert = ActiveBgAlert.getOnly();
@@ -451,7 +451,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                             next_alert_at = userNotification.timestamp;
                         }*/ //TODO snoze alert
                     }
-                    msgText = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_alert_snooze_text), alertName, snoozeMinutes, JoH.hourMinuteString((long) next_alert_at));
+                    msgText = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_alert_snooze_text), alertName, snoozeMinutes, Helper.hourMinuteString((long) next_alert_at));
                     UserError.Log.d(TAG, msgText);
                     messageQueue.addFirst(getMessageQueue( msgText, HuamiXdrip.getAppContext().getString(R.string.miband_alert_snooze_title_text)));
                     startBgTimer();
@@ -492,7 +492,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 break;
             case DeviceEvent.FIND_PHONE_START:
                 UserError.Log.d(TAG, "find phone started");
-                if ((JoH.ratelimit("band_find phone_sound", 3))) {
+                if ((Helper.ratelimit("band_find phone_sound", 3))) {
                     //player = JoH.playSoundUri(getResourceURI(R.raw.default_alert));
                 }
                 acknowledgeFindPhone();
@@ -709,7 +709,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 missingAlertMessage = message;
                 stopBgUpdateTimer();
                 bgServiceIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_BG_RETRY_ID, CMD_LOCAL_AFTER_ALARM);
-                JoH.wakeUpIntent(HuamiXdrip.getAppContext(), CALL_ALERT_DELAY, bgServiceIntent);
+                Helper.wakeUpIntent(HuamiXdrip.getAppContext(), CALL_ALERT_DELAY, bgServiceIntent);
                 AudioManager audioManager = (AudioManager)HuamiXdrip.getAppContext().getSystemService(Context.AUDIO_SERVICE);
                 ringerModeBackup = audioManager.getRingerMode();
                 break;
@@ -787,7 +787,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                                 if (!MiBand.isAuthenticated()) {
                                     String errorText = "Authentication failed due to authentication timeout. When your Band vibrates and blinks, tap it a few times in a row.";
                                     UserError.Log.d(TAG, errorText);
-                                    JoH.static_toast_long(errorText);
+                                    Helper.static_toast_long(errorText);
                                 }
                             }
                             unsubscribeAuthSubscription();
@@ -810,7 +810,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
             UserError.Log.d(TAG, "Cannot enable as connection is null!");
             return;
         }
-        FirmwareOperations firmware;
+        FirmwareOperationsNew firmware;
         try {
             MiBandType mibandType = MiBand.getMibandType();
             Version version = new Version(MiBand.getVersion());
@@ -827,48 +827,48 @@ public class MiBandService extends JamBaseBluetoothSequencer {
             SequenceState sequenceState;
             if (mibandType == MiBandType.MI_BAND4) {
                 sequenceState = new SequenceStateMiBand4();
-                firmware = new FirmwareOperations(fwArray, sequenceState, this);
+                firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
             } else if (mibandType == MiBandType.MI_BAND5 || mibandType == MiBandType.AMAZFIT5) {
                 sequenceState = new SequenceStateMiBand5();
-                firmware = new FirmwareOperations(fwArray, sequenceState, this);
+                firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
             } else if (mibandType == MiBandType.MI_BAND6) {
                     sequenceState = new SequenceStateMiBand6();
-                    firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
+                    firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
             } else if (mibandType == MiBandType.AMAZFITGTR || mibandType == MiBandType.AMAZFITGTR_LITE) {
                 if ((version.compareTo(new Version("1.3.7.16")) >= 0)) {
                     sequenceState = new SequenceStateVergeNew();
-                    firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
+                    firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
                 } else {
                     sequenceState = new SequenceStateMiBand5();
-                    firmware = new FirmwareOperations(fwArray, sequenceState, this);
+                    firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
                 }
             } else if (mibandType == MiBandType.AMAZFITGTR_42) {
                 sequenceState = new SequenceStateVergeOld();
-                firmware = new FirmwareOperations(fwArray, sequenceState, this);
+                firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
             } else if ( mibandType == MiBandType.AMAZFITGTS2_MINI) {
                 sequenceState = new SequenceStateGTS2Mini();
-                firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
+                firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
             } else if (mibandType == MiBandType.AMAZFITGTS || mibandType == MiBandType.AMAZFIT_TREX) {
                 if (version.compareTo(new Version("0.1.1.16")) >= 0) {
                     sequenceState = new SequenceStateVergeNew();
-                    firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
+                    firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
                 } else {
                     sequenceState = new SequenceStateMiBand5();
-                    firmware = new FirmwareOperations(fwArray, sequenceState, this);
+                    firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
                 }
             } else if (MiBandType.isVerge2(mibandType)) {
                 sequenceState = new SequenceStateVerge2();
-                firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
+                firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
             } else if (MiBandType.isBip(mibandType)) {
                 sequenceState = new SequenceStateBip();
-                firmware = new FirmwareOperationOld(fwArray, sequenceState, this);
+                firmware = new FirmwareOperation(fwArray, sequenceState, this);
             } else if (MiBandType.isBipS(mibandType)) {
                 if (!(version.compareTo(new Version("4.0.0.00")) >= 0) && (version.compareTo(new Version("2.1.1.50")) >= 0) || (version.compareTo(new Version("4.1.5.55")) >= 0)) {
                     sequenceState = new SequenceStateBipS();
-                    firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
+                    firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
                 } else {
                     sequenceState = new SequenceStateMiBand5();
-                    firmware = new FirmwareOperations(fwArray, sequenceState, this);
+                    firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
                 }
             } else {
                 resetFirmwareState(false, "Not supported band type");
@@ -952,7 +952,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         }
         if (value.length == 13) {
             byte[] stepsValue = new byte[]{value[1], value[2]};
-            int steps = FirmwareOperations.toUint16(stepsValue);
+            int steps = FirmwareOperationsNew.toUint16(stepsValue);
             HuamiXdrip.getAppContext().startService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class).putExtra(INTENT_FUNCTION_KEY, CMD_ADD_STEPS).putExtra("value", steps));
         } else {
             UserError.Log.d(TAG, "Unrecognized realtime steps value: " + bytesToHex(value));
@@ -1150,7 +1150,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                     if (isNeedToRestoreNightMode) {
                         // do nothing because something happen with connection while sending nightmode
                         extendWakeLock(RESTORE_NIGHT_MODE_DELAY * Constants.SECOND_IN_MS);
-                        JoH.threadSleep(RESTORE_NIGHT_MODE_DELAY);
+                        Helper.threadSleep(RESTORE_NIGHT_MODE_DELAY);
                         if (I.state.equals(CLOSED) || I.state.equals(CLOSE) || !I.isConnected)
                             break;
                         setNightMode();
@@ -1176,7 +1176,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
                 case MiBandState.WAITING_MIFIT_SILENCE:
                     //restore ringer mode because mifit won't restore it
                     extendWakeLock(2 * Constants.SECOND_IN_MS);
-                    JoH.threadSleep((Constants.SECOND_IN_MS));
+                    Helper.threadSleep((Constants.SECOND_IN_MS));
                     AudioManager audioManager = (AudioManager)HuamiXdrip.getAppContext().getSystemService(Context.AUDIO_SERVICE);
                     audioManager.setRingerMode(ringerModeBackup);
                     startBgTimer();
@@ -1226,15 +1226,15 @@ public class MiBandService extends JamBaseBluetoothSequencer {
             final long retry_in = whenToRetryNext();
             UserError.Log.d(TAG, "setRetryTimerReal: Restarting in: " + (retry_in / Constants.SECOND_IN_MS) + " seconds");
             I.serviceIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_RETRY_ID, "message");
-            I.retry_time = JoH.wakeUpIntent(HuamiXdrip.getAppContext(), retry_in, I.serviceIntent);
-            I.wakeup_time = JoH.tsl() + retry_in;
+            I.retry_time = Helper.wakeUpIntent(HuamiXdrip.getAppContext(), retry_in, I.serviceIntent);
+            I.wakeup_time = Helper.tsl() + retry_in;
         } else {
             UserError.Log.d(TAG, "Not setting retry timer as service should not be running");
         }
     }
 
     private void cancelRetryTimer() {
-        JoH.cancelAlarm(HuamiXdrip.getAppContext(), I.serviceIntent);
+        Helper.cancelAlarm(HuamiXdrip.getAppContext(), I.serviceIntent);
         I.wakeup_time = 0;
     }
 
@@ -1301,7 +1301,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
             encryptable_payload[length + 2] = (byte) ((encryptedSequenceNr >> 16) & 0xff);
             encryptable_payload[length + 3] = (byte) ((encryptedSequenceNr >> 24) & 0xff);
             encryptedSequenceNr++;
-            int checksum = (int) JoH.checksum(encryptable_payload, 0, length + 4);
+            int checksum = (int) Helper.checksum(encryptable_payload, 0, length + 4);
             encryptable_payload[length + 4] = (byte) (checksum & 0xff);
             encryptable_payload[length + 5] = (byte) ((checksum >> 8) & 0xff);
             encryptable_payload[length + 6] = (byte) ((checksum >> 16) & 0xff);
@@ -1406,7 +1406,7 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         UPDATE_PREF_DATA
     }
 
-    public static class MiBandState extends JamBaseBluetoothSequencer.BaseState {
+    public static class MiBandState extends BaseBluetoothSequencer.BaseState {
         static final String SEND_BG = "Setting Time";
         static final String SEND_SETTINGS = "Updating Settings";
         static final String QUEUE_MESSAGE = "Queue message";
@@ -1526,11 +1526,11 @@ public class MiBandService extends JamBaseBluetoothSequencer {
         }
 
         private void setExpire(){
-            this.expireAt = JoH.tsl() + (Constants.MINUTE_IN_MS * 10);
+            this.expireAt = Helper.tsl() + (Constants.MINUTE_IN_MS * 10);
         }
 
         boolean isExpired() {
-            return expireAt != 0 && expireAt < JoH.tsl();
+            return expireAt != 0 && expireAt < Helper.tsl();
         }
     }
 }

@@ -10,7 +10,7 @@ import android.util.SparseArray;
 
 import com.thatguysservice.huami_xdrip.BuildConfig;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class WakeLockTrampoline extends BroadcastReceiver {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void onReceive(final Context context, final Intent broadcastIntent) {
-        JoH.getWakeLock(TAG, 1000); // deliberately not released
+        Helper.getWakeLock(TAG, 1000); // deliberately not released
         final String serviceName = broadcastIntent.getStringExtra(SERVICE_PARAMETER);
 
         UserError.Log.d(TAG, "Trampoline ignition for: " + serviceName);

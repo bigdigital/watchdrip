@@ -6,7 +6,7 @@ import android.os.Bundle;
 
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.utils.bt.BtCallBack2;
 import com.thatguysservice.huami_xdrip.utils.bt.ScanMeister;
 
@@ -22,7 +22,7 @@ public class FindNearby implements BtCallBack2 {
         } else {
             scanMeister.stop();
         }
-        JoH.static_toast_long(HuamiXdrip.getAppContext().getString(R.string.miband_search_text));
+        Helper.static_toast_long(HuamiXdrip.getAppContext().getString(R.string.miband_search_text));
         for (MiBandType b : MiBandType.values()) {
             if (!b.toString().isEmpty()) {
                 scanMeister.setName(b.toString());
@@ -37,11 +37,11 @@ public class FindNearby implements BtCallBack2 {
             case ScanMeister.SCAN_FOUND_CALLBACK:
                 MiBand.setMac(mac);
                 MiBand.setModel(name, mac);
-                JoH.static_toast_long(String.format(HuamiXdrip.getAppContext().getString(R.string.miband_search_found_text), name, mac));
+                Helper.static_toast_long(String.format(HuamiXdrip.getAppContext().getString(R.string.miband_search_found_text), name, mac));
                 break;
             case ScanMeister.SCAN_FAILED_CALLBACK:
             case ScanMeister.SCAN_TIMEOUT_CALLBACK:
-                JoH.static_toast_long(HuamiXdrip.getAppContext().getString(R.string.miband_search_failed_text));
+                Helper.static_toast_long(HuamiXdrip.getAppContext().getString(R.string.miband_search_failed_text));
                 break;
         }
     }

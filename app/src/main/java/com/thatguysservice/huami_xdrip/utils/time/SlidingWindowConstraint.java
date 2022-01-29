@@ -10,7 +10,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
-import static com.thatguysservice.huami_xdrip.models.JoH.emptyString;
+import static com.thatguysservice.huami_xdrip.models.Helper.emptyString;
 
 /**
  * Created by jamorham on 14/02/2018.

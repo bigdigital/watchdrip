@@ -24,13 +24,12 @@ import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.UtilityModels.RxBleProvider;
 import com.thatguysservice.huami_xdrip.models.Constants;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.Pref;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.utils.bt.BackgroundScanReceiver;
 import com.thatguysservice.huami_xdrip.utils.bt.BtCallBack;
 import com.thatguysservice.huami_xdrip.utils.bt.BtCallBack2;
-import com.thatguysservice.huami_xdrip.utils.bt.BtCallBack3;
 import com.thatguysservice.huami_xdrip.utils.bt.DisconnectReceiver;
 import com.thatguysservice.huami_xdrip.utils.bt.ReplyProcessor;
 import com.thatguysservice.huami_xdrip.utils.bt.Subscription;
@@ -50,17 +49,17 @@ import io.reactivex.schedulers.Schedulers;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSE;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSED;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.CONNECT_NOW;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.DISCOVER;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.INIT;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.SEND_QUEUE;
-import static com.thatguysservice.huami_xdrip.services.JamBaseBluetoothSequencer.BaseState.SLEEP;
-import static com.thatguysservice.huami_xdrip.models.JoH.emptyString;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSE;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSED;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CONNECT_NOW;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.DISCOVER;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.INIT;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SEND_QUEUE;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SLEEP;
+import static com.thatguysservice.huami_xdrip.models.Helper.emptyString;
 import static com.thatguysservice.huami_xdrip.utils.bt.ScanMeister.SCAN_FOUND_CALLBACK;
 
-public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService implements BtCallBack, BtCallBack2/*, BtCallBack3 */{
+public abstract class BaseBluetoothSequencer extends BaseBluetoothService implements BtCallBack, BtCallBack2/*, BtCallBack3 */{
 
     private static final HashMap<UUID, String> mapToName = new HashMap<>();
     protected final RxBleClient rxBleClient = RxBleProvider.getSingleton();
@@ -134,7 +133,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
             if (id == null) return null;
             final Inst conn = singletons.get(id);
             if (conn != null) return conn;
-            synchronized (JamBaseBluetoothSequencer.class) {
+            synchronized (BaseBluetoothSequencer.class) {
                 final Inst double_check = singletons.get(id);
                 if (double_check != null) return double_check;
                 final Inst singleton = new Inst();
@@ -157,11 +156,11 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         if (emptyString(newAddress)) return;
         newAddress = newAddress.toUpperCase();
 
-        if (!JoH.validateMacAddress(newAddress)) {
+        if (!Helper.validateMacAddress(newAddress)) {
             final String msg = "Invalid MAC address: " + newAddress;
-            if (JoH.quietratelimit("jam-invalid-mac", 60)) {
+            if (Helper.quietratelimit("jam-invalid-mac", 60)) {
                 UserError.Log.wtf(TAG, msg);
-                JoH.static_toast_long(msg);
+                Helper.static_toast_long(msg);
             }
             return;
         }
@@ -195,7 +194,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         // currently we are only using this callback to implement faux auto-connect
         if (status.equals(SCAN_FOUND_CALLBACK)) {
             rxBleClient.getBackgroundScanner().stopBackgroundBleScan(scanCallBack);
-            if (JoH.ratelimit("jambase-btcb2-" + mac, 2)) {
+            if (Helper.ratelimit("jambase-btcb2-" + mac, 2)) {
                 stopConnect(mac);
                 realEstablishConnection(mac, false); // don't auto connect as we did that via scan
             }
@@ -326,7 +325,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         //msg("Connected");
         // TODO check connection already exists - close etc?
         I.connection = this_connection;
-        I.lastConnected = JoH.tsl();
+        I.lastConnected = Helper.tsl();
         I.isConnected = true;
         UserError.Log.d(TAG, "Initial connection going for service discovery");
         changeState(DISCOVER);
@@ -341,7 +340,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         } else if (throwable instanceof BleDisconnectedException) {
             if (((BleDisconnectedException) throwable).state == 133) {
                 if (I.retry133) {
-                    if (JoH.ratelimit(TAG + "133recon", 60)) {
+                    if (Helper.ratelimit(TAG + "133recon", 60)) {
                         if (I.state.equals(CONNECT_NOW)) {
                             UserError.Log.d(TAG, "Automatically retrying connection");
                             Inevitable.task(TAG + "133recon", 3000, new Runnable() {
@@ -367,7 +366,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         if (address.equals(I.address)) {
             switch (status) {
                 case "DISCONNECTED":
-                    if (JoH.ratelimit("diconnected-from-" + address, 15)) {
+                    if (Helper.ratelimit("diconnected-from-" + address, 15)) {
                         //I.isConnected = false;
                         stopConnect(I.address);
                     } else {
@@ -446,7 +445,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
                 UserError.Log.e(TAG, "No connection when in DISCOVER state - reset");
                 // These are normally just ghosts that get here, not really connected
                 if (I.resetWhenAlreadyConnected) {
-                    if (JoH.ratelimit("jam-sequencer-reset", 10)) {
+                    if (Helper.ratelimit("jam-sequencer-reset", 10)) {
                         changeState(CLOSE);
                     }
                 }
@@ -534,7 +533,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         if ((state.equals(new_state)) && !state.equals(INIT) && !state.equals(SLEEP)) {
             if (!state.equals(CLOSE)) {
                 UserError.Log.d(TAG, "Already in state: " + new_state.toUpperCase() + " changing to CLOSE");
-                UserError.Log.d(TAG, JoH.backTrace());
+                UserError.Log.d(TAG, Helper.backTrace());
                 changeState(CLOSE);
             }
         } else {
@@ -558,7 +557,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
             UserError.Log.d(TAG, "Always connected passes");
             return true;
         }
-        if (JoH.ratelimit(TAG + "auto-reconnect", 1)) {
+        if (Helper.ratelimit(TAG + "auto-reconnect", 1)) {
             UserError.Log.d(TAG, "alwaysConnected() requesting connect");
             changeState(CONNECT_NOW);
         } else {
@@ -585,7 +584,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
                     break;
                 case CONNECT_NOW:
                     if (!I.isConnected) {
-                        if (JoH.ratelimit("jambase connect" + I.address, 1)) {
+                        if (Helper.ratelimit("jambase connect" + I.address, 1)) {
                             startConnect(I.address);
                         } else {
                             UserError.Log.d(TAG, "Blocking duplicate connect within 1 second");
@@ -612,7 +611,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
                         if (I.reconnectConstraint != null) {
                             if (I.reconnectConstraint.checkAndAddIfAcceptable(1)) {
                                 UserError.Log.d(TAG, "Attempting auto-reconnect");
-                                if (JoH.isBluetoothEnabled(HuamiXdrip.getAppContext())) {
+                                if (Helper.isBluetoothEnabled(HuamiXdrip.getAppContext())) {
                                     changeState(CONNECT_NOW);
                                 } else {
                                     Inevitable.task("Auto-reconnect", 8000, () -> changeState(CONNECT_NOW)); // delay for bluetooth cycling
@@ -655,7 +654,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         Runnable runnable;
 
         boolean isExpired() {
-            return expireAt != 0 && expireAt < JoH.tsl();
+            return expireAt != 0 && expireAt < Helper.tsl();
         }
 
         QueueItem setRunnable(Runnable runnable) {
@@ -712,7 +711,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         }
 
         public QueueMe expireInSeconds(final int timeout) {
-            this.expireAt = JoH.tsl() + (Constants.SECOND_IN_MS * timeout);
+            this.expireAt = Helper.tsl() + (Constants.SECOND_IN_MS * timeout);
             return this;
         }
 
@@ -839,7 +838,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         if (I.isConnected) {
             QueueItem item = queue.poll();
             while (item != null && item.isExpired()) {
-                UserError.Log.d(TAG, "Item expired from queue early: (expiry: " + JoH.dateTimeText(item.expireAt) + " " + item.description);
+                UserError.Log.d(TAG, "Item expired from queue early: (expiry: " + Helper.dateTimeText(item.expireAt) + " " + item.description);
                 item = queue.poll();
             }
             if (item != null) {
@@ -848,7 +847,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
                     writeQueueItem(queue, item);
                 } else {
                     // TODO this is very much an edge case now
-                    UserError.Log.d(TAG, "Item expired from queue: (expiry: " + JoH.dateTimeText(item.expireAt) + " " + item.description);
+                    UserError.Log.d(TAG, "Item expired from queue: (expiry: " + Helper.dateTimeText(item.expireAt) + " " + item.description);
                     writeMultipleFromQueue(queue);
                 }
             } else {
@@ -877,13 +876,13 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         I.connection.writeCharacteristic(item.queueWriteCharacterstic, item.getData())
                 .timeout(item.timeoutSeconds, TimeUnit.SECONDS)
                 .subscribe(Value -> {
-                    UserError.Log.d(TAG, "Wrote request: " + item.description + " -> " + JoH.bytesToHex(Value));
+                    UserError.Log.d(TAG, "Wrote request: " + item.description + " -> " + Helper.bytesToHex(Value));
                     if (item.expectReply) expectReply(queue, item);
                     if (item.post_delay > 0) {
                         // always sleep if set as new item might appear in queue
                         final long sleep_time = item.post_delay + (item.description.contains("WAKE UP") ? 2000 : 0);
                         if (sleep_time != 100) UserError.Log.d(TAG, "sleeping " + sleep_time);
-                        JoH.threadSleep(sleep_time);
+                        Helper.threadSleep(sleep_time);
                     }
                     if (item.runnable != null) {
                         item.runnable.run(); // TODO should this be handled by expect reply in that case?
@@ -919,7 +918,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         Inevitable.task("expect-reply-" + I.address + "-" + item.description, wait_time, new Runnable() {
             @Override
             public void run() {
-                if (JoH.msSince(I.lastProcessedIncomingData) > wait_time) {
+                if (Helper.msSince(I.lastProcessedIncomingData) > wait_time) {
                     UserError.Log.d(TAG, "GOT NO REPLY FOR: " + item.description + " @ " + item.retries);
                     item.retries++;
                     if (item.retries <= MAX_QUEUE_RETRIES) {
@@ -986,9 +985,9 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
     public void resetBluetoothIfWeSeemToAlreadyBeConnected(final String mac) {
         if (isConnectedToDevice(mac)) {
             if (Pref.getBooleanDefaultFalse("bluetooth_watchdog")) {
-                if (JoH.ratelimit("jamsequencer-restart-bluetooth", 1200)) {
+                if (Helper.ratelimit("jamsequencer-restart-bluetooth", 1200)) {
                     UserError.Log.e(TAG, "Restarting bluetooth as device reports we are connected but we can't find our connection");
-                    JoH.niceRestartBluetooth(HuamiXdrip.getAppContext());
+                    Helper.niceRestartBluetooth(HuamiXdrip.getAppContext());
                 } else {
                     UserError.Log.d(TAG, "Cannot restart bluetooth due to rate limit but we seem to be connected");
                 }

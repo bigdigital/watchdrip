@@ -10,7 +10,7 @@ import android.view.View;
 
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.models.Constants;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.AxisSettings;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.GraphSettings;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.LineSettings;
@@ -292,7 +292,7 @@ public class BgGraphBuilder {
         v.buildDrawingCache();
         Bitmap cacheBitmap = v.getDrawingCache();
         if (cacheBitmap == null) {
-            android.util.Log.e(TAG, "failed getViewBitmap(" + JoH.backTrace() + ")", new RuntimeException());
+            android.util.Log.e(TAG, "failed getViewBitmap(" + Helper.backTrace() + ")", new RuntimeException());
 
             v.destroyDrawingCache(); // duplicate of below, flow could be reordered better
             v.setWillNotCacheDrawing(willNotCache);

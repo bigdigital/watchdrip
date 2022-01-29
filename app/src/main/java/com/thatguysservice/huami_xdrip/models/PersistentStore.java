@@ -88,7 +88,7 @@ public class PersistentStore {
     }
 
     public static byte[] getBytes(String name) {
-        return JoH.base64decodeBytes(getString(name));
+        return Helper.base64decodeBytes(getString(name));
     }
 
     public static byte getByte(String name) {
@@ -96,7 +96,7 @@ public class PersistentStore {
     }
 
     public static void setBytes(String name, byte[] value) {
-        setString(name, JoH.base64encodeBytes(value));
+        setString(name, Helper.base64encodeBytes(value));
     }
 
     public static void setByte(String name, byte value) {

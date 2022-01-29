@@ -12,7 +12,7 @@ import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.UtilityModels.Intents;
 import com.thatguysservice.huami_xdrip.models.Constants;
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.Pref;
 import com.thatguysservice.huami_xdrip.models.UserError;
 
@@ -179,7 +179,7 @@ public class MiBandEntry {
     }
 
     static void refresh() {
-        Inevitable.task("miband-preference-changed", 1000, () -> JoH.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_REFRESH));
+        Inevitable.task("miband-preference-changed", 1000, () -> Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_REFRESH));
     }
 
     public static void sendToService(String function, Bundle bundle) {

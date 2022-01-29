@@ -1,101 +1,34 @@
 package com.thatguysservice.huami_xdrip;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.widget.Toast;
 
-import androidx.appcompat.app.ActionBar;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
-import com.thatguysservice.huami_xdrip.UtilityModels.Intents;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
-    private final static String TAG = MainActivity.class.getSimpleName();
-    private static MainActivity mActivity;
-    private static String nexttoast;
-    private static boolean activityVisible;
-    private BroadcastReceiver newDataReceiver;
-
-    public static void toastStatic(String msg) {
-        nexttoast = msg;
-        staticRefresh();
-    }
-
-    public static void staticRefresh() {
-        if (activityVisible) {
-            Intent updateIntent = new Intent(Intents.ACTION_UPDATE_VIEW);
-            mActivity.sendBroadcast(updateIntent);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mActivity = this;
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings_activity);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.settings, new SettingsFragment())
-                    .commit();
-        }
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-        activityVisible = true;
-    }
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        CollapsingToolbarLayout toolBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        toolBarLayout.setTitle(getTitle());
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // If you don't have res/menu, just create a directory named "menu" inside res
-       /* getMenuInflater().inflate(R.menu.mymenu, menu);*/
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void onPause() {
-        activityVisible = false;
-        super.onPause();
-
-        if (newDataReceiver != null) {
-            try {
-                unregisterReceiver(newDataReceiver);
-            } catch (IllegalArgumentException e) {
-                UserError.Log.e(TAG, "newDataReceiver not registered", e);
-            }
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        newDataReceiver = new BroadcastReceiver() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onReceive(Context ctx, Intent intent) {
-                if (nexttoast != null) {
-                    toast(nexttoast);
-                    nexttoast = null;
-                }
-
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
-        };
-        registerReceiver(newDataReceiver, new IntentFilter(Intents.ACTION_UPDATE_VIEW));
+        });
     }
-
-    public void toast(final String msg) {
-        try {
-            runOnUiThread(() -> Toast.makeText(mActivity, msg, Toast.LENGTH_LONG).show());
-            Log.d(TAG, "toast: " + msg);
-        } catch (Exception e) {
-            Log.d(TAG, "Couldn't display toast: " + msg + " / " + e.toString());
-        }
-    }
-
 }

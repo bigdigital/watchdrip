@@ -2,7 +2,7 @@ package com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations;
 
 import android.annotation.SuppressLint;
 
-import com.thatguysservice.huami_xdrip.models.JoH;
+import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceState;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceStateVergeNew;
@@ -14,10 +14,10 @@ import java.util.Arrays;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_INIT;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_START_DATA;
 
-public class FirmwareOperationOld extends FirmwareOperations {
+public class FirmwareOperation extends FirmwareOperationsNew {
 
 
-    public FirmwareOperationOld(byte[] file, SequenceState sequenceState, MiBandService service) {
+    public FirmwareOperation(byte[] file, SequenceState sequenceState, MiBandService service) {
         super(file, sequenceState, service);
     }
 
@@ -31,7 +31,7 @@ public class FirmwareOperationOld extends FirmwareOperations {
                 nextSequence();
                 connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getFirmwareStartCommand())
                         .subscribe(valB -> {
-                                    UserError.Log.d(TAG, "Wrote Start command: " + JoH.bytesToHex(valB));
+                                    UserError.Log.d(TAG, "Wrote Start command: " + Helper.bytesToHex(valB));
                                     processFirmwareSequence();
                                 },
                                 throwable -> {
@@ -105,7 +105,7 @@ public class FirmwareOperationOld extends FirmwareOperations {
             );
             firmwareProgress += packetLength;
             int progressPercent = (int) ((((float) firmwareProgress) / len) * 100);
-            if ((i > 0) && (i % FirmwareOperations.FIRMWARE_SYNC_PACKET == 0)) {
+            if ((i > 0) && (i % FirmwareOperationsNew.FIRMWARE_SYNC_PACKET == 0)) {
                 connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getSyncCommand()).subscribe(val -> {
                             if (d)
                                 UserError.Log.d(TAG, "Wrote Sync" + progressPercent + "%");
