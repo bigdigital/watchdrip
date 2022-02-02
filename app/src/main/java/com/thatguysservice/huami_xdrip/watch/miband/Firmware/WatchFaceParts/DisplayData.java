@@ -10,6 +10,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 
 import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder;
+import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.Position;
@@ -29,16 +30,11 @@ import static com.thatguysservice.huami_xdrip.models.Helper.hourMinuteString;
 import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
 
 public class DisplayData {
-    private Double bgDeltaMgdl;
     private ValueTime unitizedDelta;
-    private Double bgValueMgdl;
     private String bgValueUnitized;
     private Bitmap arrowBitmap;
     private boolean bgIsStale = false;
     private String pluginSource = "";
-    private boolean isBgHigh = false;
-    private boolean isBgLow = false;
-    private boolean doMgdl = true;
     private ValueTime treatment;
 
     private int graphLimit = 16;
@@ -49,14 +45,20 @@ public class DisplayData {
     private Bundle bundle;
     private WatchfaceConfig config;
     private int batteryLevel;
+    private BgData bgData;
 
-    public DisplayData(Bundle intent, WatchfaceConfig config) {
-        bundle = intent;
+    public DisplayData(Bundle intent, BgData bgData, WatchfaceConfig config) {
+        this.bundle = intent;
+        this.bgData = bgData;
         this.config = config;
     }
 
-    public static Builder newBuilder(Bundle intent, AssetManager assetManager, WatchfaceConfig config) {
-        return new DisplayData(intent, config).new Builder(assetManager);
+    public static Builder newBuilder(Bundle intent, BgData bgData, AssetManager assetManager, WatchfaceConfig config) {
+        return new DisplayData(intent, bgData, config).new Builder(assetManager);
+    }
+
+    public BgData getBgData() {
+        return bgData;
     }
 
     public ValueTime getPumpReservoir() {
@@ -73,6 +75,10 @@ public class DisplayData {
 
     public ValueTime getBgValue() {
         return new ValueTime(bgValueUnitized);
+    }
+
+    public String getBgValueString() {
+        return bgValueUnitized;
     }
 
     public ValueTime getPumpIoB() {
@@ -104,13 +110,12 @@ public class DisplayData {
     }
 
     public boolean isBgHigh() {
-        return isBgHigh;
+        return bgData.isBgHigh();
     }
 
     public boolean isBgLow() {
-        return isBgLow;
+        return bgData.isBgLow();
     }
-
 
     public int getGraphLimit() {
         return graphLimit;
@@ -273,7 +278,7 @@ public class DisplayData {
         }
 
         public Builder setPumpReservoir(String pumpReservoir) {
-            if (pumpReservoir.isEmpty()){
+            if (pumpReservoir.isEmpty()) {
                 DisplayData.this.pumpReservoir = pumpReservoir;
             }
             pumpReservoir = pumpReservoir.replace(",", ".");
@@ -283,7 +288,7 @@ public class DisplayData {
         }
 
         public Builder setIoB(String iob) {
-            if (iob.isEmpty()){
+            if (iob.isEmpty()) {
                 DisplayData.this.pumpIoB = iob;
                 return this;
             }
@@ -303,19 +308,11 @@ public class DisplayData {
 
         public DisplayData build() throws IllegalArgumentException, IOException {
             String arrowImageName;
-            bgValueMgdl = bundle.getDouble("bg.valueMgdl", -1000);
-            if (bgValueMgdl == -1000) {
-                throw new IllegalArgumentException("data info not provided");
-            }
-
-            doMgdl = bundle.getBoolean("doMgdl", true);
-            arrowImageName = getEmptyIfNull(bundle.getString("bg.deltaName")) + ".png";
+            arrowImageName = getEmptyIfNull(bgData.getDeltaName()) + ".png";
             //fill bg
-            bgValueUnitized = com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder.unitized_string(bgValueMgdl, doMgdl).replace(',', '.');
-            isBgHigh = bundle.getBoolean("bg.isHigh", false);
-            isBgLow = bundle.getBoolean("bg.isLow", false);
-            long timeStampVal = bundle.getLong("bg.timeStamp", -1);
-            bgIsStale = bundle.getBoolean("bg.isStale", false);
+            bgValueUnitized = bgData.unitizedBgValue();
+            long timeStampVal = bgData.getTimeStamp();
+            bgIsStale = bgData.isStale();
             pluginSource = getEmptyIfNull(bundle.getString("bg.plugin"));
 
             InputStream arrowStream = null;
@@ -342,9 +339,7 @@ public class DisplayData {
                 isOld = true;
                 timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStampVal));
             }
-            bgDeltaMgdl = bundle.getDouble("bg.deltaValueMgdl", 0);
-            String unitized_delta = BgGraphBuilder.unitizedDeltaStringRaw(false, true, bgDeltaMgdl, doMgdl);
-            unitizedDelta = new ValueTime(unitized_delta, timeStampText, isOld);
+            unitizedDelta = new ValueTime(bgData.unitizedDelta(), timeStampText, isOld);
 
             String pumpJSON = bundle.getString("pumpJSON");
             JSONObject json = null;

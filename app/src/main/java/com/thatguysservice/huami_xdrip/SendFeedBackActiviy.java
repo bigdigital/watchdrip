@@ -3,9 +3,11 @@ package com.thatguysservice.huami_xdrip;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.squareup.okhttp.FormEncodingBuilder;
@@ -18,7 +20,7 @@ import com.thatguysservice.huami_xdrip.models.PersistentStore;
 
 import java.util.concurrent.TimeUnit;
 
-public class SendFeedBack extends AppCompatActivity {
+public class SendFeedBackActiviy extends AppCompatActivity {
     private static final String TAG = "SendFeedBack";
     private static final String FEEDBACK_CONTACT = "feedback-contact";
     private static final String FEEDBACK_SERVER_DIRECTORY = "/xdrip/debug-logs.php";
@@ -30,7 +32,12 @@ public class SendFeedBack extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_send_feed_back);
+        setContentView(R.layout.activity_send_feedback);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         send_url = getString(R.string.wserviceurl) + FEEDBACK_SERVER_DIRECTORY;
         contact = findViewById(R.id.contactTextField);
@@ -46,6 +53,17 @@ public class SendFeedBack extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish(); //this method close current activity and return to previous
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void sendFeedback(View myview) {

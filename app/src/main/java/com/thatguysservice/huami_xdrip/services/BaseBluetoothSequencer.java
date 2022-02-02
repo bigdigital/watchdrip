@@ -67,6 +67,7 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
     protected volatile Inst I;
 
     protected BaseState mState;
+    protected String connection_state;
 
     protected synchronized void setMyid(final String id) {
         UserError.Log.d(TAG, "Setting myid to: " + id);
@@ -398,7 +399,8 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
     }*/
 
     protected synchronized void onConnectionStateChange(final RxBleConnection.RxBleConnectionState newState) {
-        String connection_state = "Unknown";
+
+        connection_state = "Unknown";
         switch (newState) {
             case CONNECTING:
                 connection_state = "Connecting";

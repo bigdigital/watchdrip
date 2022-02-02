@@ -195,4 +195,8 @@
     <string name="send_logs">Submit</string>
     <string name="please_enter_your_question_or_comments_here">Please describe the issue you have encountered.</string>
     <string name="optional_contact_email">Optional contact email</string>
+    <string name="action_view_log">Logs</string>
+    <string name="space_minute_ago">" Minute ago"</string>
+    <string name="space_minutes_ago">" Minutes ago"</string>
+    <string name="action_view_watch_info">Watch info</string>
 </resources>

@@ -1,22 +1,69 @@
 package com.thatguysservice.huami_xdrip;
 
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import android.view.View;
+import com.thatguysservice.huami_xdrip.databinding.ActivityMainBinding;
+import com.thatguysservice.huami_xdrip.models.BgData;
+import com.thatguysservice.huami_xdrip.models.Constants;
+import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 
 public class MainActivity extends AppCompatActivity {
+
+    private final static String TAG = PreferenceActivity.class.getSimpleName();
+    Runnable updater;
+    ActivityMainBinding binding;
+    private BroadcastReceiver newDataReceiver;
+    private BgData bgData;
+    private Handler timerHandler;
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // If you don't have res/menu, just create a directory named "menu" inside res
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_view_log:
+                Intent intent = new Intent(this, SendFeedBackActiviy.class);
+                startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         CollapsingToolbarLayout toolBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
@@ -30,5 +77,80 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+
+        timerHandler = new Handler();
+        updater = new Runnable() {
+            @Override
+            public void run() {
+                refreshBGLine();
+                timerHandler.postDelayed(updater, Constants.MINUTE_IN_MS);
+            }
+        };
+
+        // BgDataModel model = new ViewModelProvider(this).get(BgDataModel.class);
+        BgDataRepository bgDataRepository = BgDataRepository.getInstance();
+
+        // Create the observer which updates the UI.
+        final Observer<BgData> bgDataObserver = new Observer<BgData>() {
+            @Override
+            public void onChanged(@Nullable final BgData bg) {
+                // Update the UI, in this case, a TextView.
+                bgData = bg;
+                timerHandler.post(updater);
+            }
+        };
+
+        bgDataRepository.getBgData().observe(this, bgDataObserver);
+
+        // Create the observer which updates the UI.
+        final Observer<String> connectionStatusObserver = new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable final String status) {
+                binding.setConnectionState(status);
+            }
+        };
+
+        bgDataRepository.getStatusData().observe(this, connectionStatusObserver);
+    }
+
+    public String getMinutesAgo(long msSince, boolean includeWords) {
+        final int minutes = ((int) (msSince / Constants.MINUTE_IN_MS));
+        return Integer.toString(minutes) + (includeWords ? (((minutes == 1) ? HuamiXdrip.getAppContext().getString(R.string.space_minute_ago) : HuamiXdrip.getAppContext().getString(R.string.space_minutes_ago))) : "");
+    }
+
+    private void refreshBGLine() {
+        if (bgData == null) return;
+        try {
+            TextView bgDataView = findViewById(R.id.bgDataTextView);
+            bgDataView.setText(bgData.unitizedBgValue());
+            if (bgData.isStale()) {
+                bgDataView.setPaintFlags(bgDataView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                bgDataView.setPaintFlags(bgDataView.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+            }
+
+            TextView bgDataArrowView = findViewById(R.id.bgDataArrowTextView);
+            bgDataArrowView.setText(bgData.getSlopeArrow());
+
+            TextView bgDataTimeView = findViewById(R.id.bgDataTimeTextView);
+            long msSince = Helper.msSince(bgData.getTimeStamp());
+            bgDataTimeView.setText(getMinutesAgo(msSince, true));
+            Log.d(TAG, "Refresh bg Line: " + bgData.unitizedBgValue());
+        } catch (Exception e) {
+            UserError.Log.e(TAG, "refreshBGLine exception: " + e);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        timerHandler.removeCallbacks(updater);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        timerHandler.post(updater);
     }
 }

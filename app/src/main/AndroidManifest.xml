@@ -34,13 +34,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Huamixdrip">
-        <activity android:name=".SendFeedBack"></activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".SendFeedBackActiviy"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/Theme.Huamixdrip.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="AA_DB_NAME"
             android:value="HuamiXdrip.db" />

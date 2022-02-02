@@ -12,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder;
 import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphCompontens;
+import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.WatchfaceConfig;
@@ -250,22 +251,22 @@ public class WatchFaceGenerator {
         }
     }
 
-    public byte[] genWatchFace(Bundle bundle) throws IOException {
+    public byte[] genWatchFace(Bundle bundle, BgData bgData) throws IOException {
         Bitmap mainScreen;
         //send firmware without modification, uncomment when need to test only a watchface uploading process
        /* if (true) {
             return FirmwareOperations.readAll(fwFileStream, 10000000);
         }*/
         parseWatchfaceFile();
-        double bgValue = bundle.getDouble("bg.valueMgdl", -1000);
-        if (bgValue != -1000) {
+        if (!bgData.isNoBgData()) {
             DisplayData.Builder displayDataBuilder = null;
-            displayDataBuilder = DisplayData.newBuilder(bundle, assetManager, watchfaceConfig);
+            displayDataBuilder = DisplayData.newBuilder(bundle, bgData, assetManager, watchfaceConfig);
             displayDataBuilder.setShowTreatment(MiBandEntry.isTreatmentEnabled());
             displayDataBuilder.setGraphLimit(MiBandEntry.getGraphLimit());
-            mainScreen = drawBitmap(displayDataBuilder.build());
+            DisplayData data = displayDataBuilder.build();
+            mainScreen = drawBitmap(data);
         } else {
-            DisplayData displayData = new DisplayData(bundle, watchfaceConfig);
+            DisplayData displayData = new DisplayData(bundle, bgData, watchfaceConfig);
             mainScreen = drawNoDataBitmap(displayData);
         }
         UserError.Log.d(TAG, "Encoding main picture");
@@ -395,7 +396,7 @@ public class WatchFaceGenerator {
                 @Override
                 public void run() {
                     try {
-                        BgGraphBuilder bgGraph =  new BgGraphBuilder(HuamiXdrip.getAppContext())
+                        BgGraphBuilder bgGraph = new BgGraphBuilder(HuamiXdrip.getAppContext())
                                 .setBgGraphCompontens(new BgGraphCompontens(data.getBundle(), HuamiXdrip.getAppContext()))
                                 .setWidthPx(config.graph.width + 16)
                                 .setHeightPx(config.graph.height)
@@ -406,7 +407,7 @@ public class WatchFaceGenerator {
                         bgGraph.showTreatmentLine(data.isShowTreatment());
                         graphImage = bgGraph.build();
                     } catch (Exception e) {
-                        UserError.Log.e(TAG, "Exception while generating: " + e );
+                        UserError.Log.e(TAG, "Exception while generating: " + e);
                         e.printStackTrace();
                     } finally {
                         drawMutex = false;
