@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.google.common.primitives.Bytes;
+//import com.google.common.primitives.Bytes;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 
 /**
@@ -83,9 +83,9 @@ public class PersistentStore {
         setString(name, current + value);
     }
 
-    public static void appendBytes(String name, byte[] value) {
+    /*public static void appendBytes(String name, byte[] value) {
         setBytes(name, Bytes.concat(getBytes(name), value));
-    }
+    }*/
 
     public static byte[] getBytes(String name) {
         return Helper.base64decodeBytes(getString(name));

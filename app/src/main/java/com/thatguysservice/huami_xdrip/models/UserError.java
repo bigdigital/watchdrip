@@ -411,8 +411,9 @@ public class UserError extends PlusModel {
         }
 
         public static boolean shouldLogTag(final String tag, final int level) {
-            final Integer levelForTag = extraTags.get(tag != null ? tag.toLowerCase() : "");
-            return levelForTag != null && level >= levelForTag;
+            //final Integer levelForTag = extraTags.get(tag != null ? tag.toLowerCase() : "");
+            //return levelForTag != null && level >= levelForTag;
+            return true;
         }
 
     }

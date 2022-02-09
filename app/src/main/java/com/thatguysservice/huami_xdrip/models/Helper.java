@@ -60,7 +60,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-
+import android.os.Build.VERSION;
 import static android.content.Context.ALARM_SERVICE;
 
 /**
@@ -1044,5 +1044,31 @@ public class Helper {
         }
         return wakeTime;
     }
+
+    public static boolean isRunningLollipopOrLater() {
+        return VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    public static boolean isRunningMarshmallowOrLater() {
+        return VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    }
+
+    public static boolean isRunningNougatOrLater() {
+        return VERSION.SDK_INT >= Build.VERSION_CODES.N;
+    }
+
+    public static boolean isRunningOreoOrLater() {
+        return VERSION.SDK_INT >= Build.VERSION_CODES.O;
+    }
+
+    public static boolean isRunningTenOrLater() {
+        return VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+    }
+
+
+    public static boolean isRunningPieOrLater() {
+        return VERSION.SDK_INT >= Build.VERSION_CODES.P;
+    }
+
 
 }

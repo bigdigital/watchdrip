@@ -10,6 +10,8 @@ import com.polidea.rxandroidble2.RxBleConnection;
 import com.polidea.rxandroidble2.RxBleCustomOperation;
 import com.polidea.rxandroidble2.exceptions.BleScanException;
 import com.polidea.rxandroidble2.internal.connection.RxBleGattCallback;
+import com.thatguysservice.huami_xdrip.UtilityModels.ForegroundServiceStarter;
+import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.HandleBleScanException;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.Pref;
@@ -33,6 +35,7 @@ public abstract class BaseBluetoothService extends Service {
     private volatile boolean background_launch_waiting = false;
     protected static final long TOLERABLE_JITTER = 10000;
 
+    protected ForegroundServiceStarter foregroundServiceStarter;
     protected Service service;
 
     protected String handleBleScanException(BleScanException bleScanException) {
@@ -157,12 +160,22 @@ public abstract class BaseBluetoothService extends Service {
         return array;
     }
 
+    protected void startInForeground() {
+        foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), service);
+        foregroundServiceStarter.start();
+        foregroundStatus();
+    }
+
+    protected void foregroundStatus() {
+        Inevitable.task("jam-base-foreground-status", 2000, () -> UserError.Log.d("FOREGROUND", service.getClass().getSimpleName() + (Helper.isServiceRunningInForeground(service.getClass()) ? " is running in foreground" : " is not running in foreground")));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         service = this;
         UserError.Log.d("FOREGROUND", "Current Service: " + service.getClass().getSimpleName());
-        //startInForeground();
+        startInForeground();
     }
 
 }

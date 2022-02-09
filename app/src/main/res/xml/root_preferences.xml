@@ -21,11 +21,6 @@
         app:key="miband_send_readings"
         app:title="@string/title_send_readings" />
     <SwitchPreference
-        app:defaultValue="false"
-        app:dependency="miband_send_readings"
-        app:key="miband_vibrate_on_readings"
-        app:title="@string/title_vibrate_on_readings" />
-    <SwitchPreference
         app:defaultValue="true"
         app:dependency="miband_enabled"
         app:key="miband_send_alarms"
@@ -37,30 +32,29 @@
         app:key="miband_send_alarms_other"
         app:summary="@string/summary_miband_send_alarms_other"
         app:title="@string/title_miband_send_alarms_other" />
-<!--    <Preference-->
-<!--        app:dependency="miband_enabled"-->
-<!--        app:key="update_miband_bg"-->
-<!--        app:title="@string/title_miband_update_bg"></Preference>-->
-
     <PreferenceCategory
         app:key="debug_miband4"
+        app:dependency="miband_enabled"
         app:title="Experimental">
         <SwitchPreference
             app:defaultValue="false"
-            app:dependency="miband_enabled"
             app:key="debug_miband_use_custom_watchface"
-            app:summary="You should place 'my_watchface.bin' and 'my_image.png' (config.json and my_mask.png are optional) files into 'xdrip' folder on your phone"
+            app:summary="@string/use_custom_watcface_summary"
             app:switchTextOff="@string/short_off_text_for_switches"
             app:switchTextOn="@string/short_on_text_for_switches"
-            app:title="Allow to use custom watchface" />
+            app:title="@string/use_custom_watcface_title" />
         <SwitchPreference
             app:defaultValue="false"
-            app:dependency="miband_enabled"
             app:key="debug_miband_disable_high_mtu"
             app:summary="@string/summary_disable_hight_mtu"
             app:switchTextOff="@string/short_off_text_for_switches"
             app:switchTextOn="@string/short_on_text_for_switches"
             app:title="@string/title_disable_hight_mtu" />
+        <SwitchPreference
+            app:defaultValue="false"
+            app:dependency="miband_send_readings"
+            app:key="miband_vibrate_on_readings"
+            app:title="@string/title_vibrate_on_readings" />
     </PreferenceCategory>
 
 </PreferenceScreen>
