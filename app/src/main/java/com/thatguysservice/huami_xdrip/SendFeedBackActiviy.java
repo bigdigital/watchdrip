@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,13 +19,16 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.PersistentStore;
+import com.thatguysservice.huami_xdrip.models.UserError;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class SendFeedBackActiviy extends AppCompatActivity {
-    private static final String TAG = "SendFeedBack";
     private static final String FEEDBACK_CONTACT = "feedback-contact";
     private static final String FEEDBACK_SERVER_DIRECTORY = "/xdrip/debug-logs.php";
+    private final String TAG = this.getClass().getSimpleName();
     EditText contact;
     private String type_of_message = "Unknown";
     private String send_url;
@@ -69,6 +74,37 @@ public class SendFeedBackActiviy extends AppCompatActivity {
     public void sendFeedback(View myview) {
         final EditText contact = findViewById(R.id.contactTextField);
         final EditText yourtext = findViewById(R.id.issueTextField);
+
+        List<Integer> severitiesList = new ArrayList<>();
+        // if (highCheckboxView.isChecked())
+        severitiesList.add(3);
+        // if (mediumCheckboxView.isChecked())
+        severitiesList.add(2);
+        // if (lowCheckboxView.isChecked())
+        severitiesList.add(1);
+        //if (userEventLowCheckboxView.isChecked())
+        severitiesList.add(5);
+        // if (userEventHighCheckboxView.isChecked())
+        severitiesList.add(6);
+        List<UserError> errors = UserError.bySeverity(severitiesList.toArray(new Integer[severitiesList.size()]));
+
+        if (log_data == null || log_data.isEmpty()) {
+            CheckBox logCheckbox = findViewById(R.id.sendLogsCheckBox);
+            if (logCheckbox.isChecked()) {
+                StringBuilder tmp = new StringBuilder(20000);
+                tmp.append("The following logs will be sent to the developers: \n\nPlease also include your email address or we will not know who they are from!\n\n");
+                for (UserError item : errors) {
+                    tmp.append(item.toString());
+                    tmp.append("\n");
+                    if (tmp.length() > 200000) {
+                        Helper.static_toast(this, "Could not package up all logs, using most recent", Toast.LENGTH_LONG);
+                        break;
+                    }
+                }
+                log_data = tmp.toString();
+            }
+        }
+
         final OkHttpClient client = new OkHttpClient();
 
         client.setConnectTimeout(10, TimeUnit.SECONDS);
@@ -110,5 +146,4 @@ public class SendFeedBackActiviy extends AppCompatActivity {
             Log.e(TAG, "General exception: " + e.toString());
         }
     }
-
 }

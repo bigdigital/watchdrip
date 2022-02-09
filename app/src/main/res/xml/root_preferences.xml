@@ -7,16 +7,60 @@
         app:title="@string/title_miband_enable" />
     <EditTextPreference
         app:key="miband_data_mac"
-        app:title="@string/title_miband_mac"
-        app:summary="@string/summary_miband_mac" />
+        app:summary="@string/summary_miband_mac"
+        app:title="@string/title_miband_mac" />
     <EditTextPreference
         app:icon="@drawable/ic_vpn_key"
         app:key="miband_data_authkey"
         app:summary="@string/summary_miband_authkey"
         app:title="@string/title_miband_authkey" />
-    <Preference
-        app:key="update_miband_bg"
+
+    <SwitchPreference
+        app:defaultValue="true"
         app:dependency="miband_enabled"
-        app:title="@string/title_miband_update_bg"></Preference>
+        app:key="miband_send_readings"
+        app:title="@string/title_send_readings" />
+    <SwitchPreference
+        app:defaultValue="false"
+        app:dependency="miband_send_readings"
+        app:key="miband_vibrate_on_readings"
+        app:title="@string/title_vibrate_on_readings" />
+    <SwitchPreference
+        app:defaultValue="true"
+        app:dependency="miband_enabled"
+        app:key="miband_send_alarms"
+        app:summary="@string/summary_send_alarms"
+        app:title="@string/title_send_alarms" />
+    <SwitchPreference
+        app:defaultValue="false"
+        app:dependency="miband_enabled"
+        app:key="miband_send_alarms_other"
+        app:summary="@string/summary_miband_send_alarms_other"
+        app:title="@string/title_miband_send_alarms_other" />
+<!--    <Preference-->
+<!--        app:dependency="miband_enabled"-->
+<!--        app:key="update_miband_bg"-->
+<!--        app:title="@string/title_miband_update_bg"></Preference>-->
+
+    <PreferenceCategory
+        app:key="debug_miband4"
+        app:title="Experimental">
+        <SwitchPreference
+            app:defaultValue="false"
+            app:dependency="miband_enabled"
+            app:key="debug_miband_use_custom_watchface"
+            app:summary="You should place 'my_watchface.bin' and 'my_image.png' (config.json and my_mask.png are optional) files into 'xdrip' folder on your phone"
+            app:switchTextOff="@string/short_off_text_for_switches"
+            app:switchTextOn="@string/short_on_text_for_switches"
+            app:title="Allow to use custom watchface" />
+        <SwitchPreference
+            app:defaultValue="false"
+            app:dependency="miband_enabled"
+            app:key="debug_miband_disable_high_mtu"
+            app:summary="@string/summary_disable_hight_mtu"
+            app:switchTextOff="@string/short_off_text_for_switches"
+            app:switchTextOn="@string/short_on_text_for_switches"
+            app:title="@string/title_disable_hight_mtu" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

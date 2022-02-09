@@ -1,5 +1,6 @@
 package com.thatguysservice.huami_xdrip.services;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -16,8 +17,8 @@ import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.receivers.xDripReceiver;
+import com.thatguysservice.huami_xdrip.utils.framework.WakeLockTrampoline;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
-
 
 public class BroadcastService extends Service {
 
@@ -38,14 +39,21 @@ public class BroadcastService extends Service {
     public static final String CMD_REPLY_MSG = "reply_msg";
     public static final String CMD_MESSAGE = "message";
 
-    public static final String CMD_LOCAL_REFRESH = "local_refresh";
-    public static final String CMD_LOCAL_AFTER_ALARM = "local_after_alarm";
+
+    public static final String CMD_LOCAL_PREFIX = "local_";
+    public static final String CMD_LOCAL_REFRESH = CMD_LOCAL_PREFIX + "refresh";
+    public static final String CMD_LOCAL_AFTER_MISSING_ALARM = CMD_LOCAL_PREFIX + "after_alarm";
+    public static final String CMD_LOCAL_BG_FORCE_REMOTE = CMD_LOCAL_PREFIX + "bg_force";
+    public static final String CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION = CMD_LOCAL_PREFIX + "update_bg_as_notification";
+
     //send
     protected static final String ACTION_WATCH_COMMUNICATION_RECEIVER = "com.eveningoutpost.dexdrip.watch.wearintegration.WATCH_BROADCAST_RECEIVER";
     //listen
     protected static final String ACTION_WATCH_COMMUNICATION_SENDER = "com.eveningoutpost.dexdrip.watch.wearintegration.WATCH_BROADCAST_SENDER";
     protected String TAG = this.getClass().getSimpleName();
-    private BroadcastReceiver newDataReceiver;
+    private PendingIntent serviceIntent;
+
+    public static final int SERVICE_RESTART_MINUTES = 1;
 
     public static boolean shouldServiceRun() {
         return MiBandEntry.isEnabled();
@@ -72,7 +80,7 @@ public class BroadcastService extends Service {
     }
 
     private void setReceiversEnableState(boolean enable) {
-        if (enable) {
+        /*if (enable) {
             if (newDataReceiver == null) {
                 newDataReceiver = new xDripReceiver();
                 registerReceiver(newDataReceiver, new IntentFilter(ACTION_WATCH_COMMUNICATION_SENDER));
@@ -82,7 +90,7 @@ public class BroadcastService extends Service {
                 unregisterReceiver(newDataReceiver);
                 newDataReceiver = null;
             }
-        }
+        }*/
     }
 
     @Override
@@ -127,15 +135,17 @@ public class BroadcastService extends Service {
     }
 
     private void handleCommand(String function, Intent intentIn) {
-        UserError.Log.d(TAG, "handleCommand function:" + function);
-
         Intent intent = new Intent(ACTION_WATCH_COMMUNICATION_RECEIVER);
         int value;
         switch (function) {
             case CMD_UPDATE_BG_FORCE:
+                if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
+                    return;
+                }
                 intent.putExtra(INTENT_SETTINGS, getSettings());
                 break;
             case CMD_SNOOZE_ALERT:
+                intent.putExtra(INTENT_ALERT_TYPE, intentIn.getStringExtra(INTENT_ALERT_TYPE));
                 break;
             case CMD_ADD_STEPS:
                 value = intentIn.getIntExtra("value", 0);
@@ -146,10 +156,6 @@ public class BroadcastService extends Service {
                 value = intentIn.getIntExtra("value", 0);
                 intent.putExtra("timeStamp", Helper.tsl());
                 intent.putExtra("value", value);
-                break;
-            case CMD_REPLY_MSG:
-                String replyMsg = intentIn.getStringExtra(INTENT_REPLY_MSG);
-                UserError.Log.e(TAG, "replyMsg:" + replyMsg);
                 break;
             default:
                 return;

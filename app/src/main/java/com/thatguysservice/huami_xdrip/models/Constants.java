@@ -19,5 +19,6 @@ public class Constants {
     public static final int MIBAND_SERVICE_RETRY_ID = 1026;
     public static final int MIBAND_SERVICE_BG_RETRY_ID = 1027;
 
-    public static final int GET_PHONE_READ_PERMISSION = 1023;
+    public static final int GET_EXTERNAL_STORAGE_READ_PERMISSION = 1023;
+    public static final int GET_EXTERNAL_STORAGE_WRITE_PERMISSION = 1024;
 }

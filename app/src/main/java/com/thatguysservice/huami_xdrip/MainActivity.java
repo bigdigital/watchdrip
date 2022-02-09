@@ -1,13 +1,16 @@
 package com.thatguysservice.huami_xdrip;
 
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SearchEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -27,15 +30,16 @@ import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
+import com.thatguysservice.huami_xdrip.services.BroadcastService;
 
 public class MainActivity extends AppCompatActivity {
-
-    private final static String TAG = PreferenceActivity.class.getSimpleName();
+    private final String TAG = this.getClass().getSimpleName();
     Runnable updater;
     ActivityMainBinding binding;
     private BroadcastReceiver newDataReceiver;
     private BgData bgData;
     private Handler timerHandler;
+    private MainActivity mActivity;
 
     @Override
     protected void onStop() {
@@ -61,20 +65,36 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
+        mActivity = this;
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.settings_fragment, new SettingsFragment())
+                    .commit();
+        }
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        CollapsingToolbarLayout toolBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        CollapsingToolbarLayout toolBarLayout = findViewById(R.id.toolbar_layout);
         toolBarLayout.setTitle(getTitle());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
+        if (BroadcastService.shouldServiceRun()){
+            fab.setVisibility(View.VISIBLE);
+        }
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                SettingsFragment fragment = (SettingsFragment)getSupportFragmentManager().findFragmentById(R.id.settings_fragment);
+                assert fragment != null;
+                fragment.updateMiBandBG(mActivity);
+               /* Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
             }
         });
 
@@ -114,6 +134,38 @@ public class MainActivity extends AppCompatActivity {
         bgDataRepository.getStatusData().observe(this, connectionStatusObserver);
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == Constants.GET_EXTERNAL_STORAGE_WRITE_PERMISSION) {
+            if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            } else {
+                Helper.static_toast_long("Need permission to write watchface");
+            }
+        }
+    }
+
+    @Override
+    public boolean onPictureInPictureRequested() {
+        return super.onPictureInPictureRequested();
+    }
+
+    @Override
+    public boolean onSearchRequested(@Nullable SearchEvent searchEvent) {
+        return super.onSearchRequested(searchEvent);
+    }
+
+    @Override
+    public boolean onSearchRequested() {
+        return super.onSearchRequested();
+    }
+
     public String getMinutesAgo(long msSince, boolean includeWords) {
         final int minutes = ((int) (msSince / Constants.MINUTE_IN_MS));
         return Integer.toString(minutes) + (includeWords ? (((minutes == 1) ? HuamiXdrip.getAppContext().getString(R.string.space_minute_ago) : HuamiXdrip.getAppContext().getString(R.string.space_minutes_ago))) : "");
@@ -144,13 +196,23 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
+
+        Log.d(TAG, "onPause");
         super.onPause();
         timerHandler.removeCallbacks(updater);
     }
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume");
         super.onResume();
         timerHandler.post(updater);
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy");
+        HuamiXdrip.getAppContext().stopService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class));
+        super.onDestroy();
     }
 }

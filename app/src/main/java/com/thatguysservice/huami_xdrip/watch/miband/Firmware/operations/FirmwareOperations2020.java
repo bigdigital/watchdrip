@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.utils.chiper.CRC16;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceState;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.Sequence.SequenceStateVergeNew;
@@ -144,7 +145,7 @@ public class FirmwareOperations2020 extends FirmwareOperationsNew {
             }
             resetFirmwareState(false, errorMessage);
             if (sendBGNotification) {
-                Helper.startService(MiBandService.class, "function", "update_bg_as_notification");
+                Helper.startService(MiBandService.class, BroadcastService.INTENT_FUNCTION_KEY, BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION);
                 service.changeState(SLEEP);
             }
         }

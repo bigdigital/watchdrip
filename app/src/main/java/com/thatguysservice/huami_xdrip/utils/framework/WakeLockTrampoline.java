@@ -32,7 +32,7 @@ public class WakeLockTrampoline extends BroadcastReceiver {
     private static final String SERVICE_PARAMETER = "SERVICE_PARAM";
     private static final HashMap<String, Class> cache = new HashMap<>();
     private static final SparseArray<String> collision = new SparseArray<>();
-    private static final boolean D = false;
+    private static final boolean D = true;
 
     /**
      * When we receive the broadcast callback we extract the required service and start it.
@@ -58,7 +58,7 @@ public class WakeLockTrampoline extends BroadcastReceiver {
 
         final Intent serviceIntent = new Intent(context, serviceClass);
         final String function = broadcastIntent.getStringExtra("function");
-        if (function != null) serviceIntent.putExtra("function", function);
+        if (function != null) serviceIntent.putExtra("FUNCTION", function);
 
         ComponentName startResult;
 
@@ -95,11 +95,16 @@ public class WakeLockTrampoline extends BroadcastReceiver {
         final int scheduleId = name.hashCode() + id;
 
         final Intent intent = new Intent(HuamiXdrip.getAppContext(), WakeLockTrampoline.class).putExtra(SERVICE_PARAMETER, name);
-        if (function != null) intent.putExtra("function",function);
+        String func = "";
+        if (function != null) {
+            intent.putExtra("function", function);
+            func = function;
+        }
+
         cache.put(name, serviceClass);
 
         if (D)
-            UserError.Log.d(TAG, String.format(Locale.US, "Schedule %s ID: %d (%d)", name, scheduleId, id));
+            UserError.Log.d(TAG, String.format(Locale.US, "Schedule %s ID: %d (%d), func:%s", name, scheduleId, id, func));
 
         final String existing = collision.get(scheduleId);
         if (existing == null) {

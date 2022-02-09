@@ -1,9 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"  >
     <item
-        android:id="@+id/action_view_settings"
+        android:id="@+id/action_view_scan"
         android:orderInCategory="1"
-        android:title="@string/action_settings"
+        android:title="@string/action_scan"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_view_watch_info"

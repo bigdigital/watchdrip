@@ -40,7 +40,6 @@ import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.activeandroid.ActiveAndroid;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
-import com.thatguysservice.huami_xdrip.PreferenceActivity;
 import com.thatguysservice.huami_xdrip.R;
 
 import java.io.File;
@@ -673,16 +672,13 @@ public class Helper {
                         Log.i(TAG, "Displaying toast using fallback");
                     } catch (Exception e) {
                         Log.e(TAG, "Exception processing runnable toast ui thread: " + e);
-                        PreferenceActivity.toastStatic(msg);
                     }
                 }
             })) {
                 Log.e(TAG, "Couldn't display toast via ui thread: " + msg);
-                PreferenceActivity.toastStatic(msg);
             }
         } catch (Exception e) {
             Log.e(TAG, "Couldn't display toast due to exception: " + msg + " e: " + e.toString());
-            PreferenceActivity.toastStatic(msg);
         }
     }
 

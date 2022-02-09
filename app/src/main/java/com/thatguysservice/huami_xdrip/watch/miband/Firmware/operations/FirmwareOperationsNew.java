@@ -30,6 +30,8 @@ import java.util.concurrent.TimeoutException;
 
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_WRITE_MTU_OVERHEAD;
 import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SLEEP;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.DisplayControllMessage.NightMode.Sheduled;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_CHECKSUM;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_INIT;
@@ -246,7 +248,7 @@ public class FirmwareOperationsNew {
             }
             resetFirmwareState(false, errorMessage);
             if (sendBGNotification) {
-                Helper.startService(MiBandService.class, "function", "update_bg_as_notification");
+                Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION);
                 service.changeState(SLEEP);
             }
         }
