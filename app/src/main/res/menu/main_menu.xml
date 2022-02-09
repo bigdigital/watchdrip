@@ -4,11 +4,13 @@
         android:id="@+id/action_view_scan"
         android:orderInCategory="1"
         android:title="@string/action_scan"
+        android:visible="false"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_view_watch_info"
         android:orderInCategory="2"
         android:title="@string/action_view_watch_info"
+        android:visible="false"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_view_log"

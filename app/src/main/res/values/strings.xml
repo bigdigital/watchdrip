@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Huami xDrip</string>
+    <string name="app_name">BandDrip</string>
     <string name="unit_second">second</string>
     <string name="unit_minute">minute</string>
     <string name="unit_hour">hour</string>
@@ -11,14 +11,11 @@
     <string name="unit_days">days"</string>
     <string name="unit_weeks">weeks"</string>
 
-    <string name="title_miband">MiBand</string>
-    <string name="title_miband_mac">MAC Adress</string>
+    <string name="title_miband_mac">MAC Address</string>
     <string name="summary_miband_enable">Sync Data with MiBand fitness bands</string>
-    <string name="title_miband_enable">Use MiBand Band</string>
+    <string name="title_miband_enable">Enable service</string>
     <string name="title_miband_screen_battery">Show Battery</string>
     <string name="title_miband_show_date">Show date on the screen</string>
-    <string name="title_miband_visibility">MiBand visibility</string>
-    <string name="summary_miband_visibility">MiBand will be visible for other devices</string>
     <string name="title_miband_switch_display_on_wrist">Switch display on wrist</string>
     <string name="title_miband_units">Units</string>
     <string name="summary_miband_units">Choose the distance unit used on band </string>

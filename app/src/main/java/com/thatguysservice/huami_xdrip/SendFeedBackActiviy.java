@@ -46,6 +46,7 @@ public class SendFeedBackActiviy extends AppCompatActivity {
 
         send_url = getString(R.string.wserviceurl) + FEEDBACK_SERVER_DIRECTORY;
         contact = findViewById(R.id.contactTextField);
+        contact.setText(PersistentStore.getString(FEEDBACK_CONTACT));
         Intent intent = getIntent();
         type_of_message = "feedback";
         if (intent != null) {
