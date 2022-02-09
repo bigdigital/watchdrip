@@ -12,7 +12,7 @@ import androidx.work.WorkRequest;
 
 import com.activeandroid.ActiveAndroid;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
-import com.thatguysservice.huami_xdrip.utils.jobs.DailyJob;
+import com.thatguysservice.huami_xdrip.utils.jobs.CleanupWorker;
 
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +43,7 @@ public class HuamiXdrip extends MultiDexApplication {
                 .build();
 
         WorkRequest workRequest =
-                new PeriodicWorkRequest.Builder(DailyJob.class, 24, TimeUnit.HOURS)
+                new PeriodicWorkRequest.Builder(CleanupWorker.class, 24, TimeUnit.HOURS)
                         .setConstraints(constraints)
                         .build();
 
