@@ -33,7 +33,6 @@ public class MiBand {
 
     static void setMac(final String mac) {
         Pref.setString(PREF_MIBAND_MAC, mac);
-        MiBandEntry.sendPrefIntent(MiBandService.MIBAND_INTEND_STATES.UPDATE_PREF_DATA, 0, "");
     }
 
     public static String getAuthKey() {
@@ -42,7 +41,6 @@ public class MiBand {
 
     public static void setAuthKey(final String key) {
         Pref.setString(PREF_MIBAND_AUTH_KEY, key.toLowerCase());
-        MiBandEntry.sendPrefIntent(MiBandService.MIBAND_INTEND_STATES.UPDATE_PREF_DATA, 0, "");
     }
 
     public static String getPersistentAuthMac() {

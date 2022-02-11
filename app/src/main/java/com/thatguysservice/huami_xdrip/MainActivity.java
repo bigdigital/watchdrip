@@ -1,6 +1,5 @@
 package com.thatguysservice.huami_xdrip;
 
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,7 +22,6 @@ import androidx.lifecycle.Observer;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.thatguysservice.huami_xdrip.databinding.ActivityMainBinding;
 import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Constants;
@@ -55,9 +53,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.action_view_log:
-                Intent intent = new Intent(this, SendFeedBackActiviy.class);
+                intent = new Intent(this, SendFeedBackActiviy.class);
+                startActivity(intent);
+            case R.id.action_view_about:
+                intent = new Intent(this, AboutActivity.class);
                 startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
@@ -83,14 +85,13 @@ public class MainActivity extends AppCompatActivity {
         CollapsingToolbarLayout toolBarLayout = findViewById(R.id.toolbar_layout);
         toolBarLayout.setTitle(getTitle());
 
+
         FloatingActionButton fab = findViewById(R.id.fab);
-        if (BroadcastService.shouldServiceRun()){
-            fab.setVisibility(View.VISIBLE);
-        }
+        binding.setFabVisibility(BroadcastService.shouldServiceRun());
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SettingsFragment fragment = (SettingsFragment)getSupportFragmentManager().findFragmentById(R.id.settings_fragment);
+                SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentById(R.id.settings_fragment);
                 assert fragment != null;
                 fragment.updateMiBandBG(mActivity);
                /* Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -132,8 +133,18 @@ public class MainActivity extends AppCompatActivity {
         };
 
         bgDataRepository.getStatusData().observe(this, connectionStatusObserver);
-    }
 
+
+        // Create the observer which updates the UI.
+        final Observer<Boolean> serviceStateObserver = new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable final Boolean status) {
+                binding.setFabVisibility(status);
+            }
+        };
+
+        bgDataRepository.getServiceStatus().observe(this, serviceStateObserver);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -146,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == Constants.GET_EXTERNAL_STORAGE_WRITE_PERMISSION) {
             if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
             } else {
-                Helper.static_toast_long("Need permission to write watchface");
+                Helper.static_toast_long("Application need permission to write watchface");
             }
         }
     }

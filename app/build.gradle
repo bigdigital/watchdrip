@@ -14,109 +14,11 @@ repositories {
     }*/
 }
 
-def generateVersionNumber = { ->
-    StringBuilder stringBuilder = new StringBuilder()
-    stringBuilder.append((new Date()).format('yyMMddHH'))
-    return Integer.parseInt(stringBuilder.toString())
-}
-
-def generateVersionNumberString = { ->
-    StringBuilder stringBuilder = new StringBuilder()
-    stringBuilder.append((new Date()).format('yyMMddHH'))
-    return stringBuilder.toString()
-}
-
 def generateTimestamp = { ->
     StringBuilder stringBuilder = new StringBuilder()
     stringBuilder.append((new Date()).getTime())
-    stringBuilder.append("L");
+    stringBuilder.append("L")
     return stringBuilder.toString()
-}
-
-def generateRandomUUID = { ->
-    StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append('"' + UUID.randomUUID().toString() + '"')
-    return stringBuilder.toString()
-}
-
-def generateVersionName = { ->
-
-    StringBuilder stringBuilder = new StringBuilder()
-    try {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'describe', '--always'
-            standardOutput = stdout
-        }
-        String commitObject = stdout.toString().trim()
-        try {
-            stdout = new ByteArrayOutputStream()
-            exec {
-                commandLine 'git', 'describe', '--tags'
-                standardOutput = stdout
-            }
-            //stringBuilder.append(stdout.toString().trim())
-            //stringBuilder.append("-")
-        } catch (ignored) {
-            // no tags
-        }
-
-        stringBuilder.append(commitObject)
-        stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', '--show-toplevel'
-            standardOutput = stdout
-        }
-        if (stdout.toString().trim().contains("xDrip-Experimental")) {
-            stringBuilder.append("-experimental")
-        }
-
-        stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
-            standardOutput = stdout
-        }
-        String branch = stdout.toString().trim()
-        if (!branch.equals("master")) {
-            stringBuilder.append('-')
-            stringBuilder.append(branch)
-        }
-
-    } catch (ignored) {
-        return "NoGitSystemAvailable"
-    }
-    stringBuilder.append('-')
-    stringBuilder.append((new Date()).format('yyyy.MM.dd'))
-    return stringBuilder.toString()
-}
-
-/**
- * Reads a property from the project settings (Gradle properties), the system environment or
- * from the file <code>local.properties</code>.
- *
- * @param propertyName the name of the property to read
- * @return the property value or an empty string
- */
-def getLocalProperty(String propertyName) {
-    def propVal = project.findProperty(propertyName)
-    if (propVal == null) {
-        propVal = System.getenv(propertyName)
-        if (propVal == null)
-            propVal = System.getenv(propertyName.toLowerCase())
-        if (propVal == null)
-            propVal = System.getenv(propertyName.toUpperCase())
-        if (propVal == null) {
-            def propsFile = rootProject.file('local.properties')
-            if (propsFile.exists()) {
-                def props = new Properties()
-                props.load(new FileInputStream(propsFile))
-                propVal = props[propertyName]
-            } else {
-                propVal = ""
-            }
-        }
-    }
-    return propVal
 }
 
 android {
@@ -127,14 +29,12 @@ android {
         applicationId "com.thatguysservice.huami_xdrip"
         minSdkVersion 18
         targetSdkVersion 30
+
+        // Note: always bump BOTH versionCode and versionName!
+        versionName "0.1.0"
         versionCode 1
-        versionName generateVersionName()
-        buildConfigField "int", "buildVersion", generateVersionNumberString()
-        buildConfigField "String", "buildUUID", generateRandomUUID()
         buildConfigField "long", "buildTimestamp", generateTimestamp()
         buildConfigField "int", "targetSDK", targetSdkVersion.mApiLevel.toString()
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         multiDexEnabled true
     }
@@ -148,6 +48,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        applicationVariants.all {
+            variant ->
+                variant.outputs.each {
+                    output ->
+                        output.outputFileName = "WatchDrip_v${defaultConfig.versionName}.apk"
+                }
+        }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

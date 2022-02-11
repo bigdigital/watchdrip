@@ -9,14 +9,18 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.utils.bt.LocationHelper;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
@@ -24,6 +28,26 @@ import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
+    BgDataRepository bgDataRepository;
+    public static void checkReadPermission(final Activity activity) {
+        // TODO call log permission - especially for Android 9+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (HuamiXdrip.getAppContext().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(activity,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        Constants.GET_EXTERNAL_STORAGE_READ_PERMISSION);
+            }
+        }
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        bgDataRepository = BgDataRepository.getInstance();
+        super.onViewCreated(view, savedInstanceState);
+    }
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
@@ -41,6 +65,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 checkReadPermission(this.getActivity());
                 checkWritePermissions(this.getActivity());
             }
+            bgDataRepository.setNewServiceStatus((Boolean) newValue);
+
             return true;
         });
     }
@@ -66,26 +92,13 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         alert.show();
     }
 
-    public static void checkReadPermission(final Activity activity) {
-        // TODO call log permission - especially for Android 9+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (HuamiXdrip.getAppContext().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(activity,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        Constants.GET_EXTERNAL_STORAGE_READ_PERMISSION);
-            }
-        }
-    }
-
-    protected boolean isExternalStorageWritable( final Activity activity) {
+    protected boolean isExternalStorageWritable(final Activity activity) {
         String state = Environment.getExternalStorageState();
         if (!checkWritePermissions(activity)) return false;
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    private boolean checkWritePermissions( final Activity activity ) {
+    private boolean checkWritePermissions(final Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(HuamiXdrip.getAppContext(),
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)

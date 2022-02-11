@@ -20,6 +20,7 @@ import com.squareup.okhttp.Response;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.PersistentStore;
 import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,11 +40,7 @@ public class SendFeedBackActiviy extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_feedback);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         send_url = getString(R.string.wserviceurl) + FEEDBACK_SERVER_DIRECTORY;
         contact = findViewById(R.id.contactTextField);
         contact.setText(PersistentStore.getString(FEEDBACK_CONTACT));
@@ -61,7 +58,7 @@ public class SendFeedBackActiviy extends AppCompatActivity {
         }
     }
 
-    @Override
+ /*   @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
@@ -70,7 +67,7 @@ public class SendFeedBackActiviy extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     public void sendFeedback(View myview) {
         final EditText contact = findViewById(R.id.contactTextField);
@@ -116,9 +113,13 @@ public class SendFeedBackActiviy extends AppCompatActivity {
         Helper.static_toast_short("Sending...");
 
         try {
+            String data = Helper.getDeviceDetails() + "\n Version " + Helper.getVersionDetails() + "\n";
+            data = data + "Device: " + MiBand.getMibandType() + "\n Device version: " + MiBand.getVersion() + "\n";
+            data = data + "===\n\n";
+            data = data + yourtext.getText().toString() + " \n\n===\nType: " + type_of_message + "\nLog data:\n\n" + log_data + "\n\n\nSent: " + Helper.dateTimeText(Helper.tsl());
             final RequestBody formBody = new FormEncodingBuilder()
                     .add("contact", contact.getText().toString())
-                    .add("body", Helper.getDeviceDetails() + "\n" + Helper.getVersionDetails() + "\n===\n\n" + yourtext.getText().toString() + " \n\n===\nType: " + type_of_message + "\nLog data:\n\n" + log_data + "\n\n\nSent: " + Helper.dateTimeText(Helper.tsl()))
+                    .add("body", data)
                     .add("type", type_of_message)
                     .build();
             new Thread(() -> {

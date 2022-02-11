@@ -17,4 +17,9 @@
         android:orderInCategory="3"
         android:title="@string/action_view_log"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_view_about"
+        android:orderInCategory="4"
+        android:title="@string/action_view_about"
+        app:showAsAction="never" />
 </menu>

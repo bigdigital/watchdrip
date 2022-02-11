@@ -3,9 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
+        <import type="android.view.View"/>
         <variable
             name="connectionState"
-            type="String" />
+            type="java.lang.String" />
+        <variable
+            name="fabVisibility"
+            type="java.lang.Boolean"/>
     </data>
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -46,7 +50,7 @@
                             android:id="@+id/watchStatusTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Watch status: " />
+                            android:text="@string/watch_state" />
 
                         <TextView
                             android:id="@+id/watchStatusValTextView"
@@ -106,7 +110,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/fab_margin"
-            android:visibility="invisible"
+            android:visibility="@{fabVisibility ? View.VISIBLE : View.GONE}"
             app:fabSize="auto"
             app:layout_anchor="@id/app_bar"
             app:layout_anchorGravity="bottom|end"

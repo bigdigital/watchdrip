@@ -25,6 +25,7 @@ import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Constants;
+import com.thatguysservice.huami_xdrip.models.DeviceInfo;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
@@ -145,6 +146,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     private String missingAlertMessage;
     private int ringerModeBackup;
     private BgData bgData;
+    private DeviceInfo deviceInfo;
     private BgDataRepository bgDataRepository;
 
     {
@@ -214,7 +216,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         if (!result && I.state.equals(MiBandState.AUTHORIZE_FAILED_SLEEP) && MiBandType.supportPairingKey(MiBand.getMibandType())) {
             return true;
         }
-        if (!I.isConnected) {
+        if (!isConnected()) {
             return true;
         }
         if (!result)
@@ -231,10 +233,10 @@ public class MiBandService extends BaseBluetoothSequencer {
                 final String authMac = MiBand.getPersistentAuthMac();
                 String mac = MiBand.getMac();
                 MiBandType currDevice = MiBand.getMibandType();
+                deviceInfo.setDevice(currDevice);
                 if ((currDevice != prevDeviceType) && currDevice != MiBandType.UNKNOWN) {
                     prevDeviceType = currDevice;
                     UserError.Log.d(TAG, "Found new device: " + currDevice.toString());
-                    MiBandEntry.sendPrefIntent(MIBAND_INTEND_STATES.UPDATE_PREF_SCREEN, 0, "");
                 }
                 if (!authMac.equalsIgnoreCase(mac) || authMac.isEmpty()) {
                     prevDeviceType = MiBand.getMibandType();
@@ -279,6 +281,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 stopBgUpdateTimer();
                 stopConnection();
                 changeState(CLOSE);
+                bgDataRepository.setNewConnectionState(I.state);
                 prevReadingStatusIsStale = false;
                 stopSelf();
                 return START_NOT_STICKY;
@@ -586,7 +589,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                     UserError.Log.d(TAG, "Got battery info: " + bytesToHex(readValue));
                     batteryInfo = new BatteryInfo(readValue);
 
-                    UserError.Log.d(TAG, "Battery level: " + batteryInfo.getLevelInPercent() +"%");
+                    UserError.Log.d(TAG, "Battery level: " + batteryInfo.getLevelInPercent() + "%");
                 }, throwable -> {
                     UserError.Log.e(TAG, "Could not read battery info: " + throwable);
                 });
@@ -919,7 +922,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             prevReadingStatusIsStale = false; //try to resend readings on the next bg update
         }
 
-        if (I.state.equals(CLOSED) || I.state.equals(CLOSE) || I.isConnected == false) return;
+        if (I.state.equals(CLOSED) || I.state.equals(CLOSE) || !isConnected()) return;
         changeState(MiBandState.RESTORE_NIGHTMODE);
     }
 
@@ -930,7 +933,6 @@ public class MiBandService extends BaseBluetoothSequencer {
                 rxBleConnection.observeConnectionParametersUpdates().take(1)
         );
     }
-
 
     @SuppressLint("CheckResult")
     private void setNightMode() {
@@ -1093,11 +1095,26 @@ public class MiBandService extends BaseBluetoothSequencer {
                 ));
     }
 
+    private void readRSSI() {
+        I.connection.readRssi().subscribe(
+                rssi -> {
+                    UserError.Log.d(TAG, "RSSI: " + rssi);
+                    deviceInfo.setRssi(rssi);
+                    changeNextState();
+                },
+                throwable -> {
+                    UserError.Log.d(TAG, "Cannot receive RSSI:" + throwable);
+                    changeNextState();
+                }
+        );
+    }
+
     @Override
     protected synchronized boolean automata() {
         UserError.Log.d(TAG, "Automata called in" + TAG);
         extendWakeLock(2000);
         if (shouldServiceRun()) {
+            bgDataRepository.setNewConnectionState(I.state);
             switch (I.state) {
                 case INIT:
                     // connect by default
@@ -1149,7 +1166,10 @@ public class MiBandService extends BaseBluetoothSequencer {
                         else changeState(MiBandState.SEND_QUEUE);
                         break;
                     }
-                    changeState(MiBandState.INSTALL_WATCHFACE);
+                    changeState(MiBandState.INSTALL_WATCHFACE_READ_RSSI);
+                    break;
+                case MiBandState.INSTALL_WATCHFACE_READ_RSSI:
+                    readRSSI();
                     break;
                 case MiBandState.INSTALL_WATCHFACE:
                     installWatchface();
@@ -1164,10 +1184,10 @@ public class MiBandService extends BaseBluetoothSequencer {
                         // do nothing because something happen with connection while sending nightmode
                         extendWakeLock(RESTORE_NIGHT_MODE_DELAY * Constants.SECOND_IN_MS);
                         Helper.threadSleep(RESTORE_NIGHT_MODE_DELAY);
-                        if (I.state.equals(CLOSED) || I.state.equals(CLOSE) || !I.isConnected)
+                        if (I.state.equals(CLOSED) || I.state.equals(CLOSE) || !isConnected())
                             break;
                         setNightMode();
-                        if (I.state.equals(CLOSED) || I.state.equals(CLOSE) || !I.isConnected)
+                        if (I.state.equals(CLOSED) || I.state.equals(CLOSE) || !isConnected())
                             break;
                     }
                     changeNextState();
@@ -1423,12 +1443,6 @@ public class MiBandService extends BaseBluetoothSequencer {
         bgDataRepository.setNewBgData(bgData);
     }
 
-    @Override
-    protected synchronized void onConnectionStateChange(RxBleConnection.RxBleConnectionState newState) {
-        super.onConnectionStateChange(newState);
-        bgDataRepository.setNewConnectionState(connection_state);
-    }
-
     public QueueMessage getMessageQueue(String title, String message) {
         Bundle bundle = new Bundle();
         bundle.putString("title", title);
@@ -1445,23 +1459,24 @@ public class MiBandService extends BaseBluetoothSequencer {
     }
 
     public static class MiBandState extends BaseBluetoothSequencer.BaseState {
-        public static final String AUTHORIZE_FAILED = "Authorization failed handle";
+        public static final String AUTHORIZE_FAILED = "Authorization Failed";
         static final String SEND_BG = "Setting Time";
         static final String SEND_SETTINGS = "Updating Settings";
-        static final String QUEUE_MESSAGE = "Queue message";
-        static final String WAITING_USER_RESPONSE = "WAITING_USER_RESPONSE";
-        static final String WAITING_MIFIT_SILENCE = "Waiting Mifit Silence";
+        static final String QUEUE_MESSAGE = "Queue Message";
+        static final String WAITING_USER_RESPONSE = "Waiting User Responce";
+        static final String WAITING_MIFIT_SILENCE = "Waiting MiFit Silence";
         static final String AUTHENTICATE = "Authenticate";
-        static final String AUTHORIZE = "Authorize phase";
-        static final String AUTHORIZE_FAILED_SLEEP = "Authorization failed sleep";
+        static final String AUTHORIZE = "Authorization";
+        static final String AUTHORIZE_FAILED_SLEEP = "Authorization failed, sleep";
         static final String GET_MODEL_NAME = "Getting model name";
         static final String GET_SOFT_REVISION = "Getting software revision";
-        static final String ENABLE_NOTIFICATIONS = "Enable notification";
-        static final String GET_BATTERY_INFO = "Getting battery info";
-        static final String INSTALL_WATCHFACE = "Watchface installation";
-        static final String INSTALL_WATCHFACE_IN_PROGRESS = "Watchface installation in progress";
-        static final String INSTALL_WATCHFACE_FINISHED = "Watchface installation finished";
-        static final String RESTORE_NIGHTMODE = "RESTORE_NIGHTMODE";
+        static final String ENABLE_NOTIFICATIONS = "Enabling Notifications";
+        static final String GET_BATTERY_INFO = "Getting Battery Info";
+        static final String INSTALL_WATCHFACE_READ_RSSI = "Read RSSI";
+        static final String INSTALL_WATCHFACE = "Preparing Watchface";
+        static final String INSTALL_WATCHFACE_IN_PROGRESS = "Watchface uploading";
+        static final String INSTALL_WATCHFACE_FINISHED = "Watchface Uploading Finished";
+        static final String RESTORE_NIGHTMODE = "Restore Nightmode";
         static final String VIBRATE_AFTER_READING = "Vibrate";
 
         private static final String TAG = "MiBandStateSequence";
@@ -1489,6 +1504,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             UserError.Log.d(TAG, "SET UPDATE WATCHFACE DATA SEQUENCE");
             prepareInitialSequences();
             sequence.add(SEND_BG);
+            sequence.add(INSTALL_WATCHFACE_READ_RSSI);
             sequence.add(INSTALL_WATCHFACE);
             sequence.add(INSTALL_WATCHFACE_IN_PROGRESS);
             sequence.add(INSTALL_WATCHFACE_FINISHED);

@@ -191,12 +191,4 @@ public class MiBandEntry {
         }
     }
 
-    public static void sendPrefIntent(MiBandService.MIBAND_INTEND_STATES state, Integer progress, String descrText) {
-        final Intent progressIntent = new Intent(Intents.ACTION_UPDATE_VIEW);
-        progressIntent.putExtra("state", state.name());
-        progressIntent.putExtra("progress", progress);
-        if (!descrText.isEmpty())
-            progressIntent.putExtra("descr_text", descrText);
-        LocalBroadcastManager.getInstance(HuamiXdrip.getAppContext()).sendBroadcast(progressIntent);
-    }
 }

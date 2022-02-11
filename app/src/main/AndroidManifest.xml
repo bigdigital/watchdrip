@@ -37,8 +37,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Huamixdrip">
-
-        <activity android:name=".SendFeedBackActiviy" />
+        <activity
+            android:name=".AboutActivity"
+            android:parentActivityName=".MainActivity"></activity>
+        <activity android:name=".SendFeedBackActiviy"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MainActivity"
             android:theme="@style/Theme.Huamixdrip.NoActionBar">

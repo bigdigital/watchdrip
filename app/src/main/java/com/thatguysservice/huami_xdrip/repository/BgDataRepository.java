@@ -9,6 +9,7 @@ public class BgDataRepository {
     private static BgDataRepository instance;
     private MutableLiveData<BgData> bgLiveData = new MutableLiveData<>();
     private MutableLiveData<String> watchConnectionStateLiveData = new MutableLiveData<>();
+    private MutableLiveData<Boolean> serviceStatusLiveData = new MutableLiveData<>();
 
     private BgDataRepository() {
     }
@@ -18,6 +19,14 @@ public class BgDataRepository {
             instance = new BgDataRepository();
         }
         return instance;
+    }
+
+    public MutableLiveData<Boolean> getServiceStatus() {
+        return serviceStatusLiveData;
+    }
+
+    public void setNewServiceStatus(Boolean serviceStatus) {
+        serviceStatusLiveData.postValue(serviceStatus);
     }
 
     public LiveData<BgData> getBgData() {
