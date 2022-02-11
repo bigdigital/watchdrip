@@ -110,12 +110,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/fab_margin"
+            android:adjustViewBounds="false"
+            android:baselineAlignBottom="false"
             android:visibility="@{fabVisibility ? View.VISIBLE : View.GONE}"
             app:fabSize="auto"
             app:layout_anchor="@id/app_bar"
             app:layout_anchorGravity="bottom|end"
-            app:maxImageSize="45dp"
-            app:srcCompat="@drawable/ic_restart" />
+            app:maxImageSize="35dp"
+            app:srcCompat="@drawable/ic_restart"
+            app:useCompatPadding="false" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

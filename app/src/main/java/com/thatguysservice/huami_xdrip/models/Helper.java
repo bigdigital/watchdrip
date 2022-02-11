@@ -730,67 +730,6 @@ public class Helper {
         }
     }
 
-    public static void shareImage(Context context, File file) {
-        Uri uri = Uri.fromFile(file);
-        final Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_SEND);
-        intent.setType("image/*");
-        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "");
-        intent.putExtra(android.content.Intent.EXTRA_TEXT, "");
-        intent.putExtra(Intent.EXTRA_STREAM, uri);
-        try {
-            context.startActivity(Intent.createChooser(intent, "Share"));
-        } catch (ActivityNotFoundException e) {
-            static_toast_long("No suitable app to show an image!");
-        }
-    }
-
-    public static void releaseOrientation(Activity activity) {
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
-    @SuppressWarnings("deprecation")
-    @SuppressLint("NewApi")
-    public static void lockOrientation(Activity activity) {
-        Display display = activity.getWindowManager().getDefaultDisplay();
-        int rotation = display.getRotation();
-        int height;
-        int width;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
-            height = display.getHeight();
-            width = display.getWidth();
-        } else {
-            Point size = new Point();
-            display.getSize(size);
-            height = size.y;
-            width = size.x;
-        }
-        switch (rotation) {
-            case Surface.ROTATION_90:
-                if (width > height)
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                else
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                break;
-            case Surface.ROTATION_180:
-                if (height > width)
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                else
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                break;
-            case Surface.ROTATION_270:
-                if (width > height)
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                else
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                break;
-            default:
-                if (height > width)
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                else
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        }
-    }
 
     public static boolean isAirplaneModeEnabled(Context context) {
         return Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
@@ -808,21 +747,7 @@ public class Helper {
         return false;
     }
 
-    public static boolean createSpecialBond(final String thisTAG, final BluetoothDevice device) {
-        try {
-            Log.e(thisTAG, "Attempting special bond");
-            Class[] argTypes = new Class[]{int.class};
-            final Method method = device.getClass().getMethod("createBond", argTypes);
-            if (method != null) {
-                return (Boolean) method.invoke(device, 2);
-            } else {
-                Log.e(thisTAG, "CANNOT FIND SPECIAL BOND METHOD!!");
-            }
-        } catch (Exception e) {
-            Log.e(thisTAG, "An exception occured while creating special bond: " + e);
-        }
-        return false;
-    }
+
 
     public static boolean isBluetoothEnabled(final Context context) {
         try {

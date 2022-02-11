@@ -1,5 +1,4 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <SwitchPreference
         app:defaultValue="false"
         app:key="miband_enabled"
@@ -14,12 +13,6 @@
         app:key="miband_data_authkey"
         app:summary="@string/summary_miband_authkey"
         app:title="@string/title_miband_authkey" />
-
-    <SwitchPreference
-        app:defaultValue="true"
-        app:dependency="miband_enabled"
-        app:key="miband_send_readings"
-        app:title="@string/title_send_readings" />
     <SwitchPreference
         app:defaultValue="true"
         app:dependency="miband_enabled"
@@ -32,10 +25,10 @@
         app:key="miband_send_alarms_other"
         app:summary="@string/summary_miband_send_alarms_other"
         app:title="@string/title_miband_send_alarms_other" />
-    <PreferenceCategory
-        app:key="debug_miband4"
+    <PreferenceScreen
         app:dependency="miband_enabled"
-        app:title="Experimental">
+        app:key="advanced_pref_screen"
+        app:title="@string/Advanced">
         <SwitchPreference
             app:defaultValue="false"
             app:key="debug_miband_use_custom_watchface"
@@ -51,10 +44,14 @@
             app:switchTextOn="@string/short_on_text_for_switches"
             app:title="@string/title_disable_hight_mtu" />
         <SwitchPreference
+            app:defaultValue="true"
+            app:dependency="miband_enabled"
+            app:key="miband_send_readings"
+            app:title="@string/title_send_readings" />
+        <SwitchPreference
             app:defaultValue="false"
             app:dependency="miband_send_readings"
             app:key="miband_vibrate_on_readings"
             app:title="@string/title_vibrate_on_readings" />
-    </PreferenceCategory>
-
+    </PreferenceScreen>
 </PreferenceScreen>

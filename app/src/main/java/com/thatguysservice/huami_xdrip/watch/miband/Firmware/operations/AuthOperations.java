@@ -140,7 +140,7 @@ public class AuthOperations extends BaseMessage {
     public void processAuthCharacteristic(byte[] value) {
         if (value[0] == AUTH_RESPONSE &&
                 value[1] == AUTH_SEND_KEY &&
-                (value[2] & 0x0f) == AUTH_SUCCESS) {
+                value[2] == AUTH_SUCCESS) {
             connection.writeCharacteristic(getCharacteristicUUID(), getAuthKeyRequest()) //get random key from band
                     .subscribe(val -> {
                         UserError.Log.d(TAG, "Wrote OPCODE_AUTH_REQ1: " + Helper.bytesToHex(val));
@@ -148,7 +148,7 @@ public class AuthOperations extends BaseMessage {
                         UserError.Log.e(TAG, "Could not write OPCODE_AUTH_REQ1: " + throwable);
                     });
         } else if (value[0] == AUTH_RESPONSE &&
-                (value[1] & 0x0f) == AUTH_REQUEST_RANDOM_AUTH_NUMBER &&
+                (value[1]) == (cryptFlags | AUTH_REQUEST_RANDOM_AUTH_NUMBER) &&
                 value[2] == AUTH_SUCCESS) {
             byte[] tmpValue = Arrays.copyOfRange(value, 3, 19);
             try {
@@ -256,7 +256,7 @@ public class AuthOperations extends BaseMessage {
         final byte[] result = encryptAES(responseAuthKey, getLocalKey());
         if (result == null) throw new RuntimeException("Cannot calculate auth reply");
         UserError.Log.d(TAG, "Derived: " + Helper.bytesToHex(result));
-        init(18);
+        init(2 + result.length);
         putData((byte) (AUTH_SEND_ENCRYPTED_AUTH_NUMBER | cryptFlags));
         putData(authFlags);
         putData(result);

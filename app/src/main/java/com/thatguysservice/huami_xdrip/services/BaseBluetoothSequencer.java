@@ -318,6 +318,10 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
                 UserError.Log.d(TAG, "Auto reconnect persist");
                 changeState(CONNECT_NOW);
             }
+            else{
+                UserError.Log.d(TAG, "Closing connections");
+                changeState(CLOSE);
+            }
         }
     }
 

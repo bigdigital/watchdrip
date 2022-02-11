@@ -26,6 +26,7 @@ public class MiBandEntry {
     public static final String PREF_MIBAND_ENABLED = "miband_enabled";
     public static final String PREF_MIBAND_MAC = "miband_data_mac";
     public static final String PREF_MIBAND_AUTH_KEY = "miband_data_authkey";
+    public static final String PREF_MIBAND_SEND_READINGS = "miband_send_readings";
     public static final String PREF_VIBRATE_ON_READINGS = "miband_vibrate_on_readings";
     public static final String PREF_SEND_ALARMS = "miband_send_alarms";
     public static final String PREF_SEND_ALARMS_OTHER = "miband_send_alarms_other";
@@ -114,7 +115,7 @@ public class MiBandEntry {
     }
 
     public static boolean isNeedSendReading() {
-        return isEnabled();
+        return isEnabled() && Pref.getBooleanDefaultFalse(PREF_MIBAND_SEND_READINGS);
     }
 
     public static boolean isNeedSendReadingAsNotification() {

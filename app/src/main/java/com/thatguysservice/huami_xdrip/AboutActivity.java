@@ -17,7 +17,6 @@ public class AboutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
-
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -32,17 +31,5 @@ public class AboutActivity extends AppCompatActivity {
         Date date = new Date(versionTimestamp);
         SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         about_build.setText(sd.format(date));
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                finish(); //this method close current activity and return to previous
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

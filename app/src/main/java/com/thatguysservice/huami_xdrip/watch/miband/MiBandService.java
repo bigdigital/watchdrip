@@ -106,6 +106,9 @@ import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCode
  */
 
 public class MiBandService extends BaseBluetoothSequencer {
+    protected static final int MINIMUM_RSSI = -85;
+    protected static final int MINIMUM_BATTERY_LEVEL = 12;
+
     static final List<UUID> huntCharacterstics = new ArrayList<>();
     private static final long RETRY_PERIOD_MS = Constants.SECOND_IN_MS * 30; // sleep for max ms if we have had no signal
     private static final long BG_UPDATE_NO_DATA_INTERVAL = 30 * Constants.MINUTE_IN_MS; //minutes
@@ -146,7 +149,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     private String missingAlertMessage;
     private int ringerModeBackup;
     private BgData bgData;
-    private DeviceInfo deviceInfo;
+    private DeviceInfo deviceInfo = new DeviceInfo();
     private BgDataRepository bgDataRepository;
 
     {
@@ -298,6 +301,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         } while (queueItem.isExpired() && !messageQueue.isEmpty());
         if (queueItem.isExpired()) return;
         UserError.Log.d(TAG, "handleCommand func: " + queueItem.functionName);
+        ((MiBandState) mState).resetSequence();
         switch (queueItem.functionName) {
             case CMD_LOCAL_REFRESH:
                 whenToRetryNextBgTimer(); //recalculate isNightMode
@@ -308,6 +312,16 @@ public class MiBandService extends BaseBluetoothSequencer {
                 queueItem.setMessageType(MIBAND_NOTIFY_TYPE_MESSAGE);
                 break;
             case CMD_ALERT:
+                activeAlertType = queueItem.bundle.getString("type");
+                if (activeAlertType == null) {
+                    break;
+                }
+                if (activeAlertType.equals(Const.BG_ALERT_TYPE)) {
+                    if (!MiBandEntry.areAlertsEnabled()) break;
+                } else {
+                    if (!MiBandEntry.areOtherAlertsEnabled()) break;
+                }
+
                 ((MiBandState) mState).setAlarmSequence();
                 queueItem.setMessageType(MIBAND_NOTIFY_TYPE_ALARM);
                 if (isNightMode) {
@@ -318,23 +332,20 @@ public class MiBandService extends BaseBluetoothSequencer {
                 int snoozeMinutes = queueItem.bundle.getInt("snoozeMinutes", -1000);
                 if (snoozeMinutes == -1000) {
                     UserError.Log.d(TAG, "wrong snooze minutes");
-                    handleCommand();
-                    return;
+                    break;
                 }
                 String alertName = queueItem.bundle.getString("alertName");
                 long nextAlertAt = queueItem.bundle.getLong("nextAlertAt", Helper.tsl());
                 String msgText1 = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_alert_snooze_text), alertName, snoozeMinutes, Helper.hourMinuteString(nextAlertAt));
                 UserError.Log.d(TAG, msgText1);
                 messageQueue.addFirst(getMessageQueue(msgText1, HuamiXdrip.getAppContext().getString(R.string.miband_alert_snooze_title_text)));
-
-                handleCommand();
-                return;
+                break;
             case CMD_LOCAL_AFTER_MISSING_ALARM:
                 if (!I.state.equals(MiBandState.WAITING_USER_RESPONSE)) break;
                 vibrateAlert(AlertLevelMessage.AlertLevelType.NoAlert); //disable call
                 if (!missingAlertMessage.isEmpty()) {
                     String msgText = HuamiXdrip.getAppContext().getString(R.string.miband_alert_missing_text) + missingAlertMessage;
-                    messageQueue.addFirst(getMessageQueue(msgText, HuamiXdrip.getAppContext().getString(R.string.miband_alert_missing_title_text)));
+                    messageQueue.addFirst(getMessageQueue(HuamiXdrip.getAppContext().getString(R.string.miband_alert_missing_title_text), msgText));
                 }
                 ((MiBandState) mState).setQueueSequence();
                 break;
@@ -342,13 +353,13 @@ public class MiBandService extends BaseBluetoothSequencer {
                 updateBgData();
                 if (isNightMode) {
                     UserError.Log.d(TAG, "Skip bg update because of night mode");
-                    return;
+                    break;
                 }
                 boolean curReadingStatusIsStale = isStaleReading();
 
                 if (prevReadingStatusIsStale && curReadingStatusIsStale) {
                     UserError.Log.d(TAG, "Skip bg update because of staleReading");
-                    return;
+                    break;
                 }
 
                 prevReadingStatusIsStale = curReadingStatusIsStale;
@@ -362,17 +373,17 @@ public class MiBandService extends BaseBluetoothSequencer {
                 break;
             case CMD_LOCAL_BG_FORCE_REMOTE:
                 bgForce();
-                handleCommand();
-                return;
+                break;
             case CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION:
                 ((MiBandState) mState).setSendReadingSequence();
                 break;
-            default:
-                handleCommand();
-                return;
         }
-
-        changeState(INIT);
+        if (((MiBandState) mState).isStartSequence()) {
+            changeState(INIT);
+        }
+        else{
+            handleCommand();
+        }
     }
 
     private boolean isStaleReading() {
@@ -588,7 +599,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 readValue -> {
                     UserError.Log.d(TAG, "Got battery info: " + bytesToHex(readValue));
                     batteryInfo = new BatteryInfo(readValue);
-
+                    deviceInfo.setBatteryLevel(batteryInfo.getLevelInPercent());
                     UserError.Log.d(TAG, "Battery level: " + batteryInfo.getLevelInPercent() + "%");
                 }, throwable -> {
                     UserError.Log.e(TAG, "Could not read battery info: " + throwable);
@@ -676,6 +687,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         AlertMessage alertMessage = new AlertMessage();
         String messageType = queueItem.getMessageType();
         if (message == null) {
+            isWaitingCallResponse = false;
             changeNextState();
             return;
         }
@@ -701,13 +713,6 @@ public class MiBandService extends BaseBluetoothSequencer {
                 break;
             case MIBAND_NOTIFY_TYPE_ALARM:
                 isWaitingCallResponse = false;
-                activeAlertType = queueItem.bundle.getString("type");
-                if (activeAlertType.equals(Const.BG_ALERT_TYPE)) {
-                    if (!MiBandEntry.areAlertsEnabled()) break;
-                } else {
-                    if (!MiBandEntry.areOtherAlertsEnabled()) break;
-                }
-
                 new QueueMe()
                         .setBytes(alertMessage.getAlertMessageOld(message, AlertMessage.AlertCategory.Call))
                         .setDescription("Sent glucose alert: " + message)
@@ -745,7 +750,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                             .expireInSeconds(QUEUE_EXPIRED_TIME)
                             .setDelayMs(MESSAGE_DELAY)
                             .queue();*/
-                    if (MiBandType.isBipS(type)) {
+                    if (MiBandType.AMAZFITGTS2_MINI == type) {
                         message = title;
                     }
                     alertMessage.queueChunkedMessage(this, AlertMessage.CustomIcon.APP_11, title, null, message);
@@ -760,6 +765,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     @SuppressLint("CheckResult")
     private void authPhase() {
         extendWakeLock(30000);
+        isNeedToAuthenticate = false;
         RxBleConnection connection = I.connection;
         UserError.Log.d(TAG, "Authorizing");
         if (I.connection == null) {
@@ -794,7 +800,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                             } else if (throwable instanceof BleCannotSetCharacteristicNotificationException) {
                                 UserError.Log.e(TAG, "Problems setting notifications - disconnecting");
                             } else if (throwable instanceof BleDisconnectedException) {
-                                UserError.Log.d(TAG, "Disconnected while enabling notifications");
+                                UserError.Log.d(TAG, "Disconnected exception: authSubscription");
                             } else if (throwable instanceof TimeoutException) {
                                 //check if it is normal timeout
                                 if (!MiBand.isAuthenticated()) {
@@ -804,7 +810,6 @@ public class MiBandService extends BaseBluetoothSequencer {
                                 }
                             }
                             unsubscribeAuthSubscription();
-                            changeState(CLOSE);
                             releaseWakeLock();
                         }));
     }
@@ -819,6 +824,22 @@ public class MiBandService extends BaseBluetoothSequencer {
     private void installWatchface() {
         extendWakeLock(1 * Constants.MINUTE_IN_MS);
         UserError.Log.d(TAG, "Install WatchFace");
+
+        boolean sendBGNotification = false;
+        if (deviceInfo.getRssi() < MINIMUM_RSSI){
+            UserError.Log.d(TAG, "Too weak BT connection");
+            sendBGNotification = true;
+        }
+        if (deviceInfo.getBatteryLevel() < MINIMUM_BATTERY_LEVEL){
+            UserError.Log.d(TAG, "Battery is too low");
+            sendBGNotification = true;
+        }
+        if (sendBGNotification) {
+            Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION);
+            changeState(SLEEP);
+            return;
+        }
+
         if (I.connection == null) {
             UserError.Log.d(TAG, "Cannot enable as connection is null!");
             return;
@@ -944,7 +965,6 @@ public class MiBandService extends BaseBluetoothSequencer {
             start = MiBandEntry.getNightModeStart();
             end = MiBandEntry.getNightModeEnd();
         }
-        RxBleConnection connection = I.connection;
         DisplayControllMessage dispControl = new DisplayControllMessage();
         isNeedToRestoreNightMode = false;
 
@@ -980,6 +1000,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         UserError.Log.d(TAG, "enableNotifications called");
         if (I.connection == null) {
             UserError.Log.d(TAG, "Cannot enable as connection is null!");
+            changeState(CLOSE);
             return;
         }
         if (I.isNotificationEnabled) {
@@ -987,44 +1008,13 @@ public class MiBandService extends BaseBluetoothSequencer {
             changeNextState();
             return;
         }
-
+        I.connection.requestMtu(PREFERRED_MTU_SIZE).subscribe();
 
         enableHeartRateNotification();
         enableStepsNotification();
-
-        if (notifSubscriptionDeviceEvent != null) {
-            notifSubscriptionDeviceEvent.unsubscribe();
-        }
-        UserError.Log.d(TAG, "Requesting to enable device event notifications");
-
-        I.connection.requestMtu(PREFERRED_MTU_SIZE).subscribe();
-
-        notifSubscriptionDeviceEvent = new Subscription(I.connection.setupNotification(Const.UUID_CHARACTERISTIC_DEVICEEVENT)
-                .doOnNext(notificationObservable -> {
-                    I.isNotificationEnabled = true;
-                    changeNextState();
-                }).flatMap(notificationObservable -> notificationObservable)
-                //.timeout(5, TimeUnit.SECONDS)
-                .observeOn(Schedulers.newThread())
-                .subscribe(bytes -> {
-                            // incoming notifications
-                            UserError.Log.d(TAG, "Received device notification bytes: " + bytesToHex(bytes));
-                            handleDeviceEvent(bytes);
-                        }, throwable -> {
-                            UserError.Log.d(TAG, "Throwable in notifSubscriptionDeviceEvent notification: " + throwable);
-                            I.isNotificationEnabled = false;
-                            if (throwable instanceof BleCharacteristicNotFoundException) {
-                                // maybe legacy - ignore for now but needs better handling
-                                UserError.Log.d(TAG, "Characteristic not found for notification");
-                                changeNextState();
-                            } else {
-                                UserError.Log.d(TAG, "Disconnected exception");
-                                isNeedToAuthenticate = true;
-                                messageQueue.clear();
-                                changeState(CLOSE);
-                            }
-                        }
-                ));
+        enableDeviceEventNotification();
+        I.isNotificationEnabled = true;
+        changeNextState();
     }
 
     private void enableHeartRateNotification() {
@@ -1051,11 +1041,11 @@ public class MiBandService extends BaseBluetoothSequencer {
                         }, throwable -> {
                             notifSubscriptionHeartRateMeasurement.unsubscribe();
                             notifSubscriptionHeartRateMeasurement = null;
-                            UserError.Log.d(TAG, "Throwable in HR notification: " + throwable);
+                            UserError.Log.d(TAG, "Throwable in HeartRate notification: " + throwable);
                             if (throwable instanceof BleCharacteristicNotFoundException) {
-                                UserError.Log.d(TAG, "HR Characteristic not found for notification");
+                                UserError.Log.d(TAG, "HeartRate Characteristic not found for notification");
                             } else {
-                                UserError.Log.d(TAG, "HR Disconnected exception");
+                                UserError.Log.d(TAG, "Disconnected exception: HeartRate");
                             }
                         }
                 ));
@@ -1089,7 +1079,36 @@ public class MiBandService extends BaseBluetoothSequencer {
                             if (throwable instanceof BleCharacteristicNotFoundException) {
                                 UserError.Log.d(TAG, "steps Characteristic not found for notification");
                             } else {
-                                UserError.Log.d(TAG, "steps Disconnected exception");
+                                UserError.Log.d(TAG, "Disconnected exception: Steps");
+                            }
+                        }
+                ));
+    }
+
+
+    private void enableDeviceEventNotification() {
+        if (notifSubscriptionDeviceEvent != null) {
+            notifSubscriptionDeviceEvent.unsubscribe();
+        }
+        UserError.Log.d(TAG, "Requesting to enable device event notifications");
+        notifSubscriptionDeviceEvent = new Subscription(I.connection.setupNotification(Const.UUID_CHARACTERISTIC_DEVICEEVENT)
+                .doOnNext(notificationObservable -> {
+                    I.isNotificationEnabled = true;
+                }).flatMap(notificationObservable -> notificationObservable)
+                //.timeout(5, TimeUnit.SECONDS)
+                .observeOn(Schedulers.newThread())
+                .subscribe(bytes -> {
+                            // incoming notifications
+                            UserError.Log.d(TAG, "Received device notification bytes: " + bytesToHex(bytes));
+                            handleDeviceEvent(bytes);
+                        }, throwable -> {
+                            UserError.Log.d(TAG, "Throwable in notifSubscriptionDeviceEvent notification: " + throwable);
+                            I.isNotificationEnabled = false;
+                            if (throwable instanceof BleCharacteristicNotFoundException) {
+                                // maybe legacy - ignore for now but needs better handling
+                                UserError.Log.d(TAG, "Characteristic not found for notification");
+                            } else {
+                                UserError.Log.d(TAG, "Disconnected exception: deviceEvent");
                             }
                         }
                 ));
@@ -1145,7 +1164,6 @@ public class MiBandService extends BaseBluetoothSequencer {
                     authPhase();
                     break;
                 case MiBandState.ENABLE_NOTIFICATIONS:
-                    isNeedToAuthenticate = false;
                     unsubscribeAuthSubscription();
                     enableNotifications();
                     break;
@@ -1166,9 +1184,9 @@ public class MiBandService extends BaseBluetoothSequencer {
                         else changeState(MiBandState.SEND_QUEUE);
                         break;
                     }
-                    changeState(MiBandState.INSTALL_WATCHFACE_READ_RSSI);
+                    changeNextState();
                     break;
-                case MiBandState.INSTALL_WATCHFACE_READ_RSSI:
+                case MiBandState.READ_RSSI:
                     readRSSI();
                     break;
                 case MiBandState.INSTALL_WATCHFACE:
@@ -1460,7 +1478,7 @@ public class MiBandService extends BaseBluetoothSequencer {
 
     public static class MiBandState extends BaseBluetoothSequencer.BaseState {
         public static final String AUTHORIZE_FAILED = "Authorization Failed";
-        static final String SEND_BG = "Setting Time";
+        static final String SEND_BG = "Send BG";
         static final String SEND_SETTINGS = "Updating Settings";
         static final String QUEUE_MESSAGE = "Queue Message";
         static final String WAITING_USER_RESPONSE = "Waiting User Responce";
@@ -1472,7 +1490,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         static final String GET_SOFT_REVISION = "Getting software revision";
         static final String ENABLE_NOTIFICATIONS = "Enabling Notifications";
         static final String GET_BATTERY_INFO = "Getting Battery Info";
-        static final String INSTALL_WATCHFACE_READ_RSSI = "Read RSSI";
+        static final String READ_RSSI = "Read RSSI";
         static final String INSTALL_WATCHFACE = "Preparing Watchface";
         static final String INSTALL_WATCHFACE_IN_PROGRESS = "Watchface uploading";
         static final String INSTALL_WATCHFACE_FINISHED = "Watchface Uploading Finished";
@@ -1481,7 +1499,17 @@ public class MiBandService extends BaseBluetoothSequencer {
 
         private static final String TAG = "MiBandStateSequence";
 
+        public boolean isStartSequence() {
+            return startSequence;
+        }
+
+        public boolean resetSequence () {
+            return startSequence = false;
+        }
+        private boolean startSequence = false;
+
         void prepareInitialSequences() {
+            startSequence = true;
             sequence.clear();
             sequence.add(INIT);
             sequence.add(CONNECT_NOW);
@@ -1490,21 +1518,21 @@ public class MiBandService extends BaseBluetoothSequencer {
             sequence.add(AUTHENTICATE);
             sequence.add(AUTHORIZE);
             sequence.add(ENABLE_NOTIFICATIONS);
+            sequence.add(GET_BATTERY_INFO);
+            sequence.add(READ_RSSI);
         }
 
         void prepareFinalSequences() {
             sequence.add(SEND_QUEUE);
-            sequence.add(GET_BATTERY_INFO);
             sequence.add(SLEEP);
             sequence.add(AUTHORIZE_FAILED);
             sequence.add(AUTHORIZE_FAILED_SLEEP);
         }
 
         void setSendReadingSequence() {
-            UserError.Log.d(TAG, "SET UPDATE WATCHFACE DATA SEQUENCE");
+            UserError.Log.d(TAG, "SET UPDATE WATCHFACE SEQUENCE");
             prepareInitialSequences();
             sequence.add(SEND_BG);
-            sequence.add(INSTALL_WATCHFACE_READ_RSSI);
             sequence.add(INSTALL_WATCHFACE);
             sequence.add(INSTALL_WATCHFACE_IN_PROGRESS);
             sequence.add(INSTALL_WATCHFACE_FINISHED);

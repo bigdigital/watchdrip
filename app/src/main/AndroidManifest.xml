@@ -39,9 +39,9 @@
         android:theme="@style/Theme.Huamixdrip">
         <activity
             android:name=".AboutActivity"
-            android:parentActivityName=".MainActivity"></activity>
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".SendFeedBackActiviy"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".MainActivity"
             android:theme="@style/Theme.Huamixdrip.NoActionBar">

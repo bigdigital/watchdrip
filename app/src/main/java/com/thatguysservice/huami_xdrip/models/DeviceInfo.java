@@ -8,6 +8,16 @@ public class DeviceInfo extends BaseObservable {
     private MiBandType miBandType;
     private int rssi = 0;
 
+    public int getBatteryLevel() {
+        return batteryLevel;
+    }
+
+    public void setBatteryLevel(int batteryLevel) {
+        this.batteryLevel = batteryLevel;
+    }
+
+    private int batteryLevel = 0;
+
     public String getDeviceName() {
         return miBandType.toString();
     }
