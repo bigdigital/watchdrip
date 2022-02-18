@@ -9,7 +9,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
-import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder;
 import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
@@ -333,11 +332,12 @@ public class DisplayData {
             //fill delta
             boolean isOld = false;
             String timeStampText = "";
-            if (timeStampVal > Constants.DAY_IN_MS) {
+            long since = Helper.msSince(timeStampVal);
+            if (since < Constants.DAY_IN_MS) {
                 timeStampText = hourMinuteString(timeStampVal);
             } else {
                 isOld = true;
-                timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStampVal));
+                timeStampText = Helper.niceTimeScalar(since);
             }
             unitizedDelta = new ValueTime(bgData.unitizedDelta(), timeStampText, isOld);
 
@@ -369,7 +369,7 @@ public class DisplayData {
 
             double insulin = bundle.getDouble("treatment.insulin", -1);
             double carbs = bundle.getDouble("treatment.carbs", -1);
-            long timeStamp = bundle.getLong("treatment.timeStamp", -1);
+            timeStampVal = bundle.getLong("treatment.timeStamp", -1);
 
             timeStampText = "";
             isOld = false;
@@ -382,11 +382,12 @@ public class DisplayData {
             // }
 
             if (treatmentText.length() > 0) {
-                if (timeStamp > Constants.HOUR_IN_MS * 6) {
+                since = Helper.msSince(timeStampVal);
+                if (since < Constants.HOUR_IN_MS) {
+                    timeStampText = hourMinuteString(timeStampVal);}
+                else if (since < Constants.HOUR_IN_MS * 6) {
                     isOld = true;
-                    timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStamp));
-                } else if (timeStamp > Constants.HOUR_IN_MS) {
-                    timeStampText = hourMinuteString(timeStamp);
+                    timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStampVal));
                 } else {
                     treatmentText = "";
                     timeStampText = "";

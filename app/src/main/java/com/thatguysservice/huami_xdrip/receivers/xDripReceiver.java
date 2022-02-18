@@ -15,6 +15,7 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCA
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_START;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
 
 public class xDripReceiver extends BroadcastReceiver {
     protected String TAG = this.getClass().getSimpleName();
@@ -38,6 +39,10 @@ public class xDripReceiver extends BroadcastReceiver {
 
             if (function.equals(BroadcastService.CMD_REPLY_MSG)) {
                 String replyMsg = intent.getStringExtra(BroadcastService.INTENT_REPLY_MSG);
+                String replyCode = intent.getStringExtra(BroadcastService.INTENT_REPLY_CODE);
+                if (replyCode.equals(BroadcastService.INTENT_REPLY_CODE_NOT_REGISTERED)){
+                    bgForce();
+                }
                 UserError.Log.e(TAG, "replyMsg:" + replyMsg);
                 return;
             }

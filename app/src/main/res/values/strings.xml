@@ -1,18 +1,18 @@
 <resources>
     <string name="app_name">WatchDrip</string>
-    <string name="unit_second">second</string>
-    <string name="unit_minute">minute</string>
+    <string name="unit_second">sec</string>
+    <string name="unit_minute">min</string>
     <string name="unit_hour">hour</string>
     <string name="unit_day">day"</string>
     <string name="unit_week">week"</string>
-    <string name="unit_seconds">seconds</string>
-    <string name="unit_minutes">minutes</string>
+    <string name="unit_seconds">sec</string>
+    <string name="unit_minutes">min</string>
     <string name="unit_hours">hours</string>
     <string name="unit_days">days"</string>
     <string name="unit_weeks">weeks"</string>
 
     <string name="title_miband_mac">MAC Address</string>
-    <string name="summary_miband_enable">Sync Data with MiBand fitness bands</string>
+    <string name="summary_miband_enable">Sync xDrip data with your watch</string>
     <string name="title_miband_enable">Enable service</string>
     <string name="title_miband_screen_battery">Show Battery</string>
     <string name="title_miband_show_date">Show date on the screen</string>
@@ -20,7 +20,7 @@
     <string name="title_miband_units">Units</string>
     <string name="summary_miband_units">Choose the distance unit used on band </string>
     <string name="title_miband_goal_notification">Goal notification</string>
-    <string name="summary_miband_goal_notification">MiBand will vibrate when you reach a goal</string>
+    <string name="summary_miband_goal_notification">Your watch will vibrate when you reach a goal</string>
     <string name="title_miband_locale_24_hour">24 Hour clock</string>
     <string name="summary_miband_locale_24_hour">Show 24 Hour clock</string>
 
@@ -83,10 +83,13 @@
     <string name="miband_error_auth_text">Cannot authorize %s, please recheck Auth code</string>
     <string name="miband_wrong_auth_text">Wrong %s authorization key, please recheck a key and try to reconnect again</string>
 
-    <string name="please_allow_permission">Please Allow Permission</string>
-    <string name="without_location_scan_doesnt_work">Without Location permission Android Bluetooth scan doesn\'t work</string>
-    <string name="android_10_need_background_location">Android 10 and above need background location for Bluetooth to work</string>
-    <string name="without_location_permission_emergency_cannot_get_location">Without Location permission emergency messages cannot use location data</string>
+    <string name="permission_dialog_start">To ensure all features function properly, these permissions need to be granted:\n\n</string>
+    <string name="please_allow_permission">Please allow the following permissions</string>
+    <string name="permission_location_info">Location information. Without Location permission Android Bluetooth scan doesn\'t work\n</string>
+    <string name="permissions_background_location_info">Background location information. Android 10 and above need background location for Bluetooth to work\n</string>
+    <string name="permissions_file_system_read">Access to photos, media and files on your device. To auto-populate authentication code from freemyband\n</string>
+    <string name="permissions_file_system">Access to photos, media and files on your device. To be able to read custom watchface\n</string>
+    <string name="permission_dialog_enable_permissions_in_settings">The permission were permanently disabled. Please go to application system settings and enable permissions</string>
 
     <!-- Location Settings -->
     <string name="location_not_found_title">Location Is Not Enabled</string>
@@ -128,4 +131,5 @@
     <string name="about_version">Version: %s, Build date:\u0020</string>
     <string name="action_view_about">About</string>
     <string name="Advanced">Advanced</string>
+    <string name="action_get_statistic">Get statistic</string>
 </resources>

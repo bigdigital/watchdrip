@@ -1,0 +1,25 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreference
+        app:defaultValue="true"
+        app:key="miband_send_readings"
+        app:title="@string/title_send_readings" />
+    <SwitchPreference
+        app:defaultValue="false"
+        app:dependency="miband_send_readings"
+        app:key="miband_vibrate_on_readings"
+        app:title="@string/title_vibrate_on_readings" />
+    <SwitchPreference
+        app:defaultValue="false"
+        app:key="debug_miband_use_custom_watchface"
+        app:summary="@string/use_custom_watcface_summary"
+        app:switchTextOff="@string/short_off_text_for_switches"
+        app:switchTextOn="@string/short_on_text_for_switches"
+        app:title="@string/use_custom_watcface_title" />
+    <SwitchPreference
+        app:defaultValue="false"
+        app:key="debug_miband_disable_high_mtu"
+        app:summary="@string/summary_disable_hight_mtu"
+        app:switchTextOff="@string/short_off_text_for_switches"
+        app:switchTextOn="@string/short_on_text_for_switches"
+        app:title="@string/title_disable_hight_mtu" />
+</PreferenceScreen>

@@ -115,15 +115,17 @@ public class AuthOperations extends BaseMessage {
         String authKey = MiBand.getPersistentAuthKey();
         if (MiBandType.supportPairingKey(MiBand.getMibandType())) {
             if (authKey.isEmpty()) {
-                authKey = MiBand.getAuthKey();
+                authKey = MiBand.getAuthKeyPref();
                 if (authKey.isEmpty()) {
-                    authKey = getAuthCodeFromFilesSystem(MiBand.getMac());
+                    authKey = getAuthCodeFromFilesSystem(MiBand.getMacPref());
                 }
                 if (!isValidAuthKey(authKey)) {
-                    Helper.static_toast_long(String.format(HuamiXdrip.getAppContext().getString(R.string.miband_wrong_auth_text), MiBand.getMibandType()));
+                    String errText = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_wrong_auth_text), MiBand.getMibandType());
+                    UserError.Log.d(TAG, errText);
+                    Helper.static_toast_long(errText);
                     return false;
                 } else {
-                    MiBand.setAuthKey(authKey);
+                    MiBand.setAuthKeyPref(authKey);
                 }
             }
         }
@@ -168,7 +170,7 @@ public class AuthOperations extends BaseMessage {
                 (value[1] & 0x0f) == AUTH_SEND_ENCRYPTED_AUTH_NUMBER &&
                 value[2] == AUTH_SUCCESS) {
             if (MiBand.getPersistentAuthMac().isEmpty()) {
-                MiBand.setPersistentAuthMac(MiBand.getMac());
+                MiBand.setPersistentAuthMac(MiBand.getMacPref());
                 MiBand.setPersistentAuthKey(Helper.bytesToHex(getLocalKey()), MiBand.getPersistentAuthMac());
                 String msg = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_success_auth_text), MiBand.getMibandType());
                 Helper.static_toast_long(msg);

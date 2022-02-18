@@ -31,7 +31,7 @@ android {
         targetSdkVersion 30
 
         // Note: always bump BOTH versionCode and versionName!
-        versionName "0.1.0.1"
+        versionName "0.1.0.2"
         versionCode 1
         buildConfigField "long", "buildTimestamp", generateTimestamp()
         buildConfigField "int", "targetSDK", targetSdkVersion.mApiLevel.toString()
@@ -112,6 +112,8 @@ dependencies {
     implementation("com.github.lecho:hellocharts-library:1.5.8")
     // https://mvnrepository.com/artifact/androidx.lifecycle/lifecycle-extensions
     runtimeOnly 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+
+    implementation 'pub.devrel:easypermissions:3.0.0'
 
    // implementation "com.evernote:android-job:1.4.2"
 

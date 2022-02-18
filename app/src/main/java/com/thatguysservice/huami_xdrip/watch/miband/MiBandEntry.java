@@ -86,17 +86,6 @@ public class MiBandEntry {
             return true;
         }
     };
-    public static SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-            if (key.startsWith("miband")) {
-                UserError.Log.d("miband", "Preference key: " + key);
-                if (key.equals(PREF_MIBAND_ENABLED)) {
-                    bgForce();
-                }
-                refresh();
-            }
-        }
-    };
 
     public static boolean isEnabled() {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_ENABLED);
@@ -179,12 +168,12 @@ public class MiBandEntry {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_US_DATE_FORMAT);
     }
 
-    static void refresh() {
+    public static void refresh() {
         Inevitable.task("miband-preference-changed", 1000, () -> Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_REFRESH));
     }
 
     public static void sendToService(String function, Bundle bundle) {
-        if (isNeedSendReading()) {
+        if (isEnabled()) {
             Intent serviceIntent = new Intent(HuamiXdrip.getAppContext(), MiBandService.class);
             serviceIntent.putExtra(INTENT_FUNCTION_KEY, function);
             serviceIntent.putExtras(bundle);

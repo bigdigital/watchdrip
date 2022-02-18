@@ -97,7 +97,7 @@ public class AuthOperations2021 extends AuthOperations {
                 headerSize = 5;
             } else if (value[9] == (byte) OperationCodes.CHUNKED_V2_ENDPOINT_AUTH && value[10] == 0x00 && value[11] == AUTH_RESPONSE && value[12] == 0x05 && value[13] == AUTH_SUCCESS) {
                 if (MiBand.getPersistentAuthMac().isEmpty()) {
-                    MiBand.setPersistentAuthMac(MiBand.getMac());
+                    MiBand.setPersistentAuthMac(MiBand.getMacPref());
                     MiBand.setPersistentAuthKey(Helper.bytesToHex(getLocalKey()), MiBand.getPersistentAuthMac());
                     String msg = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_success_auth_text), MiBand.getMibandType());
                     Helper.static_toast_long(msg);

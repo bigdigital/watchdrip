@@ -44,6 +44,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 import lombok.NonNull;
+import pub.devrel.easypermissions.EasyPermissions;
 
 import static com.thatguysservice.huami_xdrip.models.Helper.threadSleep;
 import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
@@ -213,7 +214,7 @@ public class WatchFaceGenerator {
             int offset = imageOffsets.get(i) + resourcesOffset;
             int nextOffset = (i + 1 < imageOffsets.size()) ? imageOffsets.get(i + 1) + resourcesOffset : fileSize;
             int length = nextOffset - offset;
-            UserError.Log.d(TAG, "Resource " + i + " offset: " + offset + ", length: " + length);
+            //UserError.Log.d(TAG, "Resource " + i + " offset: " + offset + ", length: " + length);
             if (fwFileStream.getPos() != offset) {
                 int bytesGap = offset - fwFileStream.getPos();
                 UserError.Log.d(TAG, "Found " + bytesGap + " bytes gap before resource number " + i);
@@ -257,6 +258,10 @@ public class WatchFaceGenerator {
        /* if (true) {
             return FirmwareOperations.readAll(fwFileStream, 10000000);
         }*/
+
+
+        boolean isAllowedToWrite = debug && EasyPermissions.hasPermissions(HuamiXdrip.getAppContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE);
+
         parseWatchfaceFile();
         if (!bgData.isNoBgData()) {
             DisplayData.Builder displayDataBuilder = null;
@@ -310,7 +315,7 @@ public class WatchFaceGenerator {
 
         //compress watchface if supported
         if (MiBandType.enableCompression(bandType)) {
-            if (debug) {
+            if (isAllowedToWrite) {
                 final String dir = getExternalDir();
                 byte[] firmwareData = firmwareWriteStream.toByteArray();
                 try (FileOutputStream out = new FileOutputStream(dir + "/watchface_uncomp.bin")) {
@@ -362,8 +367,8 @@ public class WatchFaceGenerator {
 
         byte[] firmwareData = firmwareWriteStream.toByteArray();
 
-        final String dir = getExternalDir();
-        if (debug) {
+        if (isAllowedToWrite) {
+            final String dir = getExternalDir();
             makeSureDirectoryExists(dir);
             try (FileOutputStream out = new FileOutputStream(dir + "/canvas.png")) {
                 resultImage.compress(Bitmap.CompressFormat.PNG, 100, out);

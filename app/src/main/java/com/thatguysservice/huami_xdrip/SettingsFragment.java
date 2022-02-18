@@ -1,46 +1,43 @@
 package com.thatguysservice.huami_xdrip;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.TwoStatePreference;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.thatguysservice.huami_xdrip.models.Constants;
-import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
+import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
-import com.thatguysservice.huami_xdrip.services.BroadcastService;
-import com.thatguysservice.huami_xdrip.utils.bt.LocationHelper;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
-import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
+import java.util.ArrayList;
+import java.util.List;
+
+import pub.devrel.easypermissions.EasyPermissions;
+
+import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_BLUETOOTH_PERMISSIONS;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
-    BgDataRepository bgDataRepository;
-    public static void checkReadPermission(final Activity activity) {
-        // TODO call log permission - especially for Android 9+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (HuamiXdrip.getAppContext().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(activity,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        Constants.GET_EXTERNAL_STORAGE_READ_PERMISSION);
+    public static SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+            if (key.startsWith("miband")) {
+                UserError.Log.d("miband", "Preference key: " + key);
+                if (!key.equals(MiBandEntry.PREF_MIBAND_ENABLED)) {
+                    MiBandEntry.refresh();
+                }
             }
         }
-    }
+    };
+    BgDataRepository bgDataRepository;
+    TwoStatePreference servicePref;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -48,85 +45,92 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         super.onViewCreated(view, savedInstanceState);
     }
 
+    public void setServicePref(Boolean state) {
+        servicePref.callChangeListener(state);
+        servicePref.setChecked(state);
+    }
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
 
-        /*findPreference(MiBandEntry.PREF_MIBAND_UPDATE_BG).setOnPreferenceClickListener(preference -> {
-            updateMiBandBG(preference.getContext());
-            return true;
-        });*/
-
-        findPreference(MiBandEntry.PREF_MIBAND_ENABLED).setOnPreferenceChangeListener((preference, newValue) -> {
+        servicePref = findPreference(MiBandEntry.PREF_MIBAND_ENABLED);
+        servicePref.setOnPreferenceChangeListener((preference, newValue) -> {
             if ((Boolean) newValue) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (boolean) newValue) {
-                    LocationHelper.requestLocationForBluetooth((Activity) preference.getContext());
+                boolean result = checkAndRequestBTPermissions();
+                if (!result) {
+                    return false;
                 }
-                checkReadPermission(this.getActivity());
-                checkWritePermissions(this.getActivity());
             }
+            Inevitable.task("start_on_pref_changed", 500, new Runnable() {
+                @Override
+                public void run() {
+                    bgForce();
+                }
+            });
             bgDataRepository.setNewServiceStatus((Boolean) newValue);
 
             return true;
         });
     }
 
-    public void updateMiBandBG(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(HuamiXdrip.getAppContext().getResources().getString(R.string.miband_bg_dialog_title));
-        builder.setPositiveButton(HuamiXdrip.getAppContext().getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                BroadcastService.initialStartIfEnabled();
-            }
-        });
+    private boolean checkAndRequestBTPermissions() {
+        FragmentActivity context = this.getActivity();
+        List<String> listPermissionsNeeded = new ArrayList<>();
 
-        builder.setNegativeButton(HuamiXdrip.getAppContext().getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    protected boolean isExternalStorageWritable(final Activity activity) {
-        String state = Environment.getExternalStorageState();
-        if (!checkWritePermissions(activity)) return false;
-        return Environment.MEDIA_MOUNTED.equals(state);
-    }
-
-    private boolean checkWritePermissions(final Activity activity) {
+        // Location needs to be enabled for Bluetooth discovery on Marshmallow.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(HuamiXdrip.getAppContext(),
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Helper.show_ok_dialog(activity, gs(R.string.please_allow_permission), "Need storage permission to install watchface", new Runnable() {
-                    @Override
-                    public void run() {
-                        ActivityCompat.requestPermissions(activity,
-                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.GET_EXTERNAL_STORAGE_WRITE_PERMISSION);
-                    }
-                });
-                return false;
+            if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                listPermissionsNeeded.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
             }
+            if (!EasyPermissions.hasPermissions(context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                listPermissionsNeeded.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+        } else {
+            // Android 10 check additional permissions
+            if (Build.VERSION.SDK_INT >= 29) {
+                if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                    listPermissionsNeeded.add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+                }
+                if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    listPermissionsNeeded.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+                }
+            }
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+
+            String dialogContent = "";
+            if (listPermissionsNeeded.contains(android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                dialogContent = dialogContent + context.getString(R.string.permission_location_info);
+            }
+            if (listPermissionsNeeded.contains(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                dialogContent = dialogContent + context.getString(R.string.permissions_background_location_info);
+            }
+            if (listPermissionsNeeded.contains(android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                dialogContent = dialogContent + context.getString(R.string.permissions_file_system_read);
+            }
+
+            String rationaleText = context.getString(R.string.permission_dialog_start) + dialogContent;
+
+            EasyPermissions.requestPermissions(context, rationaleText, REQUEST_ID_BLUETOOTH_PERMISSIONS, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]));
+
+            return false;
         }
         return true;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
-        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(MiBandEntry.prefListener);
-
+        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(prefListener);
+        if (MiBandEntry.isEnabled() && !checkAndRequestBTPermissions()){
+            setServicePref(false);
+        }
     }
 
     @Override
     public void onPause() {
-        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(MiBandEntry.prefListener);
+        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(prefListener);
         super.onPause();
     }
 }

@@ -27,19 +27,19 @@ public class MiBand {
         return  MiBand.getPersistentAuthMac().isEmpty() ? false : true;
     }
 
-    public static String getMac() {
+    public static String getMacPref() {
         return Pref.getString(PREF_MIBAND_MAC, "");
     }
 
-    static void setMac(final String mac) {
+    static void setMacPref(final String mac) {
         Pref.setString(PREF_MIBAND_MAC, mac);
     }
 
-    public static String getAuthKey() {
+    public static String getAuthKeyPref() {
         return Pref.getString(PREF_MIBAND_AUTH_KEY, "");
     }
 
-    public static void setAuthKey(final String key) {
+    public static void setAuthKeyPref(final String key) {
         Pref.setString(PREF_MIBAND_AUTH_KEY, key.toLowerCase());
     }
 
@@ -79,7 +79,7 @@ public class MiBand {
     }
 
     public static String getModel() {
-        final String mac = getMac();
+        final String mac = getMacPref();
         if (!mac.isEmpty()) {
             return PersistentStore.getString(PREF_MIBAND_MODEL + mac);
         }
@@ -87,7 +87,7 @@ public class MiBand {
     }
 
     public static void setModel(final String model, String mac) {
-        if (mac.isEmpty()) mac = getMac();
+        if (mac.isEmpty()) mac = getMacPref();
         if (model.isEmpty()) {
             PersistentStore.removeItem(PREF_MIBAND_MODEL + mac);
             return;
@@ -98,7 +98,7 @@ public class MiBand {
     }
 
     public static String getVersion() {
-        final String mac = getMac();
+        final String mac = getMacPref();
         if (!mac.isEmpty()) {
             return PersistentStore.getString(PREF_MIBAND_VERSION + mac);
         }
@@ -106,7 +106,7 @@ public class MiBand {
     }
 
     public static void setVersion(final String version, String mac) {
-        if (mac.isEmpty()) mac = getMac();
+        if (mac.isEmpty()) mac = getMacPref();
         if (version.isEmpty()) {
             PersistentStore.removeItem(PREF_MIBAND_MODEL + mac);
             return;

@@ -35,7 +35,7 @@ public class FindNearby implements BtCallBack2 {
     public void btCallback2(String mac, String status, String name, Bundle bundle) {
         switch (status) {
             case ScanMeister.SCAN_FOUND_CALLBACK:
-                MiBand.setMac(mac);
+                MiBand.setMacPref(mac);
                 MiBand.setModel(name, mac);
                 Helper.static_toast_long(String.format(HuamiXdrip.getAppContext().getString(R.string.miband_search_found_text), name, mac));
                 break;

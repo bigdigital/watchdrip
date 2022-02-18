@@ -36,7 +36,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
+                    android:layout_margin="17dp"
 
                     android:orientation="vertical"
                     app:layout_collapseMode="none">
@@ -50,6 +50,7 @@
                             android:id="@+id/watchStatusTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginLeft="35dp"
                             android:text="@string/watch_state" />
 
                         <TextView

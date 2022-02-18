@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <SwitchPreference
         app:defaultValue="false"
         app:key="miband_enabled"
@@ -25,33 +26,8 @@
         app:key="miband_send_alarms_other"
         app:summary="@string/summary_miband_send_alarms_other"
         app:title="@string/title_miband_send_alarms_other" />
-    <PreferenceScreen
+    <Preference
         app:dependency="miband_enabled"
-        app:key="advanced_pref_screen"
-        app:title="@string/Advanced">
-        <SwitchPreference
-            app:defaultValue="false"
-            app:key="debug_miband_use_custom_watchface"
-            app:summary="@string/use_custom_watcface_summary"
-            app:switchTextOff="@string/short_off_text_for_switches"
-            app:switchTextOn="@string/short_on_text_for_switches"
-            app:title="@string/use_custom_watcface_title" />
-        <SwitchPreference
-            app:defaultValue="false"
-            app:key="debug_miband_disable_high_mtu"
-            app:summary="@string/summary_disable_hight_mtu"
-            app:switchTextOff="@string/short_off_text_for_switches"
-            app:switchTextOn="@string/short_on_text_for_switches"
-            app:title="@string/title_disable_hight_mtu" />
-        <SwitchPreference
-            app:defaultValue="true"
-            app:dependency="miband_enabled"
-            app:key="miband_send_readings"
-            app:title="@string/title_send_readings" />
-        <SwitchPreference
-            app:defaultValue="false"
-            app:dependency="miband_send_readings"
-            app:key="miband_vibrate_on_readings"
-            app:title="@string/title_vibrate_on_readings" />
-    </PreferenceScreen>
+        app:title="@string/Advanced"
+        app:fragment="com.thatguysservice.huami_xdrip.SettingsAdvancedFragment" />
 </PreferenceScreen>

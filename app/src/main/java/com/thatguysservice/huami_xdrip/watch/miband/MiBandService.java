@@ -27,6 +27,7 @@ import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.DeviceInfo;
 import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.models.StatisticInfo;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer;
@@ -88,6 +89,7 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCA
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_MESSAGE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_SNOOZE_ALERT;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_STAT_INFO;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
@@ -234,33 +236,41 @@ public class MiBandService extends BaseBluetoothSequencer {
         try {
             if (shouldServiceRun()) {
                 final String authMac = MiBand.getPersistentAuthMac();
-                String mac = MiBand.getMac();
+                String macPref = MiBand.getMacPref();
                 MiBandType currDevice = MiBand.getMibandType();
                 deviceInfo.setDevice(currDevice);
                 if ((currDevice != prevDeviceType) && currDevice != MiBandType.UNKNOWN) {
                     prevDeviceType = currDevice;
                     UserError.Log.d(TAG, "Found new device: " + currDevice.toString());
                 }
-                if (!authMac.equalsIgnoreCase(mac) || authMac.isEmpty()) {
+                if (!authMac.equalsIgnoreCase(macPref) || authMac.isEmpty()) {
                     prevDeviceType = MiBand.getMibandType();
                     if (!authMac.isEmpty()) {
                         String model = MiBand.getModel();
                         MiBand.setPersistentAuthMac(""); //flush old auth info
-                        MiBand.setModel(model, mac);
+                        MiBand.setModel(model, macPref);
                     }
                     isNeedToAuthenticate = true;
+                } else {
+                    String authPrefKey = MiBand.getAuthKeyPref();
+                    String authPersistantKey = MiBand.getPersistentAuthKey();
+
+                    if (!authPersistantKey.equalsIgnoreCase(authPrefKey)) {
+                        MiBand.setPersistentAuthKey("", authMac);
+                        isNeedToAuthenticate = true;
+                    }
                 }
-                if (emptyString(mac)) {
+                if (emptyString(macPref)) {
                     // if mac not set then start up a scan and do nothing else
                     new FindNearby().scan();
                 } else {
-                    setAddress(mac);
+                    setAddress(macPref);
                     if (intent != null) {
                         final String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
                         if (function != null) {
                             UserError.Log.d(TAG, "onStartCommand was called with function:" + function);
                             //TODO handle intents
-                            if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + MiBand.getMac(), 5)) {
+                            if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + MiBand.getMacPref(), 5)) {
                                 return START_STICKY;
                             } else {
                                 if (function.equals(CMD_LOCAL_AFTER_MISSING_ALARM)) {
@@ -303,6 +313,10 @@ public class MiBandService extends BaseBluetoothSequencer {
         UserError.Log.d(TAG, "handleCommand func: " + queueItem.functionName);
         ((MiBandState) mState).resetSequence();
         switch (queueItem.functionName) {
+            case CMD_STAT_INFO:
+                StatisticInfo statisticInfo = new StatisticInfo(queueItem.bundle);
+                Helper.static_toast_long(statisticInfo.toString());
+                break;
             case CMD_LOCAL_REFRESH:
                 whenToRetryNextBgTimer(); //recalculate isNightMode
                 ((MiBandState) mState).setSettingsSequence();
@@ -380,8 +394,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         }
         if (((MiBandState) mState).isStartSequence()) {
             changeState(INIT);
-        }
-        else{
+        } else {
             handleCommand();
         }
     }
@@ -826,11 +839,11 @@ public class MiBandService extends BaseBluetoothSequencer {
         UserError.Log.d(TAG, "Install WatchFace");
 
         boolean sendBGNotification = false;
-        if (deviceInfo.getRssi() < MINIMUM_RSSI){
+        if (deviceInfo.getRssi() < MINIMUM_RSSI) {
             UserError.Log.d(TAG, "Too weak BT connection");
-            sendBGNotification = true;
+            //sendBGNotification = true;
         }
-        if (deviceInfo.getBatteryLevel() < MINIMUM_BATTERY_LEVEL){
+        if (deviceInfo.getBatteryLevel() < MINIMUM_BATTERY_LEVEL) {
             UserError.Log.d(TAG, "Battery is too low");
             sendBGNotification = true;
         }
@@ -1498,15 +1511,15 @@ public class MiBandService extends BaseBluetoothSequencer {
         static final String VIBRATE_AFTER_READING = "Vibrate";
 
         private static final String TAG = "MiBandStateSequence";
+        private boolean startSequence = false;
 
         public boolean isStartSequence() {
             return startSequence;
         }
 
-        public boolean resetSequence () {
+        public boolean resetSequence() {
             return startSequence = false;
         }
-        private boolean startSequence = false;
 
         void prepareInitialSequences() {
             startSequence = true;

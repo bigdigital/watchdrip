@@ -90,7 +90,6 @@ public class SendFeedBackActiviy extends AppCompatActivity {
             CheckBox logCheckbox = findViewById(R.id.sendLogsCheckBox);
             if (logCheckbox.isChecked()) {
                 StringBuilder tmp = new StringBuilder(20000);
-                tmp.append("The following logs will be sent to the developers: \n\nPlease also include your email address or we will not know who they are from!\n\n");
                 for (UserError item : errors) {
                     tmp.append(item.toString());
                     tmp.append("\n");

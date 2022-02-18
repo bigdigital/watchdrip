@@ -632,7 +632,7 @@ public class Helper {
         }
     }
 
-    public static void show_ok_dialog(final Activity activity, final String title, final String message, final Runnable runnable) {
+    public static void show_ok_dialog(final Activity activity, final String title, final String message, final Runnable runnable, boolean dismissable) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -640,7 +640,7 @@ public class Helper {
                     AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(activity, R.style.Theme_Huamixdrip));
                     builder.setTitle(title);
                     builder.setMessage(message);
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             try {
                                 dialog.dismiss();
@@ -649,6 +649,15 @@ public class Helper {
                             }
                             if (runnable != null) {
                                 runOnUiThreadDelayed(runnable, 10);
+                            }
+                        }
+                    });
+                    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                dialog.dismiss();
+                            } catch (Exception e) {
+                                //
                             }
                         }
                     });
