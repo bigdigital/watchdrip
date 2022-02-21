@@ -65,8 +65,8 @@
     <string name="title_miband_screen_timer">Show Timer</string>
     <string name="title_miband_screen_nfc">Show NFC (if available)</string>
 
-    <string name="summary_miband_send_alarms_other">Sends other alerts</string>
-    <string name="title_miband_send_alarms_other">Other Alerts (covers all xdrip alarms, except glucose hight/low alarms)</string>
+    <string name="title_miband_send_alarms_other">Other alarms </string>
+    <string name="summary_miband_send_alarms_other">Covers all xDrip alarms, except glucose height/low alarms</string>
 
     <string name="miband_watchface_istall_success">MiBand watchface has been uploaded successfully!</string>
     <string name="miband_watchface_istall_error">Error while uploading MiBand watchface</string>
@@ -77,11 +77,13 @@
     <string name="miband_alert_missing_title_text">Missing alert</string>
 
     <string name="miband_search_text">Searching… Please keep the watch near your phone</string>
-    <string name="miband_search_found_text">Found %1$s, MAC address: %2$s</string>
+    <string name="miband_search_found_text">Found %1$s with MAC address: %2$s</string>
     <string name="miband_search_failed_text">Could not find the watch, please try again, or enter MAC address manually</string>
     <string name="miband_success_auth_text">%s was successfully authenticated</string>
     <string name="miband_error_auth_text">Cannot authorize %s, please recheck Auth code</string>
     <string name="miband_wrong_auth_text">Wrong %s authorization key, please recheck a key and try to reconnect again</string>
+    <string name="miband_found_auth_text">Found appropriate authorization key for %s</string>
+    <string name="miband_auth_fail">Authentication failed due to authentication timeout. When your Band vibrates and blinks, tap it a few times in a row.</string>
 
     <string name="permission_dialog_start">To ensure all features function properly, these permissions need to be granted:\n\n</string>
     <string name="please_allow_permission">Please allow the following permissions</string>

@@ -113,10 +113,10 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
         I = Inst.get(id);
     }
 
-    protected void setAddress(String newAddress) {
+    protected boolean setAddress(String newAddress) {
         DisconnectReceiver.addCallBack(this, TAG);
         //ConnectReceiver.addCallBack(this, TAG);
-        if (emptyString(newAddress)) return;
+        if (emptyString(newAddress)) return false;
         newAddress = newAddress.toUpperCase();
 
         if (!Helper.validateMacAddress(newAddress)) {
@@ -125,7 +125,7 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
                 UserError.Log.wtf(TAG, msg);
                 Helper.static_toast_long(msg);
             }
-            return;
+            return false;
         }
 
         if (I.address == null || !I.address.equals(newAddress)) {
@@ -133,6 +133,11 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
             I.address = newAddress;
             newAddressEvent(oldAddress, newAddress);
         }
+        return true;
+    }
+
+    public String getAddress() {
+        return I.address;
     }
 
     protected void newAddressEvent(final String oldAddress, final String newAddress) {

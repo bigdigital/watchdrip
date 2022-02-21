@@ -74,6 +74,7 @@ import lombok.Getter;
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MAXIMUM;
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MINIMUM;
 import static com.polidea.rxandroidble2.RxBleConnection.GATT_WRITE_MTU_OVERHEAD;
+import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
 import static com.thatguysservice.huami_xdrip.models.Helper.bytesToHex;
 import static com.thatguysservice.huami_xdrip.models.Helper.emptyString;
 import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSE;
@@ -152,6 +153,11 @@ public class MiBandService extends BaseBluetoothSequencer {
     private int ringerModeBackup;
     private BgData bgData;
     private DeviceInfo deviceInfo = new DeviceInfo();
+
+    public BgDataRepository getBgDataRepository() {
+        return bgDataRepository;
+    }
+
     private BgDataRepository bgDataRepository;
 
     {
@@ -229,48 +235,50 @@ public class MiBandService extends BaseBluetoothSequencer {
         return result;
     }
 
+    private void checkDeviceAuthState(){
+        final String authMac = MiBand.getPersistentAuthMac();
+        String macPref = MiBand.getMacPref();
+        deviceInfo.setDevice(MiBand.getMibandType());
+        if (!authMac.equalsIgnoreCase(macPref) || authMac.isEmpty()) {
+            UserError.Log.d(TAG, "Found new device: " + deviceInfo.getDeviceName());
+            MiBand.setAuthKeyPref("", getBgDataRepository());
+            if (!authMac.isEmpty()) { //flush old auth info
+                String model = MiBand.getModel();
+                MiBand.setPersistentAuthMac("");
+                MiBand.setModel(model, macPref);
+            }
+            isNeedToAuthenticate = true;
+        } else {
+            String authPrefKey = MiBand.getAuthKeyPref();
+            String authPersistantKey = MiBand.getPersistentAuthKey();
+
+            if (!authPersistantKey.equalsIgnoreCase(authPrefKey) || authPersistantKey.isEmpty()) {
+                MiBand.setPersistentAuthMac(""); //flush old auth info
+                isNeedToAuthenticate = true;
+            }
+        }
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         final PowerManager.WakeLock wl = Helper.getWakeLock("Miband service", 60000);
         try {
             if (shouldServiceRun()) {
-                final String authMac = MiBand.getPersistentAuthMac();
+                checkDeviceAuthState();
                 String macPref = MiBand.getMacPref();
-                MiBandType currDevice = MiBand.getMibandType();
-                deviceInfo.setDevice(currDevice);
-                if ((currDevice != prevDeviceType) && currDevice != MiBandType.UNKNOWN) {
-                    prevDeviceType = currDevice;
-                    UserError.Log.d(TAG, "Found new device: " + currDevice.toString());
-                }
-                if (!authMac.equalsIgnoreCase(macPref) || authMac.isEmpty()) {
-                    prevDeviceType = MiBand.getMibandType();
-                    if (!authMac.isEmpty()) {
-                        String model = MiBand.getModel();
-                        MiBand.setPersistentAuthMac(""); //flush old auth info
-                        MiBand.setModel(model, macPref);
-                    }
-                    isNeedToAuthenticate = true;
-                } else {
-                    String authPrefKey = MiBand.getAuthKeyPref();
-                    String authPersistantKey = MiBand.getPersistentAuthKey();
-
-                    if (!authPersistantKey.equalsIgnoreCase(authPrefKey)) {
-                        MiBand.setPersistentAuthKey("", authMac);
-                        isNeedToAuthenticate = true;
-                    }
-                }
                 if (emptyString(macPref)) {
                     // if mac not set then start up a scan and do nothing else
-                    new FindNearby().scan();
+                    new FindNearby().scan(getBgDataRepository());
                 } else {
-                    setAddress(macPref);
+                    if (!setAddress(macPref)) {
+                        return START_STICKY;
+                    }
                     if (intent != null) {
                         final String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
                         if (function != null) {
                             UserError.Log.d(TAG, "onStartCommand was called with function:" + function);
-                            //TODO handle intents
-                            if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + MiBand.getMacPref(), 5)) {
+                            if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + macPref, 5)) {
                                 return START_STICKY;
                             } else {
                                 if (function.equals(CMD_LOCAL_AFTER_MISSING_ALARM)) {
@@ -817,7 +825,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                             } else if (throwable instanceof TimeoutException) {
                                 //check if it is normal timeout
                                 if (!MiBand.isAuthenticated()) {
-                                    String errorText = "Authentication failed due to authentication timeout. When your Band vibrates and blinks, tap it a few times in a row.";
+                                    String errorText = gs(R.string.miband_auth_fail);
                                     UserError.Log.d(TAG, errorText);
                                     Helper.static_toast_long(errorText);
                                 }

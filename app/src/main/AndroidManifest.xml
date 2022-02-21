@@ -87,7 +87,7 @@
             android:name=".receivers.xDripReceiver"
             android:enabled="true">
             <intent-filter>
-                <action android:name="com.eveningoutpost.dexdrip.watch.wearintegration.WATCH_BROADCAST_SENDER" />
+                <action android:name="com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_SENDER" />
             </intent-filter>
         </receiver>
         <receiver

@@ -9,10 +9,14 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
+import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.TwoStatePreference;
 
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
+import com.thatguysservice.huami_xdrip.models.BgData;
+import com.thatguysservice.huami_xdrip.models.PropertiesUpdate;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
@@ -117,6 +121,27 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        BgDataRepository dataRepository = BgDataRepository.getInstance();
+
+        // Create the observer which updates the UI.
+        final Observer<PropertiesUpdate> prefObserver = new Observer<PropertiesUpdate>() {
+            @Override
+            public void onChanged(@Nullable final PropertiesUpdate prop) {
+                try {
+                    EditTextPreference pref = findPreference(prop.getKey());
+                    pref.setText(prop.getValue());
+                }catch (Exception e){
+
+                }
+            }
+        };
+        dataRepository.getPropLiveData().observe(this, prefObserver);
+
     }
 
     @Override

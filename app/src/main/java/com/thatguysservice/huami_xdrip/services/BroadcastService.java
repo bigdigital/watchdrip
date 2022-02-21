@@ -2,13 +2,11 @@ package com.thatguysservice.huami_xdrip.services;
 
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.PowerManager;
 
-import com.eveningoutpost.dexdrip.wearintegration.WatchBroadcast.Models.WatchSettings;
+import com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models.Settings;
 import com.thatguysservice.huami_xdrip.BuildConfig;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
@@ -16,8 +14,6 @@ import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
-import com.thatguysservice.huami_xdrip.receivers.xDripReceiver;
-import com.thatguysservice.huami_xdrip.utils.framework.WakeLockTrampoline;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 public class BroadcastService extends Service {
@@ -28,7 +24,8 @@ public class BroadcastService extends Service {
     public static final String INTENT_REPLY_CODE = "REPLY_CODE";
     public static final String INTENT_SETTINGS = "SETTINGS";
     public static final String INTENT_ALERT_TYPE = "ALERT_TYPE";
-    public static final String INTENT_STAT_HOURS = "stat_hours";
+    public static final String INTENT_STAT_HOURS = "STAT_HOURS";
+
     public static final String CMD_SET_SETTINGS = "set_settings";
     public static final String CMD_UPDATE_BG_FORCE = "update_bg_force";
     public static final String CMD_ALERT = "alarm";
@@ -54,9 +51,9 @@ public class BroadcastService extends Service {
     public static final String CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION = CMD_LOCAL_PREFIX + "update_bg_as_notification";
 
     //send
-    protected static final String ACTION_WATCH_COMMUNICATION_RECEIVER = "com.eveningoutpost.dexdrip.watch.wearintegration.WATCH_BROADCAST_RECEIVER";
+    protected static final String ACTION_WATCH_COMMUNICATION_RECEIVER = "com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_RECEIVER";
     //listen
-    protected static final String ACTION_WATCH_COMMUNICATION_SENDER = "com.eveningoutpost.dexdrip.watch.wearintegration.WATCH_BROADCAST_SENDER";
+    protected static final String ACTION_WATCH_COMMUNICATION_SENDER = "com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_SENDER";
     protected String TAG = this.getClass().getSimpleName();
     private PendingIntent serviceIntent;
 
@@ -173,8 +170,8 @@ public class BroadcastService extends Service {
         sendBroadcast(function, intent);
     }
 
-    public WatchSettings getSettings() {
-        WatchSettings settings = new WatchSettings();
+    public Settings getSettings() {
+        Settings settings = new Settings();
         settings.setGraphStart(Helper.tsl() - Constants.HOUR_IN_MS * MiBandEntry.getGraphHours());
         settings.setGraphEnd(Helper.tsl() + Constants.MINUTE_IN_MS * 30);
         settings.setApkName(getString(R.string.app_name));

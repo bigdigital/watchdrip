@@ -1,4 +1,4 @@
-package com.eveningoutpost.dexdrip.wearintegration.WatchBroadcast.Models;
+package com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -8,6 +8,8 @@ import java.util.List;
 
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.PointValue;
+import lombok.Getter;
+import lombok.Setter;
 
 public class GraphLine implements Parcelable {
     public static final Creator<GraphLine> CREATOR = new Creator<GraphLine>() {
@@ -22,41 +24,30 @@ public class GraphLine implements Parcelable {
             return new GraphLine[size];
         }
     };
-    private List<GraphPoint> values;
+    @Getter
+    @Setter
+    private List<com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models.GraphPoint> values;
+    @Getter
+    @Setter
     private int color;
 
-    public GraphLine( ) {
+    public GraphLine() {
         values = new ArrayList<>();
         color = 0;
     }
 
     public GraphLine(Line line) {
         values = new ArrayList<>();
+        line.update(0);
         for (PointValue pointValue : line.getValues()) {
-            values.add(new GraphPoint(pointValue.getX(), pointValue.getY()));
+            values.add(new com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models.GraphPoint(pointValue.getX(), pointValue.getY()));
         }
         color = line.getColor();
     }
 
     public GraphLine(Parcel parcel) {
-        values = parcel.readArrayList(GraphPoint.class.getClassLoader());
+        values = parcel.readArrayList(com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models.GraphPoint.class.getClassLoader());
         color = parcel.readInt();
-    }
-
-    public List<GraphPoint> getValues() {
-        return values;
-    }
-
-    public void setValues(List<GraphPoint> values) {
-        this.values = values;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
     }
 
     @Override

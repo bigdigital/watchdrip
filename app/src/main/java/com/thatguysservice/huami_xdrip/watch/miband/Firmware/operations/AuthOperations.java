@@ -29,6 +29,7 @@ import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.AUTH_FAIL;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.AUTH_MIBAND4_CODE_FAIL;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.AUTH_MIBAND4_FAIL;
@@ -118,15 +119,19 @@ public class AuthOperations extends BaseMessage {
                 authKey = MiBand.getAuthKeyPref();
                 if (authKey.isEmpty()) {
                     authKey = getAuthCodeFromFilesSystem(MiBand.getMacPref());
+                    if (!authKey.isEmpty()) {
+                        String errText = String.format(gs(R.string.miband_found_auth_text), MiBand.getMibandType());
+                        UserError.Log.d(TAG, errText);
+                        Helper.static_toast_long(errText);
+                    }
                 }
                 if (!isValidAuthKey(authKey)) {
                     String errText = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_wrong_auth_text), MiBand.getMibandType());
                     UserError.Log.d(TAG, errText);
                     Helper.static_toast_long(errText);
                     return false;
-                } else {
-                    MiBand.setAuthKeyPref(authKey);
                 }
+                MiBand.setAuthKeyPref(authKey, service.getBgDataRepository());
             }
         }
         if (!isValidAuthKey(authKey)) {
@@ -142,7 +147,7 @@ public class AuthOperations extends BaseMessage {
     public void processAuthCharacteristic(byte[] value) {
         if (value[0] == AUTH_RESPONSE &&
                 value[1] == AUTH_SEND_KEY &&
-                value[2] == AUTH_SUCCESS) {
+                (value[2] & 0x0f) == AUTH_SUCCESS) {
             connection.writeCharacteristic(getCharacteristicUUID(), getAuthKeyRequest()) //get random key from band
                     .subscribe(val -> {
                         UserError.Log.d(TAG, "Wrote OPCODE_AUTH_REQ1: " + Helper.bytesToHex(val));
@@ -150,7 +155,7 @@ public class AuthOperations extends BaseMessage {
                         UserError.Log.e(TAG, "Could not write OPCODE_AUTH_REQ1: " + throwable);
                     });
         } else if (value[0] == AUTH_RESPONSE &&
-                (value[1]) == (cryptFlags | AUTH_REQUEST_RANDOM_AUTH_NUMBER) &&
+                (value[1] & 0x0f) == AUTH_REQUEST_RANDOM_AUTH_NUMBER &&
                 value[2] == AUTH_SUCCESS) {
             byte[] tmpValue = Arrays.copyOfRange(value, 3, 19);
             try {
@@ -170,8 +175,8 @@ public class AuthOperations extends BaseMessage {
                 (value[1] & 0x0f) == AUTH_SEND_ENCRYPTED_AUTH_NUMBER &&
                 value[2] == AUTH_SUCCESS) {
             if (MiBand.getPersistentAuthMac().isEmpty()) {
-                MiBand.setPersistentAuthMac(MiBand.getMacPref());
-                MiBand.setPersistentAuthKey(Helper.bytesToHex(getLocalKey()), MiBand.getPersistentAuthMac());
+                MiBand.setPersistentAuthMac(service.getAddress());
+                MiBand.setPersistentAuthKey(Helper.bytesToHex(getLocalKey()), service.getAddress());
                 String msg = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_success_auth_text), MiBand.getMibandType());
                 Helper.static_toast_long(msg);
                 UserError.Log.e(TAG, msg);

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.utils.bt.BtCallBack2;
 import com.thatguysservice.huami_xdrip.utils.bt.ScanMeister;
 
@@ -14,9 +15,10 @@ public class FindNearby implements BtCallBack2 {
 
     private static final String TAG = "MiBand Scan";
     private static ScanMeister scanMeister;
+    private BgDataRepository bgDataRepository;
 
-    public synchronized void scan() {
-
+    public synchronized void scan(BgDataRepository bgDataRepository) {
+        this.bgDataRepository = bgDataRepository;
         if (scanMeister == null) {
             scanMeister = new ScanMeister();
         } else {
@@ -35,7 +37,7 @@ public class FindNearby implements BtCallBack2 {
     public void btCallback2(String mac, String status, String name, Bundle bundle) {
         switch (status) {
             case ScanMeister.SCAN_FOUND_CALLBACK:
-                MiBand.setMacPref(mac);
+                MiBand.setMacPref(mac, bgDataRepository);
                 MiBand.setModel(name, mac);
                 Helper.static_toast_long(String.format(HuamiXdrip.getAppContext().getString(R.string.miband_search_found_text), name, mac));
                 break;

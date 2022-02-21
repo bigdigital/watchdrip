@@ -2,6 +2,8 @@ package com.thatguysservice.huami_xdrip.watch.miband;
 
 import com.thatguysservice.huami_xdrip.models.PersistentStore;
 import com.thatguysservice.huami_xdrip.models.Pref;
+import com.thatguysservice.huami_xdrip.models.PropertiesUpdate;
+import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 
 import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.PREF_MIBAND_AUTH_KEY;
 import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.PREF_MIBAND_MAC;
@@ -31,20 +33,22 @@ public class MiBand {
         return Pref.getString(PREF_MIBAND_MAC, "");
     }
 
-    static void setMacPref(final String mac) {
+    static void setMacPref(final String mac,  BgDataRepository repo) {
         Pref.setString(PREF_MIBAND_MAC, mac);
+        repo.updatePropData(new PropertiesUpdate(PREF_MIBAND_MAC, mac));
     }
 
     public static String getAuthKeyPref() {
-        return Pref.getString(PREF_MIBAND_AUTH_KEY, "");
+        return Pref.getString(PREF_MIBAND_AUTH_KEY, "").replaceAll("\\s","");
     }
 
-    public static void setAuthKeyPref(final String key) {
+    public static void setAuthKeyPref(final String key,  BgDataRepository repo) {
         Pref.setString(PREF_MIBAND_AUTH_KEY, key.toLowerCase());
+        repo.updatePropData(new PropertiesUpdate(PREF_MIBAND_AUTH_KEY, key));
     }
 
     public static String getPersistentAuthMac() {
-        return PersistentStore.getString(PREF_MIBAND_AUTH_MAC);
+        return PersistentStore.getString(PREF_MIBAND_AUTH_MAC).replaceAll("\\s","");
     }
 
     public static void setPersistentAuthMac(final String mac) {
