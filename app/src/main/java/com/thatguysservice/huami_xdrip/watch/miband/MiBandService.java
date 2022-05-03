@@ -153,11 +153,6 @@ public class MiBandService extends BaseBluetoothSequencer {
     private int ringerModeBackup;
     private BgData bgData;
     private DeviceInfo deviceInfo = new DeviceInfo();
-
-    public BgDataRepository getBgDataRepository() {
-        return bgDataRepository;
-    }
-
     private BgDataRepository bgDataRepository;
 
     {
@@ -190,6 +185,10 @@ public class MiBandService extends BaseBluetoothSequencer {
         } else {
             return false;
         }
+    }
+
+    public BgDataRepository getBgDataRepository() {
+        return bgDataRepository;
     }
 
     public byte getNextHandle() {
@@ -235,18 +234,16 @@ public class MiBandService extends BaseBluetoothSequencer {
         return result;
     }
 
-    private void checkDeviceAuthState(){
+    private void checkDeviceAuthState() {
         final String authMac = MiBand.getPersistentAuthMac();
         String macPref = MiBand.getMacPref();
         deviceInfo.setDevice(MiBand.getMibandType());
-        if (!authMac.equalsIgnoreCase(macPref) || authMac.isEmpty()) {
+        if (!MiBand.isAuthenticated()) {
+            isNeedToAuthenticate = true;
+        } else if (!authMac.equalsIgnoreCase(macPref)) { //flush old auth info for new devie
+            String model = MiBand.getModel();
+            MiBand.setPersistentAuthMac("");
             UserError.Log.d(TAG, "Found new device: " + deviceInfo.getDeviceName());
-            MiBand.setAuthKeyPref("", getBgDataRepository());
-            if (!authMac.isEmpty()) { //flush old auth info
-                String model = MiBand.getModel();
-                MiBand.setPersistentAuthMac("");
-                MiBand.setModel(model, macPref);
-            }
             isNeedToAuthenticate = true;
         } else {
             String authPrefKey = MiBand.getAuthKeyPref();

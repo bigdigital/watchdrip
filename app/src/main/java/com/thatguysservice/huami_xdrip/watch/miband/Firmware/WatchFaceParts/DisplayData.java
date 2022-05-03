@@ -377,9 +377,9 @@ public class DisplayData {
             if (insulin > 0) {
                 treatmentText = treatmentText + (Helper.qs(insulin, 2) + "u").replace(".0u", "u");
             }
-            //if (carbs > 0) {
-            //    treatmentText = treatmentText + (JoH.qs(treatment.carbs, 1) + "g").replace(".0g", "g");
-            // }
+            else if (carbs > 0) {
+               treatmentText = treatmentText + (Helper.qs(carbs, 1) + "g").replace(".0g", "g");
+            }
 
             if (treatmentText.length() > 0) {
                 since = Helper.msSince(timeStampVal);

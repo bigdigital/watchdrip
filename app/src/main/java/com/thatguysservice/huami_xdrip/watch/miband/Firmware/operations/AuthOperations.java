@@ -128,6 +128,7 @@ public class AuthOperations extends BaseMessage {
                 if (!isValidAuthKey(authKey)) {
                     String errText = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_wrong_auth_text), MiBand.getMibandType());
                     UserError.Log.d(TAG, errText);
+                    UserError.Log.d(TAG, authKey);
                     Helper.static_toast_long(errText);
                     return false;
                 }

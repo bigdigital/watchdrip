@@ -26,7 +26,7 @@ public class MiBand {
     }
 
     public static boolean isAuthenticated() {
-        return  MiBand.getPersistentAuthMac().isEmpty() ? false : true;
+        return !MiBand.getPersistentAuthMac().isEmpty();
     }
 
     public static String getMacPref() {
