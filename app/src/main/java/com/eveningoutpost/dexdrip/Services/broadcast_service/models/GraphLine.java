@@ -1,4 +1,4 @@
-package com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models;
+package com.eveningoutpost.dexdrip.Services.broadcast_service.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -26,7 +26,7 @@ public class GraphLine implements Parcelable {
     };
     @Getter
     @Setter
-    private List<com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models.GraphPoint> values;
+    private List<com.eveningoutpost.dexdrip.Services.broadcast_service.models.GraphPoint> values;
     @Getter
     @Setter
     private int color;
@@ -40,13 +40,13 @@ public class GraphLine implements Parcelable {
         values = new ArrayList<>();
         line.update(0);
         for (PointValue pointValue : line.getValues()) {
-            values.add(new com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models.GraphPoint(pointValue.getX(), pointValue.getY()));
+            values.add(new com.eveningoutpost.dexdrip.Services.broadcast_service.models.GraphPoint(pointValue.getX(), pointValue.getY()));
         }
         color = line.getColor();
     }
 
     public GraphLine(Parcel parcel) {
-        values = parcel.readArrayList(com.eveningoutpost.dexdrip.wearintegration.broadcast_service.models.GraphPoint.class.getClassLoader());
+        values = parcel.readArrayList(com.eveningoutpost.dexdrip.Services.broadcast_service.models.GraphPoint.class.getClassLoader());
         color = parcel.readInt();
     }
 
