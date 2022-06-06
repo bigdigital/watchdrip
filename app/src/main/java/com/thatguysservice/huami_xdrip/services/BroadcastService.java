@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
 
-import com.eveningoutpost.dexdrip.Services.broadcast_service.models.Settings;
+import com.eveningoutpost.dexdrip.Services.broadcastservice.models.Settings;
 import com.thatguysservice.huami_xdrip.BuildConfig;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
@@ -14,7 +14,9 @@ import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.utils.framework.WakeLockTrampoline;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBandService;
 
 public class BroadcastService extends Service {
 
@@ -49,6 +51,9 @@ public class BroadcastService extends Service {
     public static final String CMD_LOCAL_AFTER_MISSING_ALARM = CMD_LOCAL_PREFIX + "after_alarm";
     public static final String CMD_LOCAL_BG_FORCE_REMOTE = CMD_LOCAL_PREFIX + "bg_force";
     public static final String CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION = CMD_LOCAL_PREFIX + "update_bg_as_notification";
+    public static final String CMD_LOCAL_XDRIP_APP_NO_RESPONCE = CMD_LOCAL_PREFIX + "xdrip_app_no_responce";
+
+    private static final int XDRIP_APP_RESPONCE_DELAY = (int) (Constants.SECOND_IN_MS * 2);
 
     //send
     protected static final String ACTION_WATCH_COMMUNICATION_RECEIVER = "com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_RECEIVER";
@@ -58,6 +63,7 @@ public class BroadcastService extends Service {
     private PendingIntent serviceIntent;
 
     public static final int SERVICE_RESTART_MINUTES = 1;
+    private PendingIntent replyServiceIntent;
 
     public static boolean shouldServiceRun() {
         return MiBandEntry.isEnabled();
@@ -146,6 +152,8 @@ public class BroadcastService extends Service {
                 if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
                     return;
                 }
+                replyServiceIntent = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONCE);
+                Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, replyServiceIntent);
                 intent.putExtra(INTENT_SETTINGS, getSettings());
                 break;
             case CMD_SNOOZE_ALERT:

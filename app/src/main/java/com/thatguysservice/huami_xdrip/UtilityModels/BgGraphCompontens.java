@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 
-import com.eveningoutpost.dexdrip.Services.broadcast_service.models.GraphLine;
-import com.eveningoutpost.dexdrip.Services.broadcast_service.models.GraphPoint;
+import com.eveningoutpost.dexdrip.Services.broadcastservice.models.GraphLine;
+import com.eveningoutpost.dexdrip.Services.broadcastservice.models.GraphPoint;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

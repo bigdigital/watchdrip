@@ -88,6 +88,7 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCA
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_BG_FORCE_REMOTE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_NO_RESPONCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_MESSAGE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_SNOOZE_ALERT;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_STAT_INFO;
@@ -275,7 +276,11 @@ public class MiBandService extends BaseBluetoothSequencer {
                         final String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
                         if (function != null) {
                             UserError.Log.d(TAG, "onStartCommand was called with function:" + function);
-                            if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + macPref, 5)) {
+
+                            if (function.equals(CMD_LOCAL_XDRIP_APP_NO_RESPONCE )) {
+                                bgDataRepository.setNewConnectionState( HuamiXdrip.gs(R.string.xdrip_app_no_response));
+                            }
+                            else if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + macPref, 5)) {
                                 return START_STICKY;
                             } else {
                                 if (function.equals(CMD_LOCAL_AFTER_MISSING_ALARM)) {
@@ -355,9 +360,9 @@ public class MiBandService extends BaseBluetoothSequencer {
                 }
                 String alertName = queueItem.bundle.getString("alertName");
                 long nextAlertAt = queueItem.bundle.getLong("nextAlertAt", Helper.tsl());
-                String msgText1 = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_alert_snooze_text), alertName, snoozeMinutes, Helper.hourMinuteString(nextAlertAt));
+                String msgText1 = String.format( HuamiXdrip.gs(R.string.miband_alert_snooze_text), alertName, snoozeMinutes, Helper.hourMinuteString(nextAlertAt));
                 UserError.Log.d(TAG, msgText1);
-                messageQueue.addFirst(getMessageQueue(msgText1, HuamiXdrip.getAppContext().getString(R.string.miband_alert_snooze_title_text)));
+                messageQueue.addFirst(getMessageQueue(msgText1,  HuamiXdrip.gs(R.string.miband_alert_snooze_title_text)));
                 break;
             case CMD_LOCAL_AFTER_MISSING_ALARM:
                 if (!I.state.equals(MiBandState.WAITING_USER_RESPONSE)) break;
