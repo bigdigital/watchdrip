@@ -1,4 +1,4 @@
-package com.eveningoutpost.dexdrip.Services.broadcastservice.models;
+package com.eveningoutpost.dexdrip.services.broadcastservice.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

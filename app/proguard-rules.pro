@@ -43,6 +43,8 @@
 -keepclassmembers public class * {
     @com.google.gson.annotations.Expose *;
 }
-
+-keepclassmembers class * implements android.os.Parcelable {
+  public static final android.os.Parcelable$Creator CREATOR;
+}
 
 -dontnote **rx.Observable.**

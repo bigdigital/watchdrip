@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
 
-import com.eveningoutpost.dexdrip.Services.broadcastservice.models.Settings;
+import com.eveningoutpost.dexdrip.services.broadcastservice.models.Settings;
 import com.thatguysservice.huami_xdrip.BuildConfig;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
@@ -52,8 +52,9 @@ public class BroadcastService extends Service {
     public static final String CMD_LOCAL_BG_FORCE_REMOTE = CMD_LOCAL_PREFIX + "bg_force";
     public static final String CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION = CMD_LOCAL_PREFIX + "update_bg_as_notification";
     public static final String CMD_LOCAL_XDRIP_APP_NO_RESPONCE = CMD_LOCAL_PREFIX + "xdrip_app_no_responce";
+    public static final String CMD_LOCAL_XDRIP_APP_GOT_RESPONCE = CMD_LOCAL_PREFIX + "xdrip_app_got_responce";
 
-    private static final int XDRIP_APP_RESPONCE_DELAY = (int) (Constants.SECOND_IN_MS * 2);
+    private static final int XDRIP_APP_RESPONCE_DELAY = (int) (Constants.SECOND_IN_MS * 10);
 
     //send
     protected static final String ACTION_WATCH_COMMUNICATION_RECEIVER = "com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_RECEIVER";
@@ -148,6 +149,9 @@ public class BroadcastService extends Service {
         Intent intent = new Intent(ACTION_WATCH_COMMUNICATION_RECEIVER);
         int value;
         switch (function) {
+            case CMD_LOCAL_XDRIP_APP_GOT_RESPONCE:
+                Helper.cancelAlarm(HuamiXdrip.getAppContext(), replyServiceIntent);
+                break;
             case CMD_UPDATE_BG_FORCE:
                 if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
                     return;

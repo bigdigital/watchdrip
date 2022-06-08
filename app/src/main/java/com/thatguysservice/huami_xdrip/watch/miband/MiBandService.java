@@ -276,7 +276,6 @@ public class MiBandService extends BaseBluetoothSequencer {
                         final String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
                         if (function != null) {
                             UserError.Log.d(TAG, "onStartCommand was called with function:" + function);
-
                             if (function.equals(CMD_LOCAL_XDRIP_APP_NO_RESPONCE )) {
                                 bgDataRepository.setNewConnectionState( HuamiXdrip.gs(R.string.xdrip_app_no_response));
                             }
@@ -797,6 +796,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         }
 
         AuthOperations authOperations = MiBandType.getAuthOperations(MiBand.getMibandType(), this);
+        UserError.Log.d(TAG,  "authOperations: " + authOperations.getClass().getSimpleName());
         if (!authOperations.initAuthKey()) {
             changeState(MiBandState.AUTHORIZE_FAILED);
             return;
@@ -868,6 +868,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             return;
         }
         FirmwareOperationsNew firmware;
+        SequenceState sequenceState;
         try {
             MiBandType mibandType = MiBand.getMibandType();
             Version version = new Version(MiBand.getVersion());
@@ -881,7 +882,6 @@ public class MiBandService extends BaseBluetoothSequencer {
                 resetFirmwareState(false, "Empty image");
                 return;
             }
-            SequenceState sequenceState;
             if (mibandType == MiBandType.MI_BAND4) {
                 sequenceState = new SequenceStateMiBand4();
                 firmware = new FirmwareOperationsNew(fwArray, sequenceState, this);
@@ -935,6 +935,9 @@ public class MiBandService extends BaseBluetoothSequencer {
             resetFirmwareState(false, "FirmwareOperations error " + e.getMessage());
             return;
         }
+        UserError.Log.d(TAG, "FirmwareOperations type: " + firmware.getClass().getName());
+        UserError.Log.d(TAG, "sequenceState type: " + sequenceState.getClass().getName());
+
         UserError.Log.d(TAG, "Begin uploading Watchface, length: " + firmware.getSize());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
