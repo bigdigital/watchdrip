@@ -64,7 +64,6 @@ public class ScanMeister {
     public static final String SCAN_FAILED_CALLBACK = "SCAN_FAILED";
     public static final String SCAN_FOUND_CALLBACK = "SCAN_FOUND";
 
-    private static final String[] cannotFilterModels = {"Ticwatch E", "Ticwatch S"};
 
     // TODO Log errors when location disabled etc
 
@@ -125,22 +124,6 @@ public class ScanMeister {
         callbacks2.put(name, callback);
         return this;
     }
-
-    // TODO this may need to be smarter in the future to account for different android versions of the same model, but for now it has only been implemented for devices which are not expecting to get future updates
-    public ScanMeister applyKnownWorkarounds() {
-        if (Build.MODEL != null) {
-            UserError.Log.d(TAG, "Checking if workarounds needed for: " + Build.MODEL);
-            for (final String model : cannotFilterModels) {
-                if (Build.MODEL.equalsIgnoreCase(model)) {
-                    UserError.Log.d(TAG, "Activating workaround for model: " + Build.MODEL);
-                    legacyNoFilterWorkaround();
-                    break;
-                }
-            }
-        }
-        return this;
-    }
-
 
     public void removeCallBack(String name) {
         callbacks.remove(name);

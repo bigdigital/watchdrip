@@ -107,8 +107,9 @@ public class FirmwareOperation extends FirmwareOperationsNew {
             int progressPercent = (int) ((((float) firmwareProgress) / len) * 100);
             if ((i > 0) && (i % FirmwareOperationsNew.FIRMWARE_SYNC_PACKET == 0)) {
                 connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getSyncCommand()).subscribe(val -> {
-                            if (d)
-                                UserError.Log.d(TAG, "Wrote Sync" + progressPercent + "%");
+                            if (!fwStateWasReseted) {
+                                updateWfProgress(progressPercent);
+                            }
                         },
                         throwable -> {
                             if (d)

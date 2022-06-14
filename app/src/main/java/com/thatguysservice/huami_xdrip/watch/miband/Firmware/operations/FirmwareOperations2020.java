@@ -260,8 +260,9 @@ public class FirmwareOperations2020 extends FirmwareOperationsNew {
         }
 
         int progressPercent = (int) ((((float) (offset + chunkLength)) / len) * 100);
-        if (d)
-            UserError.Log.d(TAG, "Uploading progress: " + progressPercent);
+        if (!fwStateWasReseted) {
+            updateWfProgress(progressPercent);
+        }
     }
 
     @SuppressLint("CheckResult")
@@ -299,5 +300,7 @@ public class FirmwareOperations2020 extends FirmwareOperationsNew {
                         }
                 );
     }
+
+
 
 }

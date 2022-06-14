@@ -25,3 +25,4 @@ patches/
 # Log Files
 *.log
 
+/app/release/

@@ -3,8 +3,8 @@ package com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Con
 import com.google.gson.annotations.SerializedName;
 
 public class WatchfaceConfig {
-    @SerializedName("description")
-    public String watchfaceDescription = "";
+    @SerializedName("info")
+    public Info info = new Info();
 
     @SerializedName("use_custom_arrows")
     public Boolean useCustomArrows = false;

@@ -51,13 +51,13 @@ public class FirmwareOperationsNew {
     RxBleConnection connection;
     private FirmwareType firmwareType = FirmwareType.WATCHFACE;
     private Subscription watchfaceSubscription;
-    private boolean fwSatateWasReseted;
+    protected boolean fwStateWasReseted;
 
     public FirmwareOperationsNew(byte[] file, SequenceState sequenceState, MiBandService service) {
         fw = file;
         mState = sequenceState;
         this.service = service;
-        fwSatateWasReseted = false;
+        fwStateWasReseted = false;
         connection = service.getConection();
     }
 
@@ -125,6 +125,9 @@ public class FirmwareOperationsNew {
     }
 
     public void nextSequence() {
+        if (fwStateWasReseted){
+            return; //do nothing because something happen
+        }
         String oldState = mState.getSequence();
         String new_state = mState.next();
         UserError.Log.d(TAG, "Changing firmware state from: " + oldState + " to " + new_state);
@@ -451,8 +454,9 @@ public class FirmwareOperationsNew {
             int progressPercent = (int) ((((float) firmwareProgress) / len) * 100);
             if ((i > 0) && (i % FirmwareOperationsNew.FIRMWARE_SYNC_PACKET == 0)) {
                 connection.writeCharacteristic(getFirmwareCharacteristicUUID(), getSyncCommand()).subscribe(val -> {
-                            if (d)
-                                UserError.Log.d(TAG, "Wrote Sync" + progressPercent + "%");
+                            if (!fwStateWasReseted) {
+                                updateWfProgress(progressPercent);
+                            }
                         },
                         throwable -> {
                             if (d)
@@ -500,8 +504,8 @@ public class FirmwareOperationsNew {
     }
 
     public void resetFirmwareState(Boolean result, String customText) {
-        if (fwSatateWasReseted) {
-            fwSatateWasReseted = true;
+        if (!fwStateWasReseted) {
+            fwStateWasReseted = true;
         }
         if (watchfaceSubscription != null) {
             watchfaceSubscription.unsubscribe();
@@ -534,5 +538,11 @@ public class FirmwareOperationsNew {
         }
     }
 
+    protected void updateWfProgress(int progressPercent){
+        String text = "Watchface uploading: " + progressPercent + "%";
+        if (d)
+            UserError.Log.d(TAG, text);
+        service.updateConnectionState(text);
+    }
 
 }

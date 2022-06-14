@@ -88,6 +88,7 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCA
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_BG_FORCE_REMOTE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_WATCHDOG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_NO_RESPONCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_MESSAGE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_SNOOZE_ALERT;
@@ -121,6 +122,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     private static final int QUEUE_EXPIRED_TIME = 30; //second
     private static final int QUEUE_DELAY = 0; //ms
     private static final int CALL_ALERT_DELAY = (int) (Constants.SECOND_IN_MS * 10);
+    private static final int WATCHDOG_DELAY = (int) (Constants.MINUTE_IN_MS * 2);
     private static final int MESSAGE_DELAY = (int) (Constants.SECOND_IN_MS * 5);
     static BatteryInfo batteryInfo = new BatteryInfo();
     static private long bgWakeupTime;
@@ -146,6 +148,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     private boolean isNightMode = false;
     private MediaPlayer player;
     private PendingIntent bgServiceIntent;
+    private PendingIntent watchdogIntent;
     private MiBandType prevDeviceType = MiBandType.UNKNOWN;
     private QueueMessage queueItem;
     private boolean prevReadingStatusIsStale = false;
@@ -222,8 +225,15 @@ public class MiBandService extends BaseBluetoothSequencer {
         super.onDestroy();
     }
 
-    private boolean readyToProcessCommand() {
+    private boolean readyToProcessCommand(String function) {
         boolean result = I.state.equals(SLEEP) || I.state.equals(CLOSED) || I.state.equals(CLOSE) || I.state.equals(INIT) || I.state.equals(MiBandState.CONNECT_NOW);
+        if (!result && function.equals(CMD_LOCAL_WATCHDOG) && !I.state.equals(MiBandState.AUTHORIZE_FAILED_SLEEP)){
+            stopConnection();
+            changeState(SLEEP);
+            UserError.Log.e(TAG, "Watchdog!!!");
+            return true;
+        }
+
         if (!result && I.state.equals(MiBandState.AUTHORIZE_FAILED_SLEEP) && MiBandType.supportPairingKey(MiBand.getMibandType())) {
             return true;
         }
@@ -287,7 +297,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                                     handleCommand();
                                 } else {
                                     messageQueue.add(new QueueMessage(function, intent.getExtras()));
-                                    if (readyToProcessCommand()) {
+                                    if (readyToProcessCommand(function)) {
                                         handleCommand();
                                     }
                                 }
@@ -299,18 +309,26 @@ public class MiBandService extends BaseBluetoothSequencer {
                 }
                 return START_STICKY;
             } else {
-                UserError.Log.d(TAG, "Service is NOT set be active - shutting down");
-                stopBgUpdateTimer();
-                stopConnection();
-                changeState(CLOSE);
-                bgDataRepository.setNewConnectionState(I.state);
-                prevReadingStatusIsStale = false;
-                stopSelf();
+                deactivateService();
                 return START_NOT_STICKY;
             }
         } finally {
             Helper.releaseWakeLock(wl);
         }
+    }
+
+    private void deactivateService(){
+        UserError.Log.d(TAG, "Service is NOT set be active - shutting down");
+        stopBgUpdateTimer();
+        stopConnection();
+        prevReadingStatusIsStale = false;
+        stopSelf();
+    }
+
+    private void resetWatchdog(){
+        Helper.cancelAlarm(HuamiXdrip.getAppContext(), watchdogIntent);
+        watchdogIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_WATCHDOG_ID, CMD_LOCAL_WATCHDOG);
+        Helper.wakeUpIntent(HuamiXdrip.getAppContext(), WATCHDOG_DELAY, watchdogIntent);
     }
 
     private void handleCommand() {
@@ -321,6 +339,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         if (queueItem.isExpired()) return;
         UserError.Log.d(TAG, "handleCommand func: " + queueItem.functionName);
         ((MiBandState) mState).resetSequence();
+        resetWatchdog();
         switch (queueItem.functionName) {
             case CMD_STAT_INFO:
                 StatisticInfo statisticInfo = new StatisticInfo(queueItem.bundle);
@@ -851,15 +870,15 @@ public class MiBandService extends BaseBluetoothSequencer {
         boolean sendBGNotification = false;
         if (deviceInfo.getRssi() < MINIMUM_RSSI) {
             UserError.Log.d(TAG, "Too weak BT connection");
-            //sendBGNotification = true;
+            sendBGNotification = true;
         }
         if (deviceInfo.getBatteryLevel() < MINIMUM_BATTERY_LEVEL) {
             UserError.Log.d(TAG, "Battery is too low");
             sendBGNotification = true;
         }
         if (sendBGNotification) {
-            Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION);
             changeState(SLEEP);
+            Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION);
             return;
         }
 
@@ -935,8 +954,8 @@ public class MiBandService extends BaseBluetoothSequencer {
             resetFirmwareState(false, "FirmwareOperations error " + e.getMessage());
             return;
         }
-        UserError.Log.d(TAG, "FirmwareOperations type: " + firmware.getClass().getName());
-        UserError.Log.d(TAG, "sequenceState type: " + sequenceState.getClass().getName());
+        UserError.Log.d(TAG, "FirmwareOperations type: " + firmware.getClass().getSimpleName());
+        UserError.Log.d(TAG, "SequenceState type: " + sequenceState.getClass().getSimpleName());
 
         UserError.Log.d(TAG, "Begin uploading Watchface, length: " + firmware.getSize());
 
@@ -949,6 +968,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             setMTU(mtu);
         firmware.nextSequence();
         firmware.processFirmwareSequence();
+        changeNextState();
     }
 
     public void resetFirmwareState(Boolean result, String customText) {
@@ -1157,7 +1177,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     @Override
     protected synchronized boolean automata() {
         UserError.Log.d(TAG, "Automata called in" + TAG);
-        extendWakeLock(2000);
+        extendWakeLock(10000);
         if (shouldServiceRun()) {
             bgDataRepository.setNewConnectionState(I.state);
             switch (I.state) {
@@ -1217,7 +1237,6 @@ public class MiBandService extends BaseBluetoothSequencer {
                     break;
                 case MiBandState.INSTALL_WATCHFACE:
                     installWatchface();
-                    changeNextState();
                     break;
                 case MiBandState.INSTALL_WATCHFACE_IN_PROGRESS:
                     break;
@@ -1278,7 +1297,6 @@ public class MiBandService extends BaseBluetoothSequencer {
             }
         } else {
             UserError.Log.d(TAG, "Service should not be running inside automata");
-            stopSelf();
         }
         return true; // lies
     }
@@ -1290,6 +1308,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         handle = 0;
         setMTU(GATT_MTU_MINIMUM); //reset mtu
         setRetryTimerReal(); // local retry strategy
+        bgDataRepository.setNewConnectionState( HuamiXdrip.gs(R.string.watch_disconnected));
     }
 
     @Override
@@ -1485,6 +1504,10 @@ public class MiBandService extends BaseBluetoothSequencer {
     private void updateBgData() {
         bgData = new BgData(queueItem.bundle);
         bgDataRepository.setNewBgData(bgData);
+    }
+
+    public void updateConnectionState(String status ){
+        bgDataRepository.setNewConnectionState(status);
     }
 
     public QueueMessage getMessageQueue(String title, String message) {

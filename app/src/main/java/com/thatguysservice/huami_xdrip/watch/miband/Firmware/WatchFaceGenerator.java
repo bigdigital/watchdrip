@@ -26,6 +26,7 @@ import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Imag
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Image.ImageTransparentRGB;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Parameter;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Utils.QuickLZ;
+import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandType;
 
@@ -256,7 +257,7 @@ public class WatchFaceGenerator {
         Bitmap mainScreen;
         //send firmware without modification, uncomment when need to test only a watchface uploading process
        /* if (true) {
-            return FirmwareOperations.readAll(fwFileStream, 10000000);
+            return FirmwareOperationsNew.readAll(fwFileStream, 10000000);
         }*/
 
 

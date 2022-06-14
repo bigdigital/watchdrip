@@ -53,6 +53,7 @@ public class BroadcastService extends Service {
     public static final String CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION = CMD_LOCAL_PREFIX + "update_bg_as_notification";
     public static final String CMD_LOCAL_XDRIP_APP_NO_RESPONCE = CMD_LOCAL_PREFIX + "xdrip_app_no_responce";
     public static final String CMD_LOCAL_XDRIP_APP_GOT_RESPONCE = CMD_LOCAL_PREFIX + "xdrip_app_got_responce";
+    public static final String CMD_LOCAL_WATCHDOG = CMD_LOCAL_PREFIX + "watchdog";
 
     private static final int XDRIP_APP_RESPONCE_DELAY = (int) (Constants.SECOND_IN_MS * 10);
 
@@ -64,7 +65,7 @@ public class BroadcastService extends Service {
     private PendingIntent serviceIntent;
 
     public static final int SERVICE_RESTART_MINUTES = 1;
-    private PendingIntent replyServiceIntent;
+    private PendingIntent xdripResponceIntend;
 
     public static boolean shouldServiceRun() {
         return MiBandEntry.isEnabled();
@@ -136,6 +137,8 @@ public class BroadcastService extends Service {
                 }
                 return START_STICKY;
             } else {
+                //notify MiBandService about diconnection
+                Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_REFRESH);
                 UserError.Log.d(TAG, "Service is NOT set be active - shutting down");
                 stopSelf();
                 return START_NOT_STICKY;
@@ -150,14 +153,14 @@ public class BroadcastService extends Service {
         int value;
         switch (function) {
             case CMD_LOCAL_XDRIP_APP_GOT_RESPONCE:
-                Helper.cancelAlarm(HuamiXdrip.getAppContext(), replyServiceIntent);
+                Helper.cancelAlarm(HuamiXdrip.getAppContext(), xdripResponceIntend);
                 break;
             case CMD_UPDATE_BG_FORCE:
                 if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
                     return;
                 }
-                replyServiceIntent = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONCE);
-                Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, replyServiceIntent);
+                xdripResponceIntend = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONCE);
+                Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, xdripResponceIntend);
                 intent.putExtra(INTENT_SETTINGS, getSettings());
                 break;
             case CMD_SNOOZE_ALERT:

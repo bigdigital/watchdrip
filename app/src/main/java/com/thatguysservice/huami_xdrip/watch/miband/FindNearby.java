@@ -24,6 +24,7 @@ public class FindNearby implements BtCallBack2 {
         } else {
             scanMeister.stop();
         }
+        bgDataRepository.setNewConnectionState( HuamiXdrip.gs(R.string.miband_search_text));
         Helper.static_toast_long(HuamiXdrip.getAppContext().getString(R.string.miband_search_text));
         for (MiBandType b : MiBandType.values()) {
             if (!b.toString().isEmpty()) {
@@ -39,7 +40,9 @@ public class FindNearby implements BtCallBack2 {
             case ScanMeister.SCAN_FOUND_CALLBACK:
                 MiBand.setMacPref(mac, bgDataRepository);
                 MiBand.setModel(name, mac);
-                Helper.static_toast_long(String.format(HuamiXdrip.getAppContext().getString(R.string.miband_search_found_text), name, mac));
+                String text = String.format(HuamiXdrip.getAppContext().getString(R.string.miband_search_found_text), name, mac);
+                Helper.static_toast_long(text);
+                Helper.static_toast_long(text);
                 break;
             case ScanMeister.SCAN_FAILED_CALLBACK:
             case ScanMeister.SCAN_TIMEOUT_CALLBACK:
