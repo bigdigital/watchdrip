@@ -1,5 +1,10 @@
 {
-  "description": "Watchcface for MiBand6",
+  "info": {
+    "watch_type": "miband6",
+    "description": "Default watchface for MiBand6",
+    "author": "bigdigital",
+    "version": "1.0"
+  },
   "use_custom_arrows": false,
   "arrow_position": {
     "x": 115,

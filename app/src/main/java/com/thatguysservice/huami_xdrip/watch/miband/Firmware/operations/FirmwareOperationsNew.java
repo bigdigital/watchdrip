@@ -38,6 +38,7 @@ import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCode
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_START_DATA;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_UNKNOWN_MIBAND5;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_FIRMWARE_UPDATE_SYNC;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_WATCHFACE_UID;
 
 public class FirmwareOperationsNew {
     public static final boolean d = true;
@@ -281,7 +282,9 @@ public class FirmwareOperationsNew {
 
             case SequenceState.PREPARE_UPLOAD: {
                 nextSequence();
-                connection.writeCharacteristic(getFirmwareCharacteristicUUID(), prepareFWUploadInitCommand())
+                byte[] data = prepareFWUploadInitCommand();
+                UserError.Log.d(TAG, "Write prepareFWUploadInitCommand: " + Helper.bytesToHex(data));
+                connection.writeCharacteristic(getFirmwareCharacteristicUUID(), data)
                         .subscribe(valB -> {
                                     UserError.Log.d(TAG, "Wrote prepareFWUploadInitCommand: " + Helper.bytesToHex(valB));
                                 },
@@ -395,7 +398,13 @@ public class FirmwareOperationsNew {
     }
 
     protected byte[] getWatcfaceIdCommand() {
-        return OperationCodes.COMMAND_MIBAND5_UNKNOW_INIT;
+        byte[] fwBytes = getBytes();
+        return new byte[]{COMMAND_WATCHFACE_UID, 0x00, 0x00, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                fwBytes[18],
+                fwBytes[19],
+                fwBytes[20],
+                fwBytes[21]
+        };
     }
 
     @SuppressLint("CheckResult")

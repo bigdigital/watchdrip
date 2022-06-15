@@ -1,7 +1,10 @@
 {
-  "description": "Watchcface for Amazfit GTS2 Mini",
-  "author": "Artem Kovalenko",
-  "version": "1.0",
+  "info": {
+    "watch_type": "amazfit_gts2_mini",
+    "description": "Default watchface for Amazfit GTS2 Mini",
+    "author": "bigdigital",
+    "version": "1.0"
+  },
   "use_custom_arrows": true,
   "resource_to_replace": 0,
   "arrow_position": {

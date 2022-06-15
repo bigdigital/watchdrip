@@ -1,5 +1,10 @@
 {
-  "description": "Watchcface for Amazfit GTR47",
+  "info": {
+    "watch_type": "amazfit_gtr",
+    "description": "Default watchface for Amazfit GTR47",
+    "author": "bigdigital",
+    "version": "1.0"
+  },
   "use_custom_arrows": false,
   "arrow_position": {
     "x": 176,

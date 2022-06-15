@@ -1,5 +1,10 @@
 {
-  "description": "Watchcface for Amazfit GTS2(GTS2e)",
+  "info": {
+    "watch_type": "amazfit_gts2",
+    "description": "Default watchface for Amazfit GTS2(GTS2e)",
+    "author": "bigdigital",
+    "version": "1.0"
+  },
   "use_custom_arrows": false,
   "resource_to_replace": 1,
   "arrow_position": {

@@ -1,5 +1,10 @@
 {
-  "description": "Watchcface for Amazfit GTR2(GTR2e)",
+  "info": {
+    "watch_type": "amazfit_gtr2",
+    "description": "Default watchface for Amazfit GTR2(GTR2e)",
+    "author": "bigdigital",
+    "version": "1.0"
+  },
   "use_custom_arrows": false,
   "resource_to_replace": 1,
   "arrow_position": {

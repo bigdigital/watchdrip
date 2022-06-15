@@ -1,5 +1,10 @@
 {
-  "description": "Watchcface for MiBand4",
+  "info": {
+    "watch_type": "miband4",
+    "description": "Default watchface for MiBand4",
+    "author": "bigdigital",
+    "version": "1.0"
+  },
   "use_custom_arrows": false,
   "arrow_position": {
     "x": 83,

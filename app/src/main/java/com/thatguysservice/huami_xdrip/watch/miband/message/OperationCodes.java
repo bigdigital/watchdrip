@@ -78,7 +78,7 @@ public class OperationCodes {
     public static final byte COMMAND_FIRMWARE_UNKNOWN_MIBAND5 = (byte) 0xA0; // to UUID_CHARACTERISTIC_FIRMWARE
     public static final byte COMMAND_WATCHFACE_UID = (byte) 0x39; // to UUID_CHARACTERISTIC_FIRMWARE
     //possibly send watchface size and uid
-    public static final byte[] COMMAND_MIBAND5_UNKNOW_INIT = new byte[]{COMMAND_WATCHFACE_UID, 0x00, (byte) 0xa7, 0x1f, 0x01, 0x00, 0x22, 0x27, 0x00, 0x00};
+    //public static final byte[] COMMAND_MIBAND5_UNKNOW_INIT = new byte[]{COMMAND_WATCHFACE_UID, 0x00, (byte) 0xa7, 0x1f, 0x01, 0x00, 0x22, 0x27, 0x00, 0x00};
     public static final byte[] RESPONSE_FINISH_INIT_SUCCESS = new byte[]{RESPONSE, COMMAND_FIRMWARE_INIT, SUCCESS};
     public static final byte[] RESPONSE_FIRMWARE_DATA_SUCCESS = new byte[]{RESPONSE, COMMAND_FIRMWARE_START_DATA, SUCCESS};
     public static final byte[] COMMAND_NIGHT_MODE_OFF = new byte[]{0x1a, 0x00};

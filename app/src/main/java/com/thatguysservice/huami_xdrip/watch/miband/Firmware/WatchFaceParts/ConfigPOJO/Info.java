@@ -11,4 +11,6 @@ public class Info {
 
     @SerializedName("watch_type")
     public String watchType = "";
+
+    public String version = "";
 }

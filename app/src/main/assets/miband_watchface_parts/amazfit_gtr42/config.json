@@ -1,5 +1,10 @@
 {
-  "description": "Watchcface for Amazfit GTR42",
+  "info": {
+    "watch_type": "amazfit_gtr42",
+    "description": "Default watchface for Amazfit GTR42",
+    "author": "bigdigital",
+    "version": "1.0"
+  },
   "use_custom_arrows": false,
   "arrow_position": {
     "x": 292,

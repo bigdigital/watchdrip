@@ -1,5 +1,10 @@
 {
-  "description": "Watchcface for Amazfit BIP S",
+  "info": {
+    "watch_type": "bip_s",
+    "description": "Default watchface for Amazfit BIP S/S Lite",
+    "author": "bigdigital",
+    "version": "1.0"
+  },
   "use_custom_arrows": false,
   "arrow_position": {
     "x": 133,
