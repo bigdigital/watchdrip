@@ -383,9 +383,9 @@ public class DisplayData {
 
             if (treatmentText.length() > 0) {
                 since = Helper.msSince(timeStampVal);
-                if (since < Constants.HOUR_IN_MS) {
+                if (since < Constants.HOUR_IN_MS*6) {
                     timeStampText = hourMinuteString(timeStampVal);}
-                else if (since < Constants.HOUR_IN_MS * 6) {
+                else if (since < Constants.HOUR_IN_MS * 12) {
                     isOld = true;
                     timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStampVal));
                 } else {

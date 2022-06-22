@@ -22,17 +22,17 @@ def generateTimestamp = { ->
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 29
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.thatguysservice.huami_xdrip"
         minSdkVersion 18
-        targetSdkVersion 30
+        targetSdkVersion 29
 
         // Note: always bump BOTH versionCode and versionName!
-        versionName "0.1.1.0"
-        versionCode 1
+        versionName "0.1.1.2"
+        versionCode 3
         buildConfigField "long", "buildTimestamp", generateTimestamp()
         buildConfigField "int", "targetSDK", targetSdkVersion.mApiLevel.toString()
 

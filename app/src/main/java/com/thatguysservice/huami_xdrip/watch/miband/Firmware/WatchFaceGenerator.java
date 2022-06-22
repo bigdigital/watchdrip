@@ -1,5 +1,6 @@
 package com.thatguysservice.huami_xdrip.watch.miband.Firmware;
 
+import android.Manifest;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -261,7 +262,7 @@ public class WatchFaceGenerator {
         }*/
 
 
-        boolean isAllowedToWrite = debug && EasyPermissions.hasPermissions(HuamiXdrip.getAppContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE);
+        boolean isAllowedToWrite = debug && EasyPermissions.hasPermissions(HuamiXdrip.getAppContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         parseWatchfaceFile();
         if (!bgData.isNoBgData()) {

@@ -66,7 +66,7 @@
     <string name="title_miband_screen_nfc">Show NFC (if available)</string>
 
     <string name="title_miband_send_alarms_other">Other alarms </string>
-    <string name="summary_miband_send_alarms_other">Covers all xDrip alarms, except glucose height/low alarms</string>
+    <string name="summary_miband_send_alarms_other">Covers all xDrip alarms, except glucose high/low alarms</string>
 
     <string name="miband_watchface_istall_success">MiBand watchface has been uploaded successfully!</string>
     <string name="miband_watchface_istall_error">Error while uploading MiBand watchface</string>
@@ -124,11 +124,11 @@
     <string name="huami_xdrip_running">Running</string>
     <string name="notification_channel_name">General</string>
     <string name="use_custom_watcface_summary">You should place \'my_watchface.bin\' and \'my_image.png\' (config.json and my_mask.png are optional) files into \'xdrip\' folder on your phone</string>
-    <string name="use_custom_watcface_title">Allow to use custom watchface</string>
+    <string name="use_custom_watcface_title">Use custom watchface</string>
     <string name="watch_state">Status:\u0020</string>
     <string name="title_activity_about">About</string>
     <string name="about_description">This application is extension to xDrip which is allowed to communicate with different watches and display glucose, alarms directly on the watch </string>
-    <string name="supported_devices">\u0020MiBand 2\n MiBand 3\n MiBand 4\n MiBand 5\n MiBand 6\n Amazfit GTR 47mm\n Amazfit GTR 42mm\n  Amazfit GTR2\n Amazfit GTR2e\n Amazfit GTS2\n Amazfit GTS2e\n Amazfit GTS2 Mini\n Amazfit Band5\n Amazfit Bip\n Amazfit Bip Lite\n Amazfit Bip S\n  Amazfit Bip S Lite</string>
+    <string name="supported_devices" translatable="false">\u0020MiBand 2\n MiBand 3\n MiBand 4\n MiBand 5\n MiBand 6\n Amazfit GTR 47mm\n Amazfit GTR 42mm\n  Amazfit GTR2\n Amazfit GTR2e\n Amazfit GTS2\n Amazfit GTS2e\n Amazfit GTS2 Mini\n Amazfit Band5\n Amazfit Bip\n Amazfit Bip Lite\n Amazfit Bip S\n  Amazfit Bip S Lite</string>
     <string name="supported_devices_desc">Supported devices:</string>
     <string name="about_version">Version: %s, Build date:\u0020</string>
     <string name="action_view_about">About</string>

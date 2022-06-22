@@ -1,0 +1,138 @@
+<resources>
+    <string name="app_name">WatchDrip+</string>
+    <string name="unit_second">sec</string>
+    <string name="unit_minute">min</string>
+    <string name="unit_hour">ora</string>
+    <string name="unit_day">giorno"</string>
+    <string name="unit_week">settimana"</string>
+    <string name="unit_seconds">sec</string>
+    <string name="unit_minutes">min</string>
+    <string name="unit_hours">ore</string>
+    <string name="unit_days">giorni"</string>
+    <string name="unit_weeks">settimane"</string>
+
+    <string name="title_miband_mac">Indirizzo MAC</string>
+    <string name="summary_miband_enable">Sincronizzazione dati xDrip con l\'orologio</string>
+    <string name="title_miband_enable">Abilita servizio</string>
+    <string name="title_miband_screen_battery">Mostra batteria</string>
+    <string name="title_miband_show_date">Mostra data sullo schermo</string>
+    <string name="title_miband_switch_display_on_wrist">Cambia display al polso</string>
+    <string name="title_miband_units">Unità</string>
+    <string name="summary_miband_units">Scegli l\'unità di misura utilizzata sulla band</string>
+    <string name="title_miband_goal_notification">Notifica obiettivo</string>
+    <string name="summary_miband_goal_notification">Il tuo orologio vibrerà quando raggiungi un obiettivo</string>
+    <string name="title_miband_locale_24_hour">Orologio 24 ore</string>
+    <string name="summary_miband_locale_24_hour">Mostra orologio 24 ore</string>
+
+    <string name="title_miband_nightmode_category">Impostazioni modalità notturna</string>
+    <string name="title_miband_nightmode_enabled">Abilita le impostazioni della modalità notturna</string>
+    <string name="summary_miband_nightmode_enabled">Riduci la luminosità dello schermo della band in un intervallo personalizzato</string>
+    <string name="title_miband_nightmode_start">Inizio modalità notturna</string>
+    <string name="title_miband_nightmode_end">Fine modalità notturna</string>
+    <string name="title_miband_interval_in_nightmode">Intervallo</string>
+    <string name="summary_miband_interval_in_nightmode">Definisce la frequenza con cui sincronizzare la glicemia nella modalità аnotturna</string>
+
+    <string name="title_miband_other_settings_category">Altre impostazioni</string>
+    <string name="title_miband_collect_heartrate">Ricevi battito cardiaco</string>
+    <string name="summary_miband_collect_heartrate">Riceverа i dati sulla frequenza cardiaca dalla band. L\'intervallo di aggiornamento può essere configurato in MiFit o in qualsiasi applicazione di terze parti</string>
+    <string name="title_miband_collect_steps">Ricevi passi</string>
+    <string name="summary_miband_collect_steps">Riceverа i dati sui passi dalla band. L\'intervallo di aggiornamento può essere configurato in MiFit o in qualsiasi applicazione di terze parti</string>
+    <string name="title_miband_us_date_format">Formato data</string>
+
+    <string name="title_miband_date_settings_category">Impostazioni data</string>
+    <string name="summary_miband_us_date_format">Formato data del quadrante. US(MM/gg),EU(gg/MM)</string>
+
+    <string name="title_miband_authkey">Chiave di autenticazione</string>
+    <string name="summary_miband_authkey">Impostare la chiave di autenticazione per la MiBand (per ottenere la chiave di autenticazione, seguire le istruzioni su https://www.freemyband.com/)</string>
+    <string name="summary_miband_mac">Lasciare vuoto per la ricerca automatica</string>
+    <string name="title_vibrate_on_readings">Vibra alle letture</string>
+
+    <string name="title_miband_graph_category">Opzioni del grafico</string>
+    <string name="title_miband_graph_treatment_enable">Mostra il bolo</string>
+
+    <string name="title_miband_miband_graph_limit">Limiti del grafico</string>
+    <string name="summary_miband_graph_limit">Definisce il valore glicemico massimo visibile sul grafico</string>
+
+    <string name="title_miband_update_bg">Aggiornamento manuale della glicemia</string>
+    <string name="title_miband_general_settings_category">Impostazioni generali</string>
+
+    <string name="title_miband_screen_notifications">Mostra notifiche</string>
+    <string name="title_miband_screen_weather">Mostra meteo</string>
+    <string name="title_miband_screen_activity">Mostra attivitа</string>
+    <string name="title_miband_screen_more">Mostra di piщ</string>
+    <string name="title_miband_screen_status">Mostra lo stato</string>
+    <string name="title_miband_screen_heart_rate">Mostra la frequenza cardiaca</string>
+    <string name="title_miband_screen_timer">Mostra timer</string>
+    <string name="title_miband_screen_nfc">Mostra NFC (se disponibile)</string>
+
+    <string name="title_miband_send_alarms_other">Altri allarmi</string>
+    <string name="summary_miband_send_alarms_other">Copre tutti gli allarmi xDrip, eccetto gli allarmi di glicemia alta/bassa</string>
+
+    <string name="miband_watchface_istall_success">Quadrante MiBand caricato con successo!</string>
+    <string name="miband_watchface_istall_error">Errore durante il caricamento del quadrante MiBand</string>
+    <string name="miband_bg_dialog_title">Aggiornare adesso i dati della glicemia?</string>
+    <string name="miband_alert_snooze_text">Avviso %1$s posticipato per %2$d min fino alle %3$s</string>
+    <string name="miband_alert_snooze_title_text">Allarme posticipato</string>
+    <string name="miband_alert_missing_text">Allarme perso: </string>
+    <string name="miband_alert_missing_title_text">Allarme perso</string>
+
+    <string name="miband_search_text">RicercaвЂ¦ Tenere l\'orologio vicino al telefono</string>
+    <string name="miband_search_found_text">Trovato %1$s con indirizzo MAC: %2$s</string>
+    <string name="miband_search_failed_text">Impossibile trovare l\'orologio, riprovare o inserire manualmente l\'indirizzo MAC</string>
+    <string name="miband_success_auth_text">%s autenticato con successo</string>
+    <string name="miband_error_auth_text">Impossibile autorizzare %s, si prega di ricontrollare il codice di autenticazione</string>
+    <string name="miband_wrong_auth_text">Codice di autenticazione %s errato, ricontrolla la chiave di autenticazione e prova a riconnetterti</string>
+    <string name="miband_found_auth_text">Trovata chiave di autorizzazione appropriata per %s</string>
+    <string name="miband_auth_fail">Autenticazione non riuscita a causa del timeout di autenticazione. Quando la band vibra e lampeggia, toccala alcune volte di seguito.</string>
+
+    <string name="permission_dialog_start">Per garantire che tutte le caratteristiche funzionino correttamente, queste autorizzazioni devono essere concesse:\n\n</string>
+    <string name="please_allow_permission">Si prega di consentire le seguenti autorizzazioni</string>
+    <string name="permission_location_info">Informazioni sulla posizione. Senza l\'autorizzazione alla posizione, la scansione Bluetooth Android non funzionerа\n</string>
+    <string name="permissions_background_location_info">Informazioni sulla posizione in background. Android 10 e versioni successive richiedono la posizione in background per il funzionamento del Bluetooth\n</string>
+    <string name="permissions_file_system_read">Accesso a foto, file multimediali e file sul tuo dispositivo. Necessario per riempire automaticamente con il codice di autenticazione da freemyband\n</string>
+    <string name="permissions_file_system">Accesso a foto, file multimediali e file sul tuo dispositivo. Necessario per utilizzare i quadranti personalizzati\n</string>
+    <string name="permission_dialog_enable_permissions_in_settings">L\'autorizzazione è stata disabilitata in modo permanente. Vai alle impostazioni di sistema dell\'applicazione e abilita le autorizzazioni</string>
+
+    <!-- Location Settings -->
+    <string name="location_not_found_title">La posizione non è abilitata</string>
+    <string name="location_not_found_message">Affinché il rilevamento Bluetooth funzioni sui dispositivi più recenti, la posizione deve essere abilitata. xDrip non tiene traccia della tua posizione se non con la funzione opzionale di messaggio di emergenza</string>
+    <string name="location_yes">Abilitare</string>
+
+    <string name="short_off_text_for_switches">OFF</string>
+    <string name="short_on_text_for_switches">ON</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancella</string>
+    <string name="no">No</string>
+    <string name="yes">Si</string>
+    <string name="nav_menu_scan">Scansione</string>
+    <string name="title_activity_scrolling">ScrollingActivity</string>
+
+    <string name="action_settings">Impostazioni</string>
+    <string name="send_logs">Invia</string>
+    <string name="please_enter_your_question_or_comments_here">Descrivi il problema che hai riscontrato.</string>
+    <string name="optional_contact_email">Email di contatto opzionale</string>
+    <string name="action_view_log">Feedback</string>
+    <string name="space_minute_ago">" Minuto fa"</string>
+    <string name="space_minutes_ago">" Minuti fa"</string>
+    <string name="action_view_watch_info">Guarda le informazioni</string>
+    <string name="title_send_readings">Invia Letture</string>
+    <string name="summary_send_alarms">Invia notifiche alla band per ricevere gli allarmi glicemici</string>
+    <string name="title_send_alarms">Invia allarmi</string>
+    <string name="summary_disable_hight_mtu">L\'abilitazione di questa opzione in alcuni casi può correggere l\'errore di sincronizzazione del quadrante, ma ne rallenta notevolmente la velocitа di caricamento</string>
+    <string name="title_disable_hight_mtu">Disabilita valori MTU</string>
+    <string name="action_scan">Scansiona i dispositivi</string>
+    <string name="huami_xdrip_running">In esecuzione</string>
+    <string name="notification_channel_name">Generale</string>
+    <string name="use_custom_watcface_summary">Dovresti posizionare i files \'my_watchface.bin\' e \'my_image.png\' (config.json e my_mask.png sono opzionali) dentro la cartella \'xdrip\' sul tuo telefono</string>
+    <string name="use_custom_watcface_title">Usa quadrante personalizzato</string>
+    <string name="watch_state">Stato:\u0020</string>
+    <string name="title_activity_about">A riguardo</string>
+    <string name="about_description">Questa applicazione è un\'estensione di xDrip che consente di comunicare con diversi orologi e visualizzare la glicemia e gli allarmi direttamente al polso </string>
+    <string name="supported_devices_desc">Dispositivi supportati:</string>
+    <string name="about_version">Versione: %s, Data di creazione:\u0020</string>
+    <string name="action_view_about">A riguardo</string>
+    <string name="Advanced">Avanzate</string>
+    <string name="action_get_statistic">Ottieni statistiche</string>
+    <string name="xdrip_app_no_response">Nessuna risposta dall\'app xDrip. Si prega di controllare le impostazioni di xDrip</string>
+    <string name="watch_disconnected">Disconnesso</string>
+</resources>

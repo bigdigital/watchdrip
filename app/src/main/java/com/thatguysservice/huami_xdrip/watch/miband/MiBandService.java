@@ -111,7 +111,7 @@ import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCode
  */
 
 public class MiBandService extends BaseBluetoothSequencer {
-    protected static final int MINIMUM_RSSI = -85;
+    protected static final int MINIMUM_RSSI = -90;
     protected static final int MINIMUM_BATTERY_LEVEL = 12;
 
     static final List<UUID> huntCharacterstics = new ArrayList<>();
@@ -325,18 +325,24 @@ public class MiBandService extends BaseBluetoothSequencer {
         stopSelf();
     }
 
-    private void resetWatchdog(){
+    private void stopWatchdog(){
         Helper.cancelAlarm(HuamiXdrip.getAppContext(), watchdogIntent);
+    }
+
+    private void resetWatchdog(){
+        stopWatchdog();
         watchdogIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_WATCHDOG_ID, CMD_LOCAL_WATCHDOG);
         Helper.wakeUpIntent(HuamiXdrip.getAppContext(), WATCHDOG_DELAY, watchdogIntent);
     }
 
-    private void handleCommand() {
-        if (messageQueue.isEmpty()) return;
+    private boolean handleCommand() {
+        if (messageQueue.isEmpty()) {
+            return false;
+        }
         do {
             queueItem = messageQueue.poll();
         } while (queueItem.isExpired() && !messageQueue.isEmpty());
-        if (queueItem.isExpired()) return;
+        if (queueItem.isExpired()) return false;
         UserError.Log.d(TAG, "handleCommand func: " + queueItem.functionName);
         ((MiBandState) mState).resetSequence();
         resetWatchdog();
@@ -423,8 +429,9 @@ public class MiBandService extends BaseBluetoothSequencer {
         if (((MiBandState) mState).isStartSequence()) {
             changeState(INIT);
         } else {
-            handleCommand();
+            return handleCommand();
         }
+        return true;
     }
 
     private boolean isStaleReading() {
@@ -642,9 +649,26 @@ public class MiBandService extends BaseBluetoothSequencer {
                     batteryInfo = new BatteryInfo(readValue);
                     deviceInfo.setBatteryLevel(batteryInfo.getLevelInPercent());
                     UserError.Log.d(TAG, "Battery level: " + batteryInfo.getLevelInPercent() + "%");
+                    changeNextState();
                 }, throwable -> {
                     UserError.Log.e(TAG, "Could not read battery info: " + throwable);
+                    changeNextState();
                 });
+    }
+
+    @SuppressLint("CheckResult")
+    private void readRSSI() {
+        I.connection.readRssi().subscribe(
+                rssi -> {
+                    UserError.Log.d(TAG, "RSSI: " + rssi);
+                    deviceInfo.setRssi(rssi);
+                    changeNextState();
+                },
+                throwable -> {
+                    UserError.Log.d(TAG, "Cannot receive RSSI:" + throwable);
+                    changeNextState();
+                }
+        );
     }
 
     @SuppressLint("CheckResult")
@@ -768,6 +792,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 Helper.wakeUpIntent(HuamiXdrip.getAppContext(), CALL_ALERT_DELAY, bgServiceIntent);
                 AudioManager audioManager = (AudioManager) HuamiXdrip.getAppContext().getSystemService(Context.AUDIO_SERVICE);
                 ringerModeBackup = audioManager.getRingerMode();
+                UserError.Log.d(TAG, "Backup ringer mode: " + ringerModeBackup);
                 break;
             case MIBAND_NOTIFY_TYPE_MESSAGE:
                 String title = queueItem.bundle.getString("title");
@@ -1160,23 +1185,11 @@ public class MiBandService extends BaseBluetoothSequencer {
                 ));
     }
 
-    private void readRSSI() {
-        I.connection.readRssi().subscribe(
-                rssi -> {
-                    UserError.Log.d(TAG, "RSSI: " + rssi);
-                    deviceInfo.setRssi(rssi);
-                    changeNextState();
-                },
-                throwable -> {
-                    UserError.Log.d(TAG, "Cannot receive RSSI:" + throwable);
-                    changeNextState();
-                }
-        );
-    }
+
 
     @Override
     protected synchronized boolean automata() {
-        UserError.Log.d(TAG, "Automata called in" + TAG);
+        UserError.Log.d(TAG, "Automata called in " + TAG);
         extendWakeLock(10000);
         if (shouldServiceRun()) {
             bgDataRepository.setNewConnectionState(I.state);
@@ -1232,8 +1245,11 @@ public class MiBandService extends BaseBluetoothSequencer {
                     }
                     changeNextState();
                     break;
-                case MiBandState.READ_RSSI:
+                case MiBandState.GET_RSSI:
                     readRSSI();
+                    changeNextState();
+                    break;
+                case MiBandState.WAIT_GET_RSSI:
                     break;
                 case MiBandState.INSTALL_WATCHFACE:
                     installWatchface();
@@ -1264,6 +1280,8 @@ public class MiBandService extends BaseBluetoothSequencer {
                     getBatteryInfo();
                     changeNextState();
                     break;
+                case MiBandState.WAIT_BATTERY_INFO:
+                    break;
                 case MiBandState.QUEUE_MESSAGE:
                     queueMessage();
                     break;
@@ -1279,6 +1297,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                     Helper.threadSleep((Constants.SECOND_IN_MS));
                     AudioManager audioManager = (AudioManager) HuamiXdrip.getAppContext().getSystemService(Context.AUDIO_SERVICE);
                     audioManager.setRingerMode(ringerModeBackup);
+                    UserError.Log.d(TAG, "Restore ringer mode: " + ringerModeBackup);
                     startBgTimer();
                     changeNextState();
                     break;
@@ -1287,7 +1306,9 @@ public class MiBandService extends BaseBluetoothSequencer {
                     changeNextState();
                     break;
                 case SLEEP:
-                    handleCommand();
+                    if (!handleCommand()){
+                        stopWatchdog();
+                    };
                     break;
                 case CLOSED:
                     stopConnection();
@@ -1538,10 +1559,12 @@ public class MiBandService extends BaseBluetoothSequencer {
         static final String GET_MODEL_NAME = "Getting model name";
         static final String GET_SOFT_REVISION = "Getting software revision";
         static final String ENABLE_NOTIFICATIONS = "Enabling Notifications";
-        static final String GET_BATTERY_INFO = "Getting Battery Info";
-        static final String READ_RSSI = "Read RSSI";
+        static final String GET_BATTERY_INFO = "Request Battery";
+        static final String WAIT_BATTERY_INFO = "Waiting Battery Info";
+        static final String GET_RSSI = "Request RSSI";
+        static final String WAIT_GET_RSSI = "Waiting RSSI intf";
         static final String INSTALL_WATCHFACE = "Preparing Watchface";
-        static final String INSTALL_WATCHFACE_IN_PROGRESS = "Watchface uploading";
+        static final String INSTALL_WATCHFACE_IN_PROGRESS = "Watchface Uploading";
         static final String INSTALL_WATCHFACE_FINISHED = "Watchface Uploading Finished";
         static final String RESTORE_NIGHTMODE = "Restore Nightmode";
         static final String VIBRATE_AFTER_READING = "Vibrate";
@@ -1568,7 +1591,9 @@ public class MiBandService extends BaseBluetoothSequencer {
             sequence.add(AUTHORIZE);
             sequence.add(ENABLE_NOTIFICATIONS);
             sequence.add(GET_BATTERY_INFO);
-            sequence.add(READ_RSSI);
+            sequence.add(WAIT_BATTERY_INFO);
+            sequence.add(GET_RSSI);
+            sequence.add(WAIT_GET_RSSI);
         }
 
         void prepareFinalSequences() {
