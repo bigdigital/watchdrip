@@ -1,13 +1,21 @@
 package com.thatguysservice.huami_xdrip;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.preference.EditTextPreference;
@@ -54,6 +62,29 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         servicePref.setChecked(state);
     }
 
+    /// Called from onCreate - this puts up a dialog explaining we need permissions, and goes to the correct Activity
+
+    public static class NotifyPolicyPermissionsDialogFragment extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            Context context = getContext();
+            builder.setMessage(context.getString(R.string.permission_notification_policy_access,
+                    getContext().getString(R.string.app_name),
+                    getContext().getString(R.string.ok)))
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                startActivity(new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
+                            }
+                        }
+                    });
+            return builder.create();
+        }
+    }
+
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
@@ -81,7 +112,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private boolean checkAndRequestBTPermissions() {
         FragmentActivity context = this.getActivity();
         List<String> listPermissionsNeeded = new ArrayList<>();
-
         // Location needs to be enabled for Bluetooth discovery on Marshmallow.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -89,6 +119,15 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
             if (!EasyPermissions.hasPermissions(context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 listPermissionsNeeded.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+           /* In order to be able to set ringer mode to silent
+           the permission to access notifications is needed above Android M
+           ACCESS_NOTIFICATION_POLICY is also needed in the manifest */
+            if (!((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE)).isNotificationPolicyAccessGranted()) {
+                // Put up a dialog explaining why we need permissions (Polite, but also Play Store policy)
+                // When accepted, we open the Activity for Notification access
+                DialogFragment dialog = new NotifyPolicyPermissionsDialogFragment();
+                dialog.show(getActivity().getSupportFragmentManager(), "PermissionsDialogFragment");
             }
         } else {
             // Android 10 check additional permissions

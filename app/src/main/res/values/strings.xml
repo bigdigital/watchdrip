@@ -136,4 +136,5 @@
     <string name="action_get_statistic">Get statistic</string>
     <string name="xdrip_app_no_response">No response from xDrip App. Please check xDrip settings</string>
     <string name="watch_disconnected">Disconnected</string>
+    <string name="permission_notification_policy_access">%1$s needs access to Do Not Disturb settings in order to restore initial phone mode after alarm were silenced .\n\nPlease tap \'%2$s\' then \'%1$s\' and enable \'Allow Do Not Disturb\', then tap \'Back\' to return to %1$s</string>
 </resources>

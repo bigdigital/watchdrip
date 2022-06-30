@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.util.Log;
 
 import com.eveningoutpost.dexdrip.services.broadcastservice.models.Settings;
 import com.thatguysservice.huami_xdrip.BuildConfig;
@@ -161,7 +162,8 @@ public class BroadcastService extends Service {
                 }
                 xdripResponceIntend = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONCE);
                 Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, xdripResponceIntend);
-                intent.putExtra(INTENT_SETTINGS, getSettings());
+                Settings settings = getSettings();
+                intent.putExtra(INTENT_SETTINGS, settings);
                 break;
             case CMD_SNOOZE_ALERT:
                 intent.putExtra(INTENT_ALERT_TYPE, intentIn.getStringExtra(INTENT_ALERT_TYPE));
@@ -187,8 +189,8 @@ public class BroadcastService extends Service {
 
     public Settings getSettings() {
         Settings settings = new Settings();
-        settings.setGraphStart(Helper.tsl() - Constants.HOUR_IN_MS * MiBandEntry.getGraphHours());
-        settings.setGraphEnd(Helper.tsl() + Constants.MINUTE_IN_MS * 30);
+        settings.setGraphStart(Constants.HOUR_IN_MS * MiBandEntry.getGraphHours());
+        settings.setGraphEnd(Constants.MINUTE_IN_MS * 30);
         settings.setApkName(getString(R.string.app_name));
         settings.setDisplayGraph(true);
         return settings;

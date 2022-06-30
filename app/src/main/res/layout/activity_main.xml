@@ -72,7 +72,7 @@
                             android:layout_gravity="center_vertical"
                             android:gravity="center_horizontal|center_vertical"
                             android:text="No data"
-                            android:textSize="56sp" />
+                            android:textSize="22pt" />
 
                         <TextView
                             android:id="@+id/bgDataArrowTextView"
@@ -80,7 +80,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:gravity="center_horizontal|center_vertical"
-                            android:textSize="50sp" />
+                            android:textSize="20pt" />
 
                         <TextView
                             android:id="@+id/bgDataTimeTextView"
