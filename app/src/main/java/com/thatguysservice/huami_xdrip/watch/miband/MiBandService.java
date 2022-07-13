@@ -895,7 +895,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         boolean sendBGNotification = false;
         if (deviceInfo.getRssi() < MINIMUM_RSSI) {
             UserError.Log.d(TAG, "Too weak BT connection");
-            sendBGNotification = true;
+            //sendBGNotification = true;
         }
         if (deviceInfo.getBatteryLevel() < MINIMUM_BATTERY_LEVEL) {
             UserError.Log.d(TAG, "Battery is too low");
@@ -1525,6 +1525,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     private void updateBgData() {
         bgData = new BgData(queueItem.bundle);
         bgDataRepository.setNewBgData(bgData);
+        MiBand.setUnit(bgData.isDoMgdl());
     }
 
     public void updateConnectionState(String status ){
@@ -1539,11 +1540,6 @@ public class MiBandService extends BaseBluetoothSequencer {
         msg.setMessageType(MIBAND_NOTIFY_TYPE_MESSAGE);
 
         return msg;
-    }
-
-    public enum MIBAND_INTEND_STATES {
-        UPDATE_PREF_SCREEN,
-        UPDATE_PREF_DATA
     }
 
     public static class MiBandState extends BaseBluetoothSequencer.BaseState {
@@ -1562,7 +1558,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         static final String GET_BATTERY_INFO = "Request Battery";
         static final String WAIT_BATTERY_INFO = "Waiting Battery Info";
         static final String GET_RSSI = "Request RSSI";
-        static final String WAIT_GET_RSSI = "Waiting RSSI intf";
+        static final String WAIT_GET_RSSI = "Waiting RSSI info";
         static final String INSTALL_WATCHFACE = "Preparing Watchface";
         static final String INSTALL_WATCHFACE_IN_PROGRESS = "Watchface Uploading";
         static final String INSTALL_WATCHFACE_FINISHED = "Watchface Uploading Finished";

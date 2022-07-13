@@ -1005,4 +1005,12 @@ public class Helper {
     }
 
 
+    public static String unit(boolean doMgdl) {
+        if (doMgdl) {
+            return "mg/dl";
+        } else {
+            return "mmol";
+        }
+    }
+
 }

@@ -470,6 +470,12 @@ public class WatchFaceGenerator {
             data.drawFormattedTextOnCanvas(canvas, data.getBatteryLevel(), config.batteryLevel);
         }
 
+        //draw custom text
+      /*  if (config.customText != null) {
+            data.drawFormattedTextOnCanvas(canvas, data.getBatteryLevel(), config.batteryLevel);
+        }*/
+
+
         return resultBitmap;
     }
 

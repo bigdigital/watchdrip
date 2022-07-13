@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WatchDrip+</string>
+    <string name="app_name" translatable="false">WatchDrip+</string>
     <string name="unit_second">sec</string>
     <string name="unit_minute">min</string>
     <string name="unit_hour">hour</string>
@@ -17,11 +17,7 @@
     <string name="title_miband_screen_battery">Show Battery</string>
     <string name="title_miband_show_date">Show date on the screen</string>
     <string name="title_miband_switch_display_on_wrist">Switch display on wrist</string>
-    <string name="title_miband_units">Units</string>
-    <string name="summary_miband_units">Choose the distance unit used on band </string>
-    <string name="title_miband_goal_notification">Goal notification</string>
     <string name="summary_miband_goal_notification">Your watch will vibrate when you reach a goal</string>
-    <string name="title_miband_locale_24_hour">24 Hour clock</string>
     <string name="summary_miband_locale_24_hour">Show 24 Hour clock</string>
 
     <string name="title_miband_nightmode_category">Night mode settings</string>
@@ -39,7 +35,6 @@
     <string name="summary_miband_collect_steps">Would collect steps data from band. Update interval can be configured in MiFit or any third-party application</string>
     <string name="title_miband_us_date_format">Date format</string>
 
-    <string name="title_miband_date_settings_category">Date settings</string>
     <string name="summary_miband_us_date_format">Watchface date format. US(MM/dd),EU(dd/MM)</string>
 
     <string name="title_miband_authkey">Auth Key</string>
@@ -50,20 +45,13 @@
     <string name="title_miband_graph_category">Graph options</string>
     <string name="title_miband_graph_treatment_enable">Show bolus</string>
 
+    <string name="title_miband_graph_hours">Watchface graph hours</string>
+    <string name="summary_miband_graph_hours">Set how many hours in graph</string>
+
     <string name="title_miband_miband_graph_limit">Graph limit</string>
     <string name="summary_miband_graph_limit">Defines the maximum BG value which would be visible on the graph</string>
 
     <string name="title_miband_update_bg">Update BG manually</string>
-    <string name="title_miband_general_settings_category">General settings</string>
-
-    <string name="title_miband_screen_notifications">Show Notifications</string>
-    <string name="title_miband_screen_weather">Show Weather</string>
-    <string name="title_miband_screen_activity">Show Activity</string>
-    <string name="title_miband_screen_more">Show More</string>
-    <string name="title_miband_screen_status">Show Status</string>
-    <string name="title_miband_screen_heart_rate">Show Heart rate</string>
-    <string name="title_miband_screen_timer">Show Timer</string>
-    <string name="title_miband_screen_nfc">Show NFC (if available)</string>
 
     <string name="title_miband_send_alarms_other">Other alarms </string>
     <string name="summary_miband_send_alarms_other">Covers all xDrip alarms, except glucose high/low alarms</string>
@@ -89,7 +77,7 @@
     <string name="please_allow_permission">Please allow the following permissions</string>
     <string name="permission_location_info">Location information. Without Location permission Android Bluetooth scan doesn\'t work\n</string>
     <string name="permissions_background_location_info">Background location information. Android 10 and above need background location for Bluetooth to work\n</string>
-    <string name="permissions_file_system_read">Access to photos, media and files on your device. To auto-populate authentication code from freemyband\n</string>
+    <string name="permissions_file_system_read">"Access to photos, media and files on your device. To auto-populate authentication code from freemyband "</string>
     <string name="permissions_file_system">Access to photos, media and files on your device. To be able to read custom watchface\n</string>
     <string name="permission_dialog_enable_permissions_in_settings">The permission were permanently disabled. Please go to application system settings and enable permissions</string>
 
@@ -105,7 +93,6 @@
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="nav_menu_scan">Scan</string>
-    <string name="title_activity_scrolling">ScrollingActivity</string>
 
     <string name="action_settings">Settings</string>
     <string name="send_logs">Submit</string>
@@ -137,4 +124,6 @@
     <string name="xdrip_app_no_response">No response from xDrip App. Please check xDrip settings</string>
     <string name="watch_disconnected">Disconnected</string>
     <string name="permission_notification_policy_access">%1$s needs access to Do Not Disturb settings in order to restore initial phone mode after alarm were silenced .\n\nPlease tap \'%2$s\' then \'%1$s\' and enable \'Allow Do Not Disturb\', then tap \'Back\' to return to %1$s</string>
+    <string name="set_value">Set</string>
+    <string name="close_value">Close</string>
 </resources>

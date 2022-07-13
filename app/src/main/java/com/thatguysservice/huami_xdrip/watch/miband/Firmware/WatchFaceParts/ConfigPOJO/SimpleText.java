@@ -9,8 +9,8 @@ public class SimpleText {
     public Position position = new Position();
 
     @SerializedName("text_pattern")
-    public String textPattern = "$value at $time";
+    public String textPattern = "";
 
     @SerializedName("outdated_text_pattern")
-    public String outdatedTextPattern = "$value $time ago";
+    public String outdatedTextPattern = "";
 }

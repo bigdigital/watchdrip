@@ -3,9 +3,9 @@ package com.thatguysservice.huami_xdrip.watch.miband;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.Preference;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.Preference;
 
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
@@ -68,10 +68,8 @@ public class MiBandEntry {
                     setGraphLimit(ivalue);
                     final String title_text = HuamiXdrip.gs(R.string.title_miband_miband_graph_limit);
 
-                   /* boolean isgMgDl = Unitized.usingMgDl();
-                    final String unit = Unitized.unit(isgMgDl);*/
-                    boolean isgMgDl = true;
-                    String unit = "mmol";
+                    boolean isgMgDl = MiBand.usingMgDl();
+                    final String unit = Helper.unit(isgMgDl);
                     double dVal;
                     if (isgMgDl) {
                         dVal = ivalue * Constants.MMOLL_TO_MGDL;

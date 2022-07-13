@@ -1,25 +1,74 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <SwitchPreference
-        app:defaultValue="true"
-        app:key="miband_send_readings"
-        app:title="@string/title_send_readings" />
+        android:defaultValue="true"
+        android:key="miband_send_readings"
+        android:title="@string/title_send_readings" />
     <SwitchPreference
-        app:defaultValue="false"
-        app:dependency="miband_send_readings"
-        app:key="miband_vibrate_on_readings"
-        app:title="@string/title_vibrate_on_readings" />
+        android:defaultValue="false"
+        android:dependency="miband_send_readings"
+        android:key="miband_vibrate_on_readings"
+        android:title="@string/title_vibrate_on_readings" />
+
+    <PreferenceCategory
+        android:title="@string/title_miband_graph_category"
+        android:key="miband_graph_category">
+        <EditTextPreference
+            android:defaultValue="4"
+            android:digits="0123456789"
+            android:inputType="number"
+            android:key="miband_graph_hours"
+            android:summary="@string/summary_miband_graph_hours"
+            android:title="@string/title_miband_graph_hours" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="miband_graph_treatment_enable"
+            android:title="@string/title_miband_graph_treatment_enable" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="miband_nightmode_category"
+        android:title="@string/title_miband_nightmode_category">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="miband_nightmode_enabled"
+            android:summary="@string/summary_miband_nightmode_enabled"
+            android:title="@string/title_miband_nightmode_enabled" />
+        <com.thatguysservice.huami_xdrip.utils.time.TimePreference
+            android:key="miband_nightmode_start"
+            android:dependency="miband_nightmode_enabled"
+            app:allowDividerAbove="false"
+            app:iconSpaceReserved="true"
+            android:title="@string/title_miband_nightmode_start">
+        </com.thatguysservice.huami_xdrip.utils.time.TimePreference>
+        <com.thatguysservice.huami_xdrip.utils.time.TimePreference
+            android:key="miband_nightmode_end"
+            app:iconSpaceReserved="true"
+            app:allowDividerAbove="false"
+            android:dependency="miband_nightmode_enabled"
+            android:title="@string/title_miband_nightmode_end">
+        </com.thatguysservice.huami_xdrip.utils.time.TimePreference>
+        <SeekBarPreference
+            android:defaultValue="6"
+            app:allowDividerAbove="false"
+            android:dependency="miband_nightmode_enabled"
+            android:key="miband_nightmode_interval"
+            android:max="23"
+            android:summary="@string/summary_miband_interval_in_nightmode"
+            android:title="@string/title_miband_interval_in_nightmode" />
+    </PreferenceCategory>
     <SwitchPreference
-        app:defaultValue="false"
-        app:key="debug_miband_use_custom_watchface"
-        app:summary="@string/use_custom_watcface_summary"
-        app:switchTextOff="@string/short_off_text_for_switches"
-        app:switchTextOn="@string/short_on_text_for_switches"
-        app:title="@string/use_custom_watcface_title" />
+        android:defaultValue="false"
+        android:key="debug_miband_use_custom_watchface"
+        android:summary="@string/use_custom_watcface_summary"
+        android:switchTextOff="@string/short_off_text_for_switches"
+        android:switchTextOn="@string/short_on_text_for_switches"
+        android:title="@string/use_custom_watcface_title"
+        app:allowDividerAbove="true"/>
     <SwitchPreference
-        app:defaultValue="false"
-        app:key="debug_miband_disable_high_mtu"
-        app:summary="@string/summary_disable_hight_mtu"
-        app:switchTextOff="@string/short_off_text_for_switches"
-        app:switchTextOn="@string/short_on_text_for_switches"
-        app:title="@string/title_disable_hight_mtu" />
+        android:defaultValue="false"
+        android:key="debug_miband_disable_high_mtu"
+        android:summary="@string/summary_disable_hight_mtu"
+        android:switchTextOff="@string/short_off_text_for_switches"
+        android:switchTextOn="@string/short_on_text_for_switches"
+        android:title="@string/title_disable_hight_mtu" />
 </PreferenceScreen>

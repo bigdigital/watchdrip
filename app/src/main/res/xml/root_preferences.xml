@@ -1,33 +1,33 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <SwitchPreference
-        app:defaultValue="false"
-        app:key="miband_enabled"
-        app:summary="@string/summary_miband_enable"
-        app:title="@string/title_miband_enable" />
+        android:defaultValue="false"
+        android:key="miband_enabled"
+        android:summary="@string/summary_miband_enable"
+        android:title="@string/title_miband_enable" />
     <EditTextPreference
-        app:key="miband_data_mac"
-        app:summary="@string/summary_miband_mac"
-        app:title="@string/title_miband_mac" />
+        android:key="miband_data_mac"
+        android:summary="@string/summary_miband_mac"
+        android:title="@string/title_miband_mac" />
     <EditTextPreference
-        app:icon="@drawable/ic_vpn_key"
-        app:key="miband_data_authkey"
-        app:summary="@string/summary_miband_authkey"
-        app:title="@string/title_miband_authkey" />
+        android:icon="@drawable/ic_vpn_key"
+        android:key="miband_data_authkey"
+        android:summary="@string/summary_miband_authkey"
+        android:title="@string/title_miband_authkey" />
     <SwitchPreference
-        app:defaultValue="true"
-        app:dependency="miband_enabled"
-        app:key="miband_send_alarms"
-        app:summary="@string/summary_send_alarms"
-        app:title="@string/title_send_alarms" />
+        android:defaultValue="true"
+        android:dependency="miband_enabled"
+        android:key="miband_send_alarms"
+        android:summary="@string/summary_send_alarms"
+        android:title="@string/title_send_alarms" />
     <SwitchPreference
-        app:defaultValue="false"
-        app:dependency="miband_enabled"
-        app:key="miband_send_alarms_other"
-        app:summary="@string/summary_miband_send_alarms_other"
-        app:title="@string/title_miband_send_alarms_other" />
+        android:defaultValue="false"
+        android:dependency="miband_enabled"
+        android:key="miband_send_alarms_other"
+        android:summary="@string/summary_miband_send_alarms_other"
+        android:title="@string/title_miband_send_alarms_other" />
     <Preference
-        app:dependency="miband_enabled"
-        app:title="@string/Advanced"
-        app:fragment="com.thatguysservice.huami_xdrip.SettingsAdvancedFragment" />
+        android:dependency="miband_enabled"
+        android:title="@string/Advanced"
+        android:fragment="com.thatguysservice.huami_xdrip.SettingsAdvancedFragment" />
 </PreferenceScreen>

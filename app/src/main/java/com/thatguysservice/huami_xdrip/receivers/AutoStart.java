@@ -14,16 +14,8 @@ public class AutoStart extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null) return;
-        // TODO add intent action filter
-
         try {
             UserError.Log.ueh(TAG, "Device Rebooted - Auto Start: " + intent.getAction());
-        } catch (Exception e) {
-            //
-        }
-
-
-        try {
             BroadcastService.initialStartIfEnabled();
         } catch (Exception e) {
             UserError.Log.wtf(TAG, "Failed to start collector: " + e);

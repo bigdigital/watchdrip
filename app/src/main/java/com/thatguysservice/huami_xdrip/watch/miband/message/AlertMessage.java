@@ -156,7 +156,6 @@ public class AlertMessage extends BaseMessage {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            ;
         } else {
             // some write a null byte instead of leaving out this optional value
             // stream.write(new byte[] {0});

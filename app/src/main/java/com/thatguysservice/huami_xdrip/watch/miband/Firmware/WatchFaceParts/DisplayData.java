@@ -145,7 +145,6 @@ public class DisplayData {
         switch (align) {
             case LEFT:
                 canvas.drawText(text, position.x, position.y, paint);
-                paint.setTextAlign(align);
                 return;
             case CENTER:
                 paint.getTextBounds(text, 0, text.length(), bounds);
@@ -161,7 +160,6 @@ public class DisplayData {
         canvas.rotate(position.rotate, 0, position.y);
         canvas.drawText(text, 0, position.y, paint);
         canvas.restore();
-        paint.setTextAlign(align);
     }
 
     public Paint getTextPaint(TextSettings text) {
@@ -287,7 +285,7 @@ public class DisplayData {
         }
 
         public Builder setIoB(String iob) {
-            if (iob.isEmpty()) {
+            if (iob.isEmpty() ) {
                 DisplayData.this.pumpIoB = iob;
                 return this;
             }
@@ -364,8 +362,10 @@ public class DisplayData {
             }
 
             setIoB(getDouble(pumpIob, 2));
-            setPumpReservoir(getDouble(pumpReservoir, 1));
-            setPumpBattery(getDouble(pumpBattery, 0));
+            setPumpReservoir(String.valueOf(pumpReservoir));
+            setPumpBattery(String.valueOf(pumpBattery));
+
+            setBatteryLevel( bundle.getInt("phoneBattery"));
 
             double insulin = bundle.getDouble("treatment.insulin", -1);
             double carbs = bundle.getDouble("treatment.carbs", -1);

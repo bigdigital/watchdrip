@@ -3,12 +3,17 @@ package com.thatguysservice.huami_xdrip;
 import android.Manifest;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.TwoStatePreference;
 
+import com.thatguysservice.huami_xdrip.utils.time.TimePreference;
+import com.thatguysservice.huami_xdrip.utils.time.TimePreferenceDialogFragmentCompat;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 import java.util.ArrayList;
@@ -25,15 +30,24 @@ public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.advanced_preferences, rootKey);
         customWatcfacePref = findPreference(MiBandEntry.PREF_MIBAND_USE_CUSTOM_WATHCFACE);
-        customWatcfacePref.setOnPreferenceChangeListener((preference, newValue) -> {
-            if ((Boolean) newValue) {
-                boolean result = checkAndRequestFilePermissions();
-                if (!result) {
-                    return false;
+        if (customWatcfacePref != null) {
+            customWatcfacePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                if ((Boolean) newValue) {
+                    boolean result = checkAndRequestFilePermissions();
+                    return result;
                 }
-            }
-            return true;
-        });
+                return true;
+            });
+        }
+
+        Preference miband_nightmode_interval = findPreference(MiBandEntry.PREF_MIBAND_NIGHTMODE_INTERVAL);
+        if (miband_nightmode_interval != null) {
+            miband_nightmode_interval.setOnPreferenceChangeListener(MiBandEntry.sBindMibandPreferenceChangeListener);
+            MiBandEntry.sBindMibandPreferenceChangeListener.onPreferenceChange(miband_nightmode_interval,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(miband_nightmode_interval.getContext())
+                            .getInt(miband_nightmode_interval.getKey(), -1));
+        }
     }
 
     private boolean checkAndRequestFilePermissions() {
@@ -75,9 +89,26 @@ public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
     public void onResume() {
         super.onResume();
 
-        if (MiBandEntry.isNeedToUseCustomWatchface() && !checkAndRequestFilePermissions()){
+        if (MiBandEntry.isNeedToUseCustomWatchface() && !checkAndRequestFilePermissions()) {
             setWatchfacePref(false);
         }
     }
 
+
+    @Override
+    public void onDisplayPreferenceDialog(Preference preference) {
+
+        if (preference instanceof TimePreference) {
+            DialogFragment dialogFragment = new TimePreferenceDialogFragmentCompat();
+            Bundle bundle = new Bundle(1);
+            bundle.putString("key", preference.getKey());
+            dialogFragment.setArguments(bundle);
+            dialogFragment.setTargetFragment(this, 0);
+            if (getFragmentManager() != null) {
+                dialogFragment.show(getFragmentManager(), "androidx.preference.PreferenceFragment.DIALOG");
+            }
+        } else {
+            super.onDisplayPreferenceDialog(preference);
+        }
+    }
 }

@@ -43,12 +43,11 @@ public class AlertLevelMessage extends BaseMessage {
     }
 
     public enum AlertLevelType {
-
         NoAlert(0),
         MidAlert(1),
         HightAlert(2),
         VibrateAlert(3),
-        Custom((byte) 0xfa);// followed by another uin8
+        Custom((byte) 0xfa);// followed by another uint8
         @Getter
         private final byte value;
 

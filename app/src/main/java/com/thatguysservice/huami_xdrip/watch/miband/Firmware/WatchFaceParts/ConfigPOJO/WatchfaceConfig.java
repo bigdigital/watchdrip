@@ -49,5 +49,8 @@ public class WatchfaceConfig {
     public int resourceToReplace = 0;
 
     @SerializedName("battery_level")
-    public SimpleText batteryLevel;
+    public SimpleText batteryLevel = new SimpleText();
+
+    @SerializedName("status_text")
+    SimpleText[] statusText;
 }

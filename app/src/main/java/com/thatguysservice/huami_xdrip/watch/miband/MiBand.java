@@ -21,6 +21,18 @@ public class MiBand {
     private static final String PREF_MIBAND_MODEL = "miband_model_";
     private static final String PREF_MIBAND_VERSION = "miband_version_";
 
+    public static boolean usingMgDl() {
+        return Pref.getString("units", "mgdl").equals("mgdl");
+    }
+
+    public static void setUnit(Boolean unit) {
+        String unitVal = "mg/dl";
+        if (!unit){
+            unitVal = "mmol";
+        }
+        Pref.setString("units", unitVal);
+    }
+
     public static MiBandType getMibandType() {
         return MiBandType.fromString(getModel());
     }

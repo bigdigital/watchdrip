@@ -12,10 +12,10 @@
     "y": 156
   },
   "bg_value_text": {
-    "color_high": "#f19621",
-    "color_low": "#d20202",
+    "color_high": "#ffe400",
+    "color_low": "#e40000",
     "position": {
-      "x": 190,
+      "x": 198,
       "y": 198
     },
     "text_pattern": "$value",
@@ -25,7 +25,8 @@
       "stroke_width": 2,
       "text_align": "right",
       "text_scale": 0.88,
-      "text_style": "bold"
+      "text_style": "bold",
+      "color": "#1be600"
     }
   },
   "graph": {
@@ -38,23 +39,23 @@
     },
     "low_val_line":{
       "point_radius":2,
-      "color": "#d20202"
+      "color": "#e40000"
     },
     "in_range_line":{
       "point_radius":2,
-      "color": "#1ba8c6"
+      "color": "#1be600"
     },
     "high_val_line":{
       "point_radius":2,
-      "color": "#f19621"
+      "color": "#ffe400"
     },
     "low_line":{
       "display":false,
-      "color": "#d20202"
+      "color": "#e40000"
     },
     "high_line":{
       "display":false,
-      "color": "#f19621"
+      "color": "#ffe400"
     },
     "poly_predictive_line":{
       "line_thickness": 2,
@@ -74,8 +75,8 @@
   },
   "delta_text": {
     "position": {
-      "x": 81,
-      "y": 173
+      "x": 86,
+      "y": 172
     },
     "text_pattern": "$value",
     "outdated_text_pattern": "$value",
@@ -87,7 +88,7 @@
   },
   "delta_time_text": {
     "position": {
-      "x": 232,
+      "x": 10,
       "y": 172
     },
     "text_pattern": "at $time",
@@ -96,13 +97,14 @@
       "font_size": 22,
       "text_scale": 0.88,
       "color": "#9f9f9f",
-      "text_style": "bold"
+      "text_style": "bold",
+      "text_align": "right"
     }
   },
   "treatment_text": {
     "position": {
-      "x": 81,
-      "y": 199
+      "x": 86,
+      "y": 195
     },
     "text_pattern": "$value",
     "outdated_text_pattern": "$value",
@@ -114,8 +116,8 @@
   },
   "treatment_time_text": {
     "position": {
-      "x": 232,
-      "y": 198
+      "x": 10,
+      "y": 195
     },
     "text_pattern": "at $time",
     "outdated_text_pattern": "$time ago",
@@ -123,7 +125,8 @@
       "font_size": 22,
       "text_scale": 0.88,
       "color": "#9f9f9f",
-      "text_style": "bold"
+      "text_style": "bold",
+      "text_align": "right"
     }
   },
   "no_readings_text": {
@@ -150,27 +153,26 @@
   },
   "iob_text": {
     "position": {
-      "x": 50,
+      "x": 161,
       "y": 224
     },
     "text_pattern": "IoB:$value",
     "text_settings": {
       "text_style": "bold",
       "font_size": 25,
-	  "text_scale": 0.9,
-	   "text_align": "right"
+      "text_scale": 0.9
     }
   },
   "battery_level": {
     "position": {
-      "x": 53,
+      "x": 146,
       "y": 224
     },
     "text_pattern": "$value%",
     "text_settings": {
       "font_size": 25,
       "text_style": "bold",
-	  "text_scale": 0.9
+      "text_scale": 0.9
     }
   }
 }

@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">WatchDrip+</string>
     <string name="unit_second">sec</string>
     <string name="unit_minute">min</string>
     <string name="unit_hour">ora</string>
@@ -17,11 +16,7 @@
     <string name="title_miband_screen_battery">Mostra batteria</string>
     <string name="title_miband_show_date">Mostra data sullo schermo</string>
     <string name="title_miband_switch_display_on_wrist">Cambia display al polso</string>
-    <string name="title_miband_units">Unità</string>
-    <string name="summary_miband_units">Scegli l\'unità di misura utilizzata sulla band</string>
-    <string name="title_miband_goal_notification">Notifica obiettivo</string>
     <string name="summary_miband_goal_notification">Il tuo orologio vibrerà quando raggiungi un obiettivo</string>
-    <string name="title_miband_locale_24_hour">Orologio 24 ore</string>
     <string name="summary_miband_locale_24_hour">Mostra orologio 24 ore</string>
 
     <string name="title_miband_nightmode_category">Impostazioni modalità notturna</string>
@@ -39,7 +34,6 @@
     <string name="summary_miband_collect_steps">Riceverа i dati sui passi dalla band. L\'intervallo di aggiornamento può essere configurato in MiFit o in qualsiasi applicazione di terze parti</string>
     <string name="title_miband_us_date_format">Formato data</string>
 
-    <string name="title_miband_date_settings_category">Impostazioni data</string>
     <string name="summary_miband_us_date_format">Formato data del quadrante. US(MM/gg),EU(gg/MM)</string>
 
     <string name="title_miband_authkey">Chiave di autenticazione</string>
@@ -54,16 +48,6 @@
     <string name="summary_miband_graph_limit">Definisce il valore glicemico massimo visibile sul grafico</string>
 
     <string name="title_miband_update_bg">Aggiornamento manuale della glicemia</string>
-    <string name="title_miband_general_settings_category">Impostazioni generali</string>
-
-    <string name="title_miband_screen_notifications">Mostra notifiche</string>
-    <string name="title_miband_screen_weather">Mostra meteo</string>
-    <string name="title_miband_screen_activity">Mostra attivitа</string>
-    <string name="title_miband_screen_more">Mostra di piщ</string>
-    <string name="title_miband_screen_status">Mostra lo stato</string>
-    <string name="title_miband_screen_heart_rate">Mostra la frequenza cardiaca</string>
-    <string name="title_miband_screen_timer">Mostra timer</string>
-    <string name="title_miband_screen_nfc">Mostra NFC (se disponibile)</string>
 
     <string name="title_miband_send_alarms_other">Altri allarmi</string>
     <string name="summary_miband_send_alarms_other">Copre tutti gli allarmi xDrip, eccetto gli allarmi di glicemia alta/bassa</string>
@@ -105,7 +89,6 @@
     <string name="no">No</string>
     <string name="yes">Si</string>
     <string name="nav_menu_scan">Scansione</string>
-    <string name="title_activity_scrolling">ScrollingActivity</string>
 
     <string name="action_settings">Impostazioni</string>
     <string name="send_logs">Invia</string>
@@ -135,4 +118,9 @@
     <string name="action_get_statistic">Ottieni statistiche</string>
     <string name="xdrip_app_no_response">Nessuna risposta dall\'app xDrip. Si prega di controllare le impostazioni di xDrip</string>
     <string name="watch_disconnected">Disconnesso</string>
+    <string name="title_miband_graph_hours">Orario grafico Watchface</string>
+    <string name="summary_miband_graph_hours">Imposta quante ore nel grafico</string>
+    <string name="permission_notification_policy_access">%1$s deve accedere alle impostazioni Non disturbare per ripristinare la modalità telefono iniziale dopo che la sveglia è stata silenziata .</string>
+    <string name="set_value">Set</string>
+    <string name="close_value">Close</string>
 </resources>
