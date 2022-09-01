@@ -12,21 +12,20 @@
     "y": 156
   },
   "bg_value_text": {
-    "color_high": "#ffe400",
-    "color_low": "#e40000",
+    "color_high": "#f19621",
+    "color_low": "#d20202",
     "position": {
-      "x": 198,
+      "x": 190,
       "y": 198
     },
     "text_pattern": "$value",
     "text_settings": {
-      "font_family": "sans-serif",
+      "font_family": "Roboto-Bold",
       "font_size": 60,
       "stroke_width": 2,
       "text_align": "right",
       "text_scale": 0.88,
-      "text_style": "bold",
-      "color": "#1be600"
+      "text_style": "bold"
     }
   },
   "graph": {
@@ -39,23 +38,23 @@
     },
     "low_val_line":{
       "point_radius":2,
-      "color": "#e40000"
+      "color": "#d20202"
     },
     "in_range_line":{
       "point_radius":2,
-      "color": "#1be600"
+      "color": "#1ba8c6"
     },
     "high_val_line":{
       "point_radius":2,
-      "color": "#ffe400"
+      "color": "#f19621"
     },
     "low_line":{
       "display":false,
-      "color": "#e40000"
+      "color": "#d20202"
     },
     "high_line":{
       "display":false,
-      "color": "#ffe400"
+      "color": "#f19621"
     },
     "poly_predictive_line":{
       "line_thickness": 2,
@@ -75,20 +74,21 @@
   },
   "delta_text": {
     "position": {
-      "x": 86,
-      "y": 172
+      "x": 81,
+      "y": 173
     },
     "text_pattern": "$value",
     "outdated_text_pattern": "$value",
     "text_settings": {
       "font_size": 24,
       "text_align": "right",
+      "font_family": "Roboto-Bold",
       "text_style": "bold"
     }
   },
   "delta_time_text": {
     "position": {
-      "x": 10,
+      "x": 232,
       "y": 172
     },
     "text_pattern": "at $time",
@@ -97,27 +97,28 @@
       "font_size": 22,
       "text_scale": 0.88,
       "color": "#9f9f9f",
-      "text_style": "bold",
-      "text_align": "right"
+      "font_family": "Roboto-Bold",
+      "text_style": "bold"
     }
   },
   "treatment_text": {
     "position": {
-      "x": 86,
-      "y": 195
+      "x": 81,
+      "y": 199
     },
     "text_pattern": "$value",
     "outdated_text_pattern": "$value",
     "text_settings": {
       "font_size": 24,
       "text_align": "right",
+      "font_family": "Roboto-Bold",
       "text_style": "bold"
     }
   },
   "treatment_time_text": {
     "position": {
-      "x": 10,
-      "y": 195
+      "x": 232,
+      "y": 198
     },
     "text_pattern": "at $time",
     "outdated_text_pattern": "$time ago",
@@ -125,8 +126,8 @@
       "font_size": 22,
       "text_scale": 0.88,
       "color": "#9f9f9f",
-      "text_style": "bold",
-      "text_align": "right"
+      "font_family": "Roboto-Bold",
+      "text_style": "bold"
     }
   },
   "no_readings_text": {
@@ -136,6 +137,7 @@
     },
     "text_pattern": "No data",
     "text_settings": {
+      "font_family": "Roboto-Regular",
       "font_size": 30,
       "text_align": "center"
     }
@@ -147,29 +149,33 @@
     },
     "text_pattern": "at $time",
     "text_settings": {
+      "font_family": "Roboto-Regular",
       "font_size": 24,
       "text_align": "center"
     }
   },
   "iob_text": {
     "position": {
-      "x": 161,
+      "x": 50,
       "y": 224
     },
     "text_pattern": "IoB:$value",
     "text_settings": {
+      "font_family": "Roboto-Bold",
       "text_style": "bold",
       "font_size": 25,
-      "text_scale": 0.9
+      "text_scale": 0.9,
+      "text_align": "right"
     }
   },
   "battery_level": {
     "position": {
-      "x": 146,
+      "x": 53,
       "y": 224
     },
     "text_pattern": "$value%",
     "text_settings": {
+      "font_family": "Roboto-Bold",
       "font_size": 25,
       "text_style": "bold",
       "text_scale": 0.9

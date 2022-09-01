@@ -49,14 +49,17 @@ public class DisplayData {
     private int batteryLevel;
     private BgData bgData;
 
-    public DisplayData(Bundle intent, BgData bgData, WatchfaceConfig config) {
+    private AssetManager assetManager;
+
+    public DisplayData(Bundle intent, BgData bgData, WatchfaceConfig config, AssetManager assetManager) {
         this.bundle = intent;
         this.bgData = bgData;
         this.config = config;
+        this.assetManager = assetManager;
     }
 
-    public static Builder newBuilder(Bundle intent, BgData bgData, AssetManager assetManager, WatchfaceConfig config) {
-        return new DisplayData(intent, bgData, config).new Builder(assetManager);
+    public static Builder newBuilder(Bundle intent, BgData bgData, WatchfaceConfig config, AssetManager assetManager) {
+        return new DisplayData(intent, bgData, config, assetManager).new Builder();
     }
 
     public BgData getBgData() {
@@ -179,13 +182,23 @@ public class DisplayData {
         paint.setAntiAlias(true);
 
         Typeface tf = null;
-        if (MiBandEntry.isNeedToUseCustomWatchface() && text.fontFamily != null) {
-            final String dir = getExternalDir();
-            final File fontFile = new File(dir + "/fonts/" + text.fontFamily);
-            if (fontFile.exists()) {
+        if (text.fontFamily != null) {
+            if (MiBandEntry.isNeedToUseCustomWatchface()) {
+                final String dir = getExternalDir();
+                final File fontFile = new File(dir + "/fonts/" + text.fontFamily);
+                if (fontFile.exists()) {
+                    try {
+                        tf = Typeface.createFromFile(fontFile);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+            if (tf == null) {
                 try {
-                    tf = Typeface.createFromFile(fontFile);
-                }catch (Exception e){
+                    String assetFontsDir = "fonts/";
+                    tf = Typeface.createFromAsset(assetManager, assetFontsDir + text.fontFamily);
+                } catch (Exception e) {
 
                 }
             }
@@ -272,12 +285,6 @@ public class DisplayData {
     }
 
     public class Builder {
-        private AssetManager assetManager;
-
-        public Builder(AssetManager assetManager) {
-            this.assetManager = assetManager;
-        }
-
 
         public Builder setShowTreatment(boolean showTreatment) {
             DisplayData.this.showTreatment = showTreatment;
@@ -315,7 +322,7 @@ public class DisplayData {
 
         public Builder setPredictIoB(String iob) {
             iob = getEmptyIfNull(iob);
-            if (iob.isEmpty() ) {
+            if (iob.isEmpty()) {
                 DisplayData.this.predictIoB = iob;
                 return this;
             }
@@ -327,7 +334,7 @@ public class DisplayData {
 
         public Builder setPredictWpB(String wpb) {
             wpb = getEmptyIfNull(wpb);
-            if (wpb.isEmpty() ) {
+            if (wpb.isEmpty()) {
                 DisplayData.this.predictWpB = wpb;
                 return this;
             }
@@ -340,7 +347,7 @@ public class DisplayData {
 
         public Builder setPumpIob(String iob) {
             iob = getEmptyIfNull(iob);
-            if ( iob.isEmpty() ) {
+            if (iob.isEmpty()) {
                 DisplayData.this.pumpIoB = iob;
                 return this;
             }
@@ -423,7 +430,7 @@ public class DisplayData {
             setPumpReservoir(String.valueOf(pumpReservoir));
             setPumpBattery(String.valueOf(pumpBattery));
 
-            setBatteryLevel( bundle.getInt("phoneBattery"));
+            setBatteryLevel(bundle.getInt("phoneBattery"));
 
             double insulin = bundle.getDouble("treatment.insulin", -1);
             double carbs = bundle.getDouble("treatment.carbs", -1);
@@ -434,16 +441,15 @@ public class DisplayData {
             String treatmentText = "";
             if (insulin > 0) {
                 treatmentText = treatmentText + (Helper.qs(insulin, 2) + "u").replace(".0u", "u");
-            }
-            else if (carbs > 0) {
-               treatmentText = treatmentText + (Helper.qs(carbs, 1) + "g").replace(".0g", "g");
+            } else if (carbs > 0) {
+                treatmentText = treatmentText + (Helper.qs(carbs, 1) + "g").replace(".0g", "g");
             }
 
             if (treatmentText.length() > 0) {
                 since = Helper.msSince(timeStampVal);
-                if (since < Constants.HOUR_IN_MS*6) {
-                    timeStampText = hourMinuteString(timeStampVal);}
-                else if (since < Constants.HOUR_IN_MS * 12) {
+                if (since < Constants.HOUR_IN_MS * 6) {
+                    timeStampText = hourMinuteString(timeStampVal);
+                } else if (since < Constants.HOUR_IN_MS * 12) {
                     isOld = true;
                     timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStampVal));
                 } else {

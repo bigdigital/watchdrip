@@ -19,7 +19,7 @@
     },
     "text_pattern": "$value",
     "text_settings": {
-      "font_family": "sans-serif",
+      "font_family": "Roboto-Bold",
       "font_size": 66,
       "stroke_width": 2,
       "text_align": "right",
@@ -35,6 +35,7 @@
     "text_pattern": "$value at $time",
     "outdated_text_pattern": "$value $time ago",
     "text_settings": {
+      "font_family": "Roboto-Regular",
       "font_size": 24,
       "text_align": "right"
     }
@@ -55,6 +56,7 @@
     },
     "text_pattern": "IoB: $value",
     "text_settings": {
+      "font_family": "Roboto-Bold",
 	  "text_style": "bold",
       "font_size": 25,
       "text_align": "right"
@@ -68,6 +70,7 @@
     "text_pattern": "$value at $time",
     "outdated_text_pattern": "$value $time ago",
     "text_settings": {
+      "font_family": "Roboto-Regular",
       "font_size": 24,
       "text_align": "right"
     }
@@ -79,6 +82,7 @@
     },
     "text_pattern": "No data",
     "text_settings": {
+      "font_family": "Roboto-Regular",
       "font_size": 30,
       "text_align": "center"
     }
@@ -90,6 +94,7 @@
     },
     "text_pattern": "at $time",
     "text_settings": {
+      "font_family": "Roboto-Regular",
       "font_size": 24,
       "text_align": "center"
     }

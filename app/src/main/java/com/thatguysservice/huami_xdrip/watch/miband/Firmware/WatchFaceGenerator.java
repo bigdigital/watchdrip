@@ -269,13 +269,13 @@ public class WatchFaceGenerator {
         parseWatchfaceFile();
         if (!bgData.isNoBgData()) {
             DisplayData.Builder displayDataBuilder = null;
-            displayDataBuilder = DisplayData.newBuilder(bundle, bgData, assetManager, watchfaceConfig);
+            displayDataBuilder = DisplayData.newBuilder(bundle, bgData, watchfaceConfig, assetManager );
             displayDataBuilder.setShowTreatment(MiBandEntry.isTreatmentEnabled());
             displayDataBuilder.setGraphLimit(MiBandEntry.getGraphLimit());
             DisplayData data = displayDataBuilder.build();
             mainScreen = drawBitmap(data);
         } else {
-            DisplayData displayData = new DisplayData(bundle, bgData, watchfaceConfig);
+            DisplayData displayData = new DisplayData(bundle, bgData, watchfaceConfig, assetManager);
             mainScreen = drawNoDataBitmap(displayData);
         }
         UserError.Log.d(TAG, "Encoding main picture");
