@@ -16,6 +16,7 @@ import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Conf
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.SimpleText;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.TextSettings;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.WatchfaceConfig;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +39,8 @@ public class DisplayData {
 
     private int graphLimit = 16;
     private boolean showTreatment = false;
+    private String predictIoB = "";
+    private String predictWpB = "";
     private String pumpIoB = "";
     private String pumpReservoir = "";
     private String pumpBattery = "";
@@ -78,6 +81,14 @@ public class DisplayData {
 
     public String getBgValueString() {
         return bgValueUnitized;
+    }
+
+    public ValueTime getPredictIoB() {
+        return new ValueTime(predictIoB);
+    }
+
+    public ValueTime getPredictWpb() {
+        return new ValueTime(predictWpB);
     }
 
     public ValueTime getPumpIoB() {
@@ -167,15 +178,32 @@ public class DisplayData {
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
 
-        if (text.fontFamily != null && text.textStyle != null) {
-            paint.setTypeface(Typeface.create(text.fontFamily, TextStyle.valueOf(text.textStyle.toUpperCase()).getValue()));
-        } else if (text.fontFamily == null && text.textStyle != null) {
-            paint.setTypeface(Typeface.create(Typeface.DEFAULT, TextStyle.valueOf(text.textStyle.toUpperCase()).getValue()));
-        } else if (text.fontFamily != null && text.textStyle == null) {
-            paint.setTypeface(Typeface.create(text.fontFamily, Typeface.NORMAL));
+        Typeface tf = null;
+        if (MiBandEntry.isNeedToUseCustomWatchface() && text.fontFamily != null) {
+            final String dir = getExternalDir();
+            final File fontFile = new File(dir + "/fonts/" + text.fontFamily);
+            if (fontFile.exists()) {
+                try {
+                    tf = Typeface.createFromFile(fontFile);
+                }catch (Exception e){
+
+                }
+            }
         }
 
-        //Typeface tf = Typeface.createFromFile("font.ttf");
+        if (tf == null) {
+            if (text.fontFamily != null && text.textStyle != null) {
+                tf = Typeface.create(text.fontFamily, TextStyle.valueOf(text.textStyle.toUpperCase()).getValue());
+            } else if (text.fontFamily == null && text.textStyle != null) {
+                tf = Typeface.create(Typeface.DEFAULT, TextStyle.valueOf(text.textStyle.toUpperCase()).getValue());
+            } else if (text.fontFamily != null && text.textStyle == null) {
+                tf = paint.setTypeface(Typeface.create(text.fontFamily, Typeface.NORMAL));
+            }
+        }
+
+        if (tf != null) {
+            paint.setTypeface(tf);
+        }
 
         if (text.textAlign != null) {
             paint.setTextAlign(Paint.Align.valueOf(text.textAlign.toUpperCase()));
@@ -275,6 +303,7 @@ public class DisplayData {
         }
 
         public Builder setPumpReservoir(String pumpReservoir) {
+            pumpReservoir = getEmptyIfNull(pumpReservoir);
             if (pumpReservoir.isEmpty()) {
                 DisplayData.this.pumpReservoir = pumpReservoir;
             }
@@ -284,8 +313,34 @@ public class DisplayData {
             return this;
         }
 
-        public Builder setIoB(String iob) {
+        public Builder setPredictIoB(String iob) {
+            iob = getEmptyIfNull(iob);
             if (iob.isEmpty() ) {
+                DisplayData.this.predictIoB = iob;
+                return this;
+            }
+            iob = iob.replace(",", ".");
+            iob = iob + "u".replace(".0u", "u");
+            DisplayData.this.predictIoB = iob;
+            return this;
+        }
+
+        public Builder setPredictWpB(String wpb) {
+            wpb = getEmptyIfNull(wpb);
+            if (wpb.isEmpty() ) {
+                DisplayData.this.predictWpB = wpb;
+                return this;
+            }
+            wpb = wpb.replace(",", ".");
+            wpb = wpb.replace("\u224F", "");
+            wpb = wpb.replace("\u26A0", "!");
+            DisplayData.this.predictWpB = wpb;
+            return this;
+        }
+
+        public Builder setPumpIob(String iob) {
+            iob = getEmptyIfNull(iob);
+            if ( iob.isEmpty() ) {
                 DisplayData.this.pumpIoB = iob;
                 return this;
             }
@@ -339,6 +394,9 @@ public class DisplayData {
             }
             unitizedDelta = new ValueTime(bgData.unitizedDelta(), timeStampText, isOld);
 
+            setPredictIoB(bundle.getString("predict.IOB"));
+            setPredictWpB(bundle.getString("predict.BWP"));
+
             String pumpJSON = bundle.getString("pumpJSON");
             JSONObject json = null;
             double pumpReservoir = -1;
@@ -361,7 +419,7 @@ public class DisplayData {
             } catch (JSONException e) {
             }
 
-            setIoB(getDouble(pumpIob, 2));
+            setPumpIob(getDouble(pumpIob, 2));
             setPumpReservoir(String.valueOf(pumpReservoir));
             setPumpBattery(String.valueOf(pumpBattery));
 

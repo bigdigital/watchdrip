@@ -104,6 +104,8 @@ public class WatchFaceGenerator {
             filePrefix = "amazfit_gts2";
         } else if (bandType == MiBandType.AMAZFITGTS2_MINI) {
             filePrefix = "amazfit_gts2_mini";
+        } else if (bandType == MiBandType.AMAZFIT_TREX_PRO) {
+            filePrefix = "amazfit_trex_pro";
         }
         if (MiBandEntry.isNeedToUseCustomWatchface()) {
             final String dir = getExternalDir();
@@ -283,6 +285,8 @@ public class WatchFaceGenerator {
             encodedImage = new ImageBipPalette(imageByteArrayOutput);
         } else if (MiBandType.AMAZFITGTS2_MINI == bandType) {
             encodedImage = new ImageRGB_GTS2Mini(imageByteArrayOutput);
+        } else if (MiBandType.AMAZFIT_TREX_PRO == bandType) {
+            encodedImage = new ImageTransparentRGB(imageByteArrayOutput);
         } else if (MiBandType.isVerge1(bandType)) {
             encodedImage = new ImageRGB(imageByteArrayOutput);
         } else if (MiBandType.isVerge2(bandType)) {
@@ -333,7 +337,7 @@ public class WatchFaceGenerator {
             int uncFileSize = firmwareWriteStream.size();
             ByteArrayInputStream firmwareReadStream = new ByteArrayInputStream(firmwareWriteStream.toByteArray());
             firmwareWriteStream.reset();
-            if (MiBandType.isVerge2(bandType)) {
+            if ( (MiBandType.AMAZFIT_TREX_PRO == bandType) || MiBandType.isVerge2(bandType)) {
                 byte[] header = new byte[VERGE2_HEADERLEN];
                 firmwareReadStream.read(header, 0, header.length);
                 //copy header chunk unmodified
@@ -432,8 +436,11 @@ public class WatchFaceGenerator {
                 canvas.restore();
             }
         }
+        //draw predicted data
+        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPredictIoB(), config.predictIOB), config.predictIOB.position, data.getTextPaint(config.predictIOB.textSettings));
+        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPredictWpb(), config.predictWPB), config.predictWPB.position, data.getTextPaint(config.predictWPB.textSettings));
         //draw pump
-        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpIoB(), config.iob), config.iob.position, data.getTextPaint(config.iob.textSettings));
+        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpIoB(), config.pumpIOB), config.pumpIOB.position, data.getTextPaint(config.pumpIOB.textSettings));
         data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpReservoir(), config.pumpReservoir), config.pumpReservoir.position, data.getTextPaint(config.pumpReservoir.textSettings));
         data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpBattery(), config.pumpBattery), config.pumpBattery.position, data.getTextPaint(config.pumpBattery.textSettings));
 

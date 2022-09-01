@@ -177,6 +177,7 @@ public class Const {
     public static final String AMAZFITGTR2_NAME = "Amazfit GTR 2";
     public static final String AMAZFITGTS2_NAME = "Amazfit GTS 2";
     public static final String AMAZFIT_TREX = "Amazfit T-Rex";
+    public static final String AMAZFIT_TREX_PRO = "Amazfit T-Rex Pro";
     public static final String ZEPP_E_NAME = "Zepp E";
     public static final String AMAZFITBIP_NAME = "Amazfit Bip Watch";
     public static final String AMAZFITBIP_LITE_NAME = "Amazfit Bip Lite";

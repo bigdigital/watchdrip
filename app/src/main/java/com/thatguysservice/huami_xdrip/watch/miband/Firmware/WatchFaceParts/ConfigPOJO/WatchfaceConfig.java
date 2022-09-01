@@ -19,7 +19,13 @@ public class WatchfaceConfig {
     public BgValueText bgValue = new BgValueText();
 
     @SerializedName("iob_text")
-    public SimpleText iob = new SimpleText();
+    public SimpleText predictIOB = new SimpleText();
+
+    @SerializedName("wpb_text")
+    public SimpleText predictWPB = new SimpleText();
+
+    @SerializedName("pump_iob_text")
+    public SimpleText pumpIOB = new SimpleText();
 
     @SerializedName("pump_reservoir_text")
     public SimpleText pumpReservoir = new SimpleText();

@@ -23,6 +23,7 @@ public enum MiBandType {
     AMAZFITGTR2(Const.AMAZFITGTR2_NAME),
     AMAZFITGTS2(Const.AMAZFITGTS2_NAME),
     AMAZFIT_TREX(Const.AMAZFIT_TREX),
+    AMAZFIT_TREX_PRO(Const.AMAZFIT_TREX_PRO),
     ZEPP_E(Const.ZEPP_E_NAME),
     AMAZFITBIP(Const.AMAZFITBIP_NAME),
     AMAZFITBIP_LITE(Const.AMAZFITBIP_LITE_NAME),
@@ -124,6 +125,7 @@ public enum MiBandType {
         return bandType == MiBandType.AMAZFITGTR ||
                 bandType == MiBandType.AMAZFITGTR_42 ||
                 bandType == MiBandType.AMAZFITGTS ||
+                bandType == MiBandType.AMAZFIT_TREX_PRO ||
                 bandType == MiBandType.AMAZFITGTS2_MINI ||
                 bandType == MiBandType.AMAZFITGTR_LITE ||
                 bandType == MiBandType.ZEPP_E;

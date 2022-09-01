@@ -949,9 +949,15 @@ public class MiBandService extends BaseBluetoothSequencer {
             } else if (mibandType == MiBandType.AMAZFITGTS2_MINI) {
                 sequenceState = new SequenceStateGTS2Mini();
                 firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
-            } else if (mibandType == MiBandType.AMAZFITGTS || mibandType == MiBandType.AMAZFIT_TREX) {
+            } else if (mibandType == MiBandType.AMAZFITGTS || mibandType == MiBandType.AMAZFIT_TREX_PRO) {
                 if (version.compareTo(new Version("0.1.1.16")) >= 0) {
-                    sequenceState = new SequenceStateVergeNew();
+                    if (mibandType == MiBandType.AMAZFIT_TREX_PRO){
+                        sequenceState = new SequenceStateVerge2();
+                    }
+                    else {
+                        sequenceState = new SequenceStateVergeNew();
+                    }
+
                     firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
                 } else {
                     sequenceState = new SequenceStateMiBand5();
