@@ -41,11 +41,14 @@ public class MiBandEntry {
     public static final String PREF_MIBAND_GRAPH_LIMIT = "miband_graph_limit";
     public static final String PREF_MIBAND_TREATMENT_ENBALE = "miband_graph_treatment_enable";
     public static final String PREF_MIBAND_DISABLE_HIGH_MTU = "debug_miband_disable_high_mtu";
+    public static final String PREF_MIBAND_RSSI_TRESHOLD = "advanced_rssi_threshold";
     public static final String PREF_MIBAND_USE_CUSTOM_WATHCFACE = "debug_miband_use_custom_watchface";
     public static final String PREF_MIBAND_COLLECT_HEARTRATE = "miband_collect_heartrate";
     public static final String PREF_MIBAND_COLLECT_STEPS = "miband_collect_steps";
     public static final String PREF_MIBAND_DATE_CAREGORY = "miband_date_settings_category";
     public static final String PREF_MIBAND_US_DATE_FORMAT = "miband_us_date_format";
+
+    protected static final int MINIMUM_RSSI = 90;
 
     public static final int NIGHT_MODE_INTERVAL_STEP = 5;
     public static Preference.OnPreferenceChangeListener sBindMibandPreferenceChangeListener = new Preference.OnPreferenceChangeListener() {
@@ -139,7 +142,11 @@ public class MiBandEntry {
     }
 
     public static int getGraphLimit() {
-        return Pref.getInt(PREF_MIBAND_GRAPH_LIMIT, 16);
+        return 16; //Pref.getInt(PREF_MIBAND_GRAPH_LIMIT, 16);
+    }
+
+    public static int getRSSITreshold() {
+        return -Pref.getStringToInt(PREF_MIBAND_RSSI_TRESHOLD, MINIMUM_RSSI);
     }
 
     public static void setGraphLimit(int val) {

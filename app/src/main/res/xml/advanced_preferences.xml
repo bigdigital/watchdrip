@@ -71,4 +71,11 @@
         android:switchTextOff="@string/short_off_text_for_switches"
         android:switchTextOn="@string/short_on_text_for_switches"
         android:title="@string/title_disable_hight_mtu" />
+    <EditTextPreference
+        android:defaultValue="90"
+        android:digits="0123456789"
+        android:inputType="number"
+        android:key="advanced_rssi_threshold"
+        android:summary="@string/advanced_rssi_threshold_summary"
+        android:title="@string/advanced_rssi_threshold_title" />
 </PreferenceScreen>

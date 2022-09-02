@@ -111,7 +111,6 @@ import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCode
  */
 
 public class MiBandService extends BaseBluetoothSequencer {
-    protected static final int MINIMUM_RSSI = -90;
     protected static final int MINIMUM_BATTERY_LEVEL = 12;
 
     static final List<UUID> huntCharacterstics = new ArrayList<>();
@@ -893,9 +892,11 @@ public class MiBandService extends BaseBluetoothSequencer {
         UserError.Log.d(TAG, "Install WatchFace");
 
         boolean sendBGNotification = false;
-        if (deviceInfo.getRssi() < MINIMUM_RSSI) {
+        if (deviceInfo.getRssi() < MiBandEntry.getRSSITreshold()) {
             UserError.Log.d(TAG, "Too weak BT connection");
-            //sendBGNotification = true;
+            UserError.Log.d(TAG, "RSSI:" + deviceInfo.getRssi() + " RSSI Treshold:" + MiBandEntry.getRSSITreshold());
+
+            sendBGNotification = true;
         }
         if (deviceInfo.getBatteryLevel() < MINIMUM_BATTERY_LEVEL) {
             UserError.Log.d(TAG, "Battery is too low");

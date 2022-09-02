@@ -4,10 +4,14 @@ import android.Manifest;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.InputType;
+import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.TwoStatePreference;
@@ -48,6 +52,22 @@ public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
                             .getDefaultSharedPreferences(miband_nightmode_interval.getContext())
                             .getInt(miband_nightmode_interval.getKey(), -1));
         }
+
+        EditTextPreference editTextPreference = getPreferenceManager().findPreference(MiBandEntry.PREF_MIBAND_RSSI_TRESHOLD);
+        editTextPreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            @Override
+            public void onBindEditText(@NonNull EditText editText) {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+            }
+        });
+
+        editTextPreference = getPreferenceManager().findPreference(MiBandEntry.PREF_MIBAND_GRAPH_HOURS);
+        editTextPreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            @Override
+            public void onBindEditText(@NonNull EditText editText) {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+            }
+        });
     }
 
     private boolean checkAndRequestFilePermissions() {

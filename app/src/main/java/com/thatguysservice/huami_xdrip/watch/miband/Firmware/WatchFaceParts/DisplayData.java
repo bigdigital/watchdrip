@@ -197,7 +197,7 @@ public class DisplayData {
             if (tf == null) {
                 try {
                     String assetFontsDir = "fonts/";
-                    tf = Typeface.createFromAsset(assetManager, assetFontsDir + text.fontFamily);
+                    tf = Typeface.createFromAsset(assetManager, assetFontsDir + text.fontFamily + ".ttf");
                 } catch (Exception e) {
 
                 }

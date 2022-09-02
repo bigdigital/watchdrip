@@ -15,7 +15,7 @@
     "color_high": "#f19621",
     "color_low": "#d20202",
     "position": {
-      "x": 190,
+      "x": 194,
       "y": 198
     },
     "text_pattern": "$value",

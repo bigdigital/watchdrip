@@ -48,6 +48,9 @@
     <string name="title_miband_graph_hours">Watchface graph hours</string>
     <string name="summary_miband_graph_hours">Set how many hours in graph</string>
 
+    <string name="advanced_rssi_threshold_title">RSSI threshold</string>
+    <string name="advanced_rssi_threshold_summary">Defines the RSSI signal strength threshold at which the watchface will be loaded. The larger the value, the worse the signal</string>
+
     <string name="title_miband_miband_graph_limit">Graph limit</string>
     <string name="summary_miband_graph_limit">Defines the maximum BG value which would be visible on the graph</string>
 
