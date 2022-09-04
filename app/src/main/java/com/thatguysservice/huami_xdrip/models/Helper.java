@@ -452,6 +452,34 @@ public class Helper {
         return qs((double) t, 0) + " " + unit;
     }
 
+    public static String niceTimeScalarShortText(long t) {
+        String unit = HuamiXdrip.getAppContext().getString(R.string.unit_short_second);
+        t = t / 1000;
+        if (t != 1) unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_seconds);
+        if (t > 59) {
+            unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_minute);
+            t = t / 60;
+            if (t != 1) unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_minutes);
+            if (t > 59) {
+                unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_hour);
+                t = t / 60;
+                if (t != 1) unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_hours);
+                if (t > 24) {
+                    unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_day);
+                    t = t / 24;
+                    if (t != 1) unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_days);
+                    if (t > 28) {
+                        unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_week);
+                        t = t / 7;
+                        if (t != 1) unit =  HuamiXdrip.getAppContext().getString(R.string.unit_short_weeks);
+                    }
+                }
+            }
+        }
+        //if (t != 1) unit = unit + "s"; //implemented plurality in every step, because in other languages plurality of time is not every time adding the same character
+        return qs((double) t, 0) + unit;
+    }
+
     public static String niceTimeScalar(double t, int digits) {
         String unit =  HuamiXdrip.getAppContext().getString(R.string.unit_second);
         t = t / 1000;

@@ -437,12 +437,12 @@ public class WatchFaceGenerator {
             }
         }
         //draw predicted data
-        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPredictIoB(), config.predictIOB), config.predictIOB.position, data.getTextPaint(config.predictIOB.textSettings));
-        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPredictWpb(), config.predictWPB), config.predictWPB.position, data.getTextPaint(config.predictWPB.textSettings));
+        data.drawFormattedTextOnCanvas(canvas,  data.getPredictIoB(), config.predictIOB);
+        data.drawFormattedTextOnCanvas(canvas, data.getPredictWpb(), config.predictWPB);
         //draw pump
-        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpIoB(), config.pumpIOB), config.pumpIOB.position, data.getTextPaint(config.pumpIOB.textSettings));
-        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpReservoir(), config.pumpReservoir), config.pumpReservoir.position, data.getTextPaint(config.pumpReservoir.textSettings));
-        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getPumpBattery(), config.pumpBattery), config.pumpBattery.position, data.getTextPaint(config.pumpBattery.textSettings));
+        data.drawFormattedTextOnCanvas(canvas, data.getPumpIoB(), config.pumpIOB);
+        data.drawFormattedTextOnCanvas(canvas, data.getPumpReservoir(), config.pumpReservoir);
+        data.drawFormattedTextOnCanvas(canvas, data.getPumpBattery(), config.pumpBattery);
 
         //draw arrow
         canvas.save();
@@ -456,7 +456,7 @@ public class WatchFaceGenerator {
         if (data.isBgLow()) paint.setColor(config.bgValue.getColorLow());
         paint.setStrikeThruText(data.isBgIsStale());
 
-        data.drawTextOnCanvas(canvas, data.getFormattedText(data.getBgValue(), config.bgValue), config.bgValue.position, paint);
+        data.drawFormattedTextOnCanvas(canvas, data.getBgValue(), config.bgValue, paint);
 
         //draw unitized delta
         data.drawFormattedTextOnCanvas(canvas, data.getUnitized_delta(), config.deltaText);

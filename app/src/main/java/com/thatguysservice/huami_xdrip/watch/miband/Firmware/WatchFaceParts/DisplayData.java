@@ -107,7 +107,7 @@ public class DisplayData {
     }
 
     public ValueTime getNoReadings() {
-        return new ValueTime(config.noReadingsText.textPattern, hourMinuteString(Helper.tsl()), false);
+        return new ValueTime(config.noReadingsText.textPattern, Helper.tsl(), false);
     }
 
     public ValueTime getTreatment() {
@@ -146,8 +146,12 @@ public class DisplayData {
         drawTextOnCanvas(canvas, getFormattedText(val, simpleText), simpleText.position, getTextPaint(simpleText.textSettings));
     }
 
+    public void drawFormattedTextOnCanvas(Canvas canvas, ValueTime val, SimpleText simpleText, Paint paint) {
+        drawTextOnCanvas(canvas, getFormattedText(val, simpleText), simpleText.position, paint);
+    }
+
     //handle text alignment
-    public void drawTextOnCanvas(Canvas canvas, String text, Position position, Paint paint) {
+    private void drawTextOnCanvas(Canvas canvas, String text, Position position, Paint paint) {
         if (text.isEmpty()) {
             return;
         }
@@ -253,12 +257,13 @@ public class DisplayData {
             text = simpleText.textPattern;
         }
         boolean handled = false;
-        if (val.value != null && !val.value.isEmpty()) {
-            text = text.replace("$value", val.value);
+        if (val.getValue() != null && !val.getValue().isEmpty()) {
+            text = text.replaceAll("\\$value\\b", val.getValue());
             handled = true;
         }
-        if (val.timestamp != null && !val.timestamp.isEmpty()) {
-            text = text.replace("$time", val.timestamp);
+        if (val.getTimestamp() != null ) {
+            text = text.replaceAll("\\$time\\b", val.getTimestampText(false));
+            text = text.replaceAll("\\$time_short\\b", val.getTimestampText(true));
             handled = true;
         }
         if (!handled) {
@@ -391,15 +396,15 @@ public class DisplayData {
 
             //fill delta
             boolean isOld = false;
-            String timeStampText = "";
             long since = Helper.msSince(timeStampVal);
+            Long timeStamp;
             if (since < Constants.DAY_IN_MS) {
-                timeStampText = hourMinuteString(timeStampVal);
+                timeStamp = timeStampVal;
             } else {
                 isOld = true;
-                timeStampText = Helper.niceTimeScalar(since);
+                timeStamp = timeStampVal;
             }
-            unitizedDelta = new ValueTime(bgData.unitizedDelta(), timeStampText, isOld);
+            unitizedDelta = new ValueTime(bgData.unitizedDelta(), timeStamp, isOld);
 
             setPredictIoB(bundle.getString("predict.IOB"));
             setPredictWpB(bundle.getString("predict.BWP"));
@@ -436,7 +441,7 @@ public class DisplayData {
             double carbs = bundle.getDouble("treatment.carbs", -1);
             timeStampVal = bundle.getLong("treatment.timeStamp", -1);
 
-            timeStampText = "";
+            timeStamp = null;
             isOld = false;
             String treatmentText = "";
             if (insulin > 0) {
@@ -448,17 +453,16 @@ public class DisplayData {
             if (treatmentText.length() > 0) {
                 since = Helper.msSince(timeStampVal);
                 if (since < Constants.HOUR_IN_MS * 6) {
-                    timeStampText = hourMinuteString(timeStampVal);
+                    timeStamp = timeStampVal;
                 } else if (since < Constants.HOUR_IN_MS * 12) {
                     isOld = true;
-                    timeStampText = Helper.niceTimeScalar(Helper.msSince(timeStampVal));
+                    timeStamp = timeStampVal;
                 } else {
                     treatmentText = "";
-                    timeStampText = "";
                 }
             }
 
-            treatment = new ValueTime(treatmentText, timeStampText, isOld);
+            treatment = new ValueTime(treatmentText, timeStamp, isOld);
 
             return DisplayData.this;
         }
@@ -466,14 +470,14 @@ public class DisplayData {
 
     private class ValueTime {
         private String value;
-        private String timestamp = null;
+        private Long timestamp = null;
         private boolean isOld = false;
 
         ValueTime(String value) {
             this.value = value;
         }
 
-        ValueTime(String value, String timestamp, boolean isOld) {
+        ValueTime(String value, Long timestamp, boolean isOld) {
             this.value = value;
             this.timestamp = timestamp;
             this.isOld = isOld;
@@ -483,12 +487,31 @@ public class DisplayData {
             return value;
         }
 
-        public String getTimestamp() {
+        public Long getTimestamp() {
             return timestamp;
         }
 
         public boolean isOld() {
             return isOld;
+        }
+
+        public String getTimestampText(boolean isShortText){
+           String timeStampText = "";
+           if (timestamp != null){
+                if (isOld()){
+                    long since = Helper.msSince(getTimestamp());
+                    if (isShortText) {
+                        timeStampText = Helper.niceTimeScalarShortText(since);
+                    }
+                    else{
+                        timeStampText = Helper.niceTimeScalar(since);
+                    }
+                }else{
+                    timeStampText = hourMinuteString(getTimestamp());
+                }
+           }
+
+           return timeStampText;
         }
     }
 }

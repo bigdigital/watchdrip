@@ -11,6 +11,17 @@
     <string name="unit_days">days"</string>
     <string name="unit_weeks">weeks"</string>
 
+    <string name="unit_short_second">s</string>
+    <string name="unit_short_minute">m</string>
+    <string name="unit_short_hour">h</string>
+    <string name="unit_short_day">d"</string>
+    <string name="unit_short_week">w"</string>
+    <string name="unit_short_seconds">s</string>
+    <string name="unit_short_minutes">m</string>
+    <string name="unit_short_hours">h</string>
+    <string name="unit_short_days">d"</string>
+    <string name="unit_short_weeks">w"</string>
+
     <string name="title_miband_mac">MAC Address</string>
     <string name="summary_miband_enable">Sync xDrip data with your watch</string>
     <string name="title_miband_enable">Enable service</string>
@@ -118,7 +129,7 @@
     <string name="watch_state">Status:\u0020</string>
     <string name="title_activity_about">About</string>
     <string name="about_description">This application is extension to xDrip which is allowed to communicate with different watches and display glucose, alarms directly on the watch </string>
-    <string name="supported_devices" translatable="false">\u0020MiBand 2\n MiBand 3\n MiBand 4\n MiBand 5\n MiBand 6\n Amazfit GTR 47mm\n Amazfit GTR 42mm\n  Amazfit GTR2\n Amazfit GTR2e\n Amazfit GTS2\n Amazfit GTS2e\n Amazfit GTS2 Mini\n Amazfit Band5\n Amazfit Bip\n Amazfit Bip Lite\n Amazfit Bip S\n  Amazfit Bip S Lite</string>
+    <string name="supported_devices" translatable="false">\u0020MiBand 2\n MiBand 3\n MiBand 4\n MiBand 5\n MiBand 6\n Amazfit GTR 47mm\n Amazfit GTR 42mm\n  Amazfit GTR2\n Amazfit GTR2e\n Amazfit GTS2\n Amazfit GTS2e\n Amazfit GTS2 Mini\n Amazfit Band5\n Amazfit Bip\n Amazfit Bip Lite\n Amazfit Bip S\n  Amazfit Bip S Lite\n Amazfit T-Rex Pro</string>
     <string name="supported_devices_desc">Supported devices:</string>
     <string name="about_version">Version: %s, Build date:\u0020</string>
     <string name="action_view_about">About</string>
