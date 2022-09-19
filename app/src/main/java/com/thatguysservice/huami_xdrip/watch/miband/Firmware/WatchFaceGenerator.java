@@ -27,7 +27,6 @@ import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Imag
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Image.ImageTransparentRGB;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Parameter;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Utils.QuickLZ;
-import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandType;
 
@@ -482,6 +481,8 @@ public class WatchFaceGenerator {
             data.drawFormattedTextOnCanvas(canvas, data.getBatteryLevel(), config.batteryLevel);
         }*/
 
+        //draw ext status data
+        data.drawFormattedTextOnCanvas(canvas, data.getExtStatusLine(), config.extStatusLineText);
 
         return resultBitmap;
     }

@@ -41,6 +41,7 @@ public class DisplayData {
     private boolean showTreatment = false;
     private String predictIoB = "";
     private String predictWpB = "";
+    private ValueTime extStatusLine;
     private String pumpIoB = "";
     private String pumpReservoir = "";
     private String pumpBattery = "";
@@ -92,6 +93,10 @@ public class DisplayData {
 
     public ValueTime getPredictWpb() {
         return new ValueTime(predictWpB);
+    }
+
+    public ValueTime getExtStatusLine() {
+        return extStatusLine;
     }
 
     public ValueTime getPumpIoB() {
@@ -325,6 +330,12 @@ public class DisplayData {
             return this;
         }
 
+        public Builder setExtStatusLine(String iob, long timeStamp) {
+            iob = getEmptyIfNull(iob);
+            DisplayData.this.extStatusLine = new ValueTime(iob, timeStamp, false);
+            return this;
+        }
+
         public Builder setPredictIoB(String iob) {
             iob = getEmptyIfNull(iob);
             if (iob.isEmpty()) {
@@ -464,6 +475,9 @@ public class DisplayData {
 
             treatment = new ValueTime(treatmentText, timeStamp, isOld);
 
+
+            timeStampVal = bundle.getLong("ext_status.timeStamp", -1);
+            setExtStatusLine(bundle.getString("ext_status.text"), timeStampVal );
             return DisplayData.this;
         }
     }

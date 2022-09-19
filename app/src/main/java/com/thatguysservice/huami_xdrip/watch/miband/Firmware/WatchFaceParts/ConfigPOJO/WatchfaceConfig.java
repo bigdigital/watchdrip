@@ -58,5 +58,8 @@ public class WatchfaceConfig {
     public SimpleText batteryLevel = new SimpleText();
 
     @SerializedName("status_text")
-    SimpleText[] statusText;
+    public SimpleText[] statusText;
+
+    @SerializedName("ext_status_line_text")
+    public SimpleText extStatusLineText;
 }
