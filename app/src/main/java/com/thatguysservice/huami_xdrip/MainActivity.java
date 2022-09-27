@@ -76,6 +76,10 @@ public class MainActivity extends AppCompatActivity implements
                 intent = new Intent(this, SendFeedBackActiviy.class);
                 startActivity(intent);
                 return true;
+            case R.id.action_wf_store:
+                intent = new Intent(this, WatchStoreActivity.class);
+                startActivity(intent);
+                return true;
             case R.id.action_view_about:
                 intent = new Intent(this, AboutActivity.class);
                 startActivity(intent);

@@ -116,6 +116,7 @@
     <string name="space_minute_ago">" Minute ago"</string>
     <string name="space_minutes_ago">" Minutes ago"</string>
     <string name="action_view_watch_info">Watch info</string>
+    <string name="action_wf_store">Watchface store</string>
     <string name="title_send_readings">Send Readings</string>
     <string name="summary_send_alarms">Send notifications to the band for glucose alarms</string>
     <string name="title_send_alarms">Send Alarms</string>

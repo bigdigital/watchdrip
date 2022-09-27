@@ -13,6 +13,11 @@
         android:visible="false"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_wf_store"
+        android:orderInCategory="2"
+        android:title="@string/action_wf_store"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_get_statistic"
         android:orderInCategory="3"
         android:title="@string/action_get_statistic"
