@@ -15,7 +15,7 @@
     <item
         android:id="@+id/action_wf_store"
         android:orderInCategory="2"
-        android:title="@string/action_wf_store"
+        android:title="@string/title_activity_watch_store"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_get_statistic"

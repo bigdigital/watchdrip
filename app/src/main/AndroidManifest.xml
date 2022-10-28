@@ -44,8 +44,8 @@
         android:theme="@style/Theme.Huamixdrip">
         <activity
             android:name=".WatchStoreActivity"
-            android:label="@string/title_activity_watch_store"
-            android:theme="@style/Theme.Huamixdrip.NoActionBar"></activity>
+            android:parentActivityName=".MainActivity"
+            android:label="@string/title_activity_watch_store"/>
         <activity
             android:name=".AboutActivity"
             android:parentActivityName=".MainActivity" />

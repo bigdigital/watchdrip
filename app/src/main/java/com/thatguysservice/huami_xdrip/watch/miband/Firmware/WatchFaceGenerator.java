@@ -82,30 +82,6 @@ public class WatchFaceGenerator {
 
         boolean customFilesFound = false;
 
-        String filePrefix = "";
-        if (bandType == MiBandType.MI_BAND4) {
-            filePrefix = "miband4";
-        } else if (bandType == MiBandType.MI_BAND5 || bandType == MiBandType.AMAZFIT5) {
-            filePrefix = "miband5";
-        } else if (bandType == MiBandType.MI_BAND6) {
-            filePrefix = "miband6";
-        } else if (bandType == MiBandType.AMAZFITGTR || bandType == MiBandType.AMAZFITGTR_LITE) {
-            filePrefix = "amazfit_gtr";
-        } else if (bandType == MiBandType.AMAZFITGTR_42) {
-            filePrefix = "amazfit_gtr42";
-        } else if (MiBandType.isBip(bandType)) {
-            filePrefix = "bip";
-        } else if (MiBandType.isBipS(bandType)) {
-            filePrefix = "bip_s";
-        } else if ((bandType == MiBandType.AMAZFITGTR2 || bandType == MiBandType.AMAZFITGTR2E)) {
-            filePrefix = "amazfit_gtr2";
-        } else if ((bandType == MiBandType.AMAZFITGTS2 || bandType == MiBandType.AMAZFITGTS2E)) {
-            filePrefix = "amazfit_gts2";
-        } else if (bandType == MiBandType.AMAZFITGTS2_MINI) {
-            filePrefix = "amazfit_gts2_mini";
-        } else if (bandType == MiBandType.AMAZFIT_TREX_PRO) {
-            filePrefix = "amazfit_trex_pro";
-        }
         if (MiBandEntry.isNeedToUseCustomWatchface()) {
             final String dir = getExternalDir();
             final File imageFile = new File(dir + "/my_image.png");
@@ -124,6 +100,8 @@ public class WatchFaceGenerator {
                 firmwareFileStream = new FileInputStream(wfFile);
             }
         }
+
+        String filePrefix = MiBandType.getModelPrefix(bandType);
         String assetWatcfaceDir = "miband_watchface_parts/" + filePrefix + "/";
 
         if (configFileStream == null) {

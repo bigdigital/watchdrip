@@ -142,8 +142,8 @@ public class UserError extends PlusModel {
     public synchronized static void cleanupRaw() {
         final long timestamp = Helper.tsl();
         cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS, "severity < 3");
-        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 3, "severity = 3");
-        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 7, "severity > 3");
+        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 2, "severity = 3");
+        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 2, "severity > 3");
         Cache.clear();
     }
 
@@ -165,13 +165,13 @@ public class UserError extends PlusModel {
         List<UserError> highErrors = new Select()
                 .from(UserError.class)
                 .where("severity = ?", 3)
-                .where("timestamp < ?", (new Date().getTime() - 1000*60*60*24*3))
+                .where("timestamp < ?", (new Date().getTime() - 1000*60*60*24*2))
                 .orderBy("timestamp desc")
                 .execute();
         List<UserError> events = new Select()
                 .from(UserError.class)
                 .where("severity > ?", 3)
-                .where("timestamp < ?", (new Date().getTime() - 1000*60*60*24*7))
+                .where("timestamp < ?", (new Date().getTime() - 1000*60*60*24*2))
                 .orderBy("timestamp desc")
                 .execute();
         userErrors.addAll(highErrors);

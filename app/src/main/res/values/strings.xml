@@ -116,7 +116,6 @@
     <string name="space_minute_ago">" Minute ago"</string>
     <string name="space_minutes_ago">" Minutes ago"</string>
     <string name="action_view_watch_info">Watch info</string>
-    <string name="action_wf_store">Watchface store</string>
     <string name="title_send_readings">Send Readings</string>
     <string name="summary_send_alarms">Send notifications to the band for glucose alarms</string>
     <string name="title_send_alarms">Send Alarms</string>
@@ -141,13 +140,16 @@
     <string name="permission_notification_policy_access">%1$s needs access to Do Not Disturb settings in order to restore initial phone mode after alarm were silenced .\n\nPlease tap \'%2$s\' then \'%1$s\' and enable \'Allow Do Not Disturb\', then tap \'Back\' to return to %1$s</string>
     <string name="set_value">Set</string>
     <string name="close_value">Close</string>
-    <string name="title_activity_watch_store">Store Catalog</string>
+    <string name="title_activity_watch_store">Watch face store</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="retry">Retry</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="download">Download</string>
+    <string name="downloadComplete">Downloading completed</string>
+    <string name="downloadError">An error occurred during request.</string>
+    <string name="downloadZipError">Could not extract zip.</string>
 </resources>

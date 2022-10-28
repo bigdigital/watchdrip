@@ -105,8 +105,6 @@ public class MainActivity extends AppCompatActivity implements
                     .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
                     .replace(R.id.settings_fragment, new SettingsFragment())
                     .commit();
-
-
         }
 
         Toolbar toolbar = findViewById(R.id.toolbar);

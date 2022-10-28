@@ -39,7 +39,7 @@ public class HuamiXdrip extends MultiDexApplication {
     private void scheduleTask() {
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.UNMETERED)
-                .setRequiresCharging(true)
+                .setRequiresCharging(false)
                 .build();
 
         WorkRequest workRequest =

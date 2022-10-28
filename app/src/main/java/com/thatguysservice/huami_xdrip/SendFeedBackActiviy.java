@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SendFeedBackActiviy extends AppCompatActivity {
     private static final String FEEDBACK_CONTACT = "feedback-contact";
-    private static final String FEEDBACK_SERVER_DIRECTORY = "/xdrip/debug-logs.php";
+    private static final String FEEDBACK_SERVER_DIRECTORY = "/debug-logs.php";
     private final String TAG = this.getClass().getSimpleName();
     EditText contact;
     private String type_of_message = "Unknown";
