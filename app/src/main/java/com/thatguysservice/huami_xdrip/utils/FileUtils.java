@@ -3,6 +3,8 @@ package com.thatguysservice.huami_xdrip.utils;
 import android.content.Context;
 import android.os.Environment;
 
+import com.thatguysservice.huami_xdrip.models.UserError;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,49 +24,65 @@ public class FileUtils {
         return file.exists() || file.mkdirs();
     }
 
+    public static void deleteFile(String filePath){
+        File myFile = new File(filePath);
+        if (myFile.exists()) {
+            myFile.delete();
+        }
+    }
+
     public static String getExternalDir() {
         final StringBuilder sb = new StringBuilder();
         sb.append( Environment.getExternalStorageDirectory().getAbsolutePath() );
         sb.append( "/xdrip" );
 
-        final String dir = sb.toString();
-        return dir;
+        return sb.toString();
     }
 
     public static String getDownloadFolder(Context c) {
-        return c.getFilesDir().getAbsolutePath();
+        return c.getCacheDir().getAbsolutePath();
     }
 
-    public static void unzip(File zipFile, File targetDirectory) throws IOException {
-        ZipInputStream zis = new ZipInputStream(
-                new BufferedInputStream(new FileInputStream(zipFile)));
-        try {
-            ZipEntry ze;
-            int count;
-            byte[] buffer = new byte[8192];
-            while ((ze = zis.getNextEntry()) != null) {
-                File file = new File(targetDirectory, ze.getName());
-                File dir = ze.isDirectory() ? file : file.getParentFile();
-                if (!dir.isDirectory() && !dir.mkdirs())
-                    throw new FileNotFoundException("Failed to ensure directory: " +
-                            dir.getAbsolutePath());
-                if (ze.isDirectory())
-                    continue;
-                FileOutputStream fout = new FileOutputStream(file);
-                try {
-                    while ((count = zis.read(buffer)) != -1)
-                        fout.write(buffer, 0, count);
-                } finally {
-                    fout.close();
+    public static void unzip(String zipFile, String location)
+    {
+        try
+        {
+            FileInputStream fin = new FileInputStream(zipFile);
+            ZipInputStream zin = new ZipInputStream(fin);
+            ZipEntry ze = null;
+            while ((ze = zin.getNextEntry()) != null)
+            {
+                if(ze.isDirectory())
+                {
+                    dirChecker(location +  ze.getName());
                 }
-            /* if time should be restored as well
-            long time = ze.getTime();
-            if (time > 0)
-                file.setLastModified(time);
-            */
+                else
+                {
+                    FileOutputStream fout = new FileOutputStream(location + ze.getName());
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = zin.read(buffer)) != -1)
+                    {
+                        fout.write(buffer, 0, len);
+                    }
+                    fout.close();
+                    zin.closeEntry();
+                }
             }
-        } finally {
-            zis.close();
+            zin.close();
+        }
+        catch(Exception e)
+        {
+            throw new RuntimeException("Could not unzip file:", e);
+        }
+    }
+
+    private static void dirChecker(String dir)
+    {
+        File f = new File( dir);
+        if(!f.isDirectory())
+        {
+            f.mkdirs();
         }
     }
 }

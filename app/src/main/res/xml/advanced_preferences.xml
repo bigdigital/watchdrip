@@ -62,7 +62,7 @@
         android:summary="@string/use_custom_watcface_summary"
         android:switchTextOff="@string/short_off_text_for_switches"
         android:switchTextOn="@string/short_on_text_for_switches"
-        android:title="@string/use_custom_watcface_title"
+        android:title="@string/use_custom_watchface_title"
         app:allowDividerAbove="true"/>
     <SwitchPreference
         android:defaultValue="false"

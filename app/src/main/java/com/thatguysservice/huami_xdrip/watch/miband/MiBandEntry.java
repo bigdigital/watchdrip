@@ -157,6 +157,10 @@ public class MiBandEntry {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_DISABLE_HIGH_MTU);
     }
 
+    public static boolean setCustomWatchfaceUse(boolean val) {
+        return Pref.setBoolean(PREF_MIBAND_USE_CUSTOM_WATHCFACE, val);
+    }
+
     public static boolean isNeedToUseCustomWatchface() {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_USE_CUSTOM_WATHCFACE);
     }

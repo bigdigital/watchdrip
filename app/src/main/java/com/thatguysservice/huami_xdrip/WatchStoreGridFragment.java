@@ -45,14 +45,13 @@ public class WatchStoreGridFragment extends Fragment implements WatchFaceListAda
                     assert activity != null;
                     wf = activity.getWatchfaces();
                     if (wf == null) {
-                        // 'nothing found for your watch model'
                     } else {
                         adapter = new WatchFaceListAdapter(wf, getString(R.string.wserviceurl) + DATA_FILES_DIR);
                         adapter.setClickListener(fragment);
                         watchfacesGrid.setAdapter(adapter);
-                        progressBarLoading.setVisibility(View.GONE);
                         removeError();
                     }
+                    progressBarLoading.setVisibility(View.GONE);
                 } else {
                     displayError(msg);
                 }
@@ -63,11 +62,11 @@ public class WatchStoreGridFragment extends Fragment implements WatchFaceListAda
     @Override
     public void onResume() {
         super.onResume();
-
     }
 
     private void displayError(String msg) {
         errorText.setText(msg);
+        progressBarLoading.setVisibility(View.GONE);
         errorText.setVisibility(View.VISIBLE);
         retryButton.setVisibility(View.VISIBLE);
     }
@@ -83,15 +82,7 @@ public class WatchStoreGridFragment extends Fragment implements WatchFaceListAda
             Bundle savedInstanceState
     ) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.watch_store_grid_fragment, container, false);
-    }
-
-
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        //mViewModel = new ViewModelProvider(requireActivity()).get(WatchfaceViewModel.class);
-
-
+        View view =  inflater.inflate(R.layout.watch_store_grid_fragment, container, false);
         errorText = view.findViewById(R.id.textview_watchface_grid_error);
         retryButton = view.findViewById(R.id.button_watchface_grid_retry);
         progressBarLoading = view.findViewById(R.id.progress_bar_grid_loading);
@@ -100,13 +91,31 @@ public class WatchStoreGridFragment extends Fragment implements WatchFaceListAda
         watchfacesGrid.setLayoutManager(layoutManager);
         watchfacesGrid.setHasFixedSize(true);
         removeError();
+
+        updateWf();
         view.findViewById(R.id.button_watchface_grid_retry).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                updateWf();
                 removeError();
                 progressBarLoading.setVisibility(View.VISIBLE);
             }
         });
+        return view;
+    }
+
+    private void updateWf(){
+        WatchStoreActivity activity = (WatchStoreActivity) getActivity();
+        if ( activity != null){
+            activity.updateRemoteWathcfaces();
+        }
+    }
+
+
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        //mViewModel = new ViewModelProvider(requireActivity()).get(WatchfaceViewModel.class);
+
     }
 
     private void openItemFragment(WatchFaceInfo wfInfo) {

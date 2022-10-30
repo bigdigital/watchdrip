@@ -107,7 +107,7 @@
     <string name="huami_xdrip_running">In esecuzione</string>
     <string name="notification_channel_name">Generale</string>
     <string name="use_custom_watcface_summary">Dovresti posizionare i files \'my_watchface.bin\' e \'my_image.png\' (config.json e my_mask.png sono opzionali) dentro la cartella \'xdrip\' sul tuo telefono</string>
-    <string name="use_custom_watcface_title">Usa quadrante personalizzato</string>
+    <string name="use_custom_watchface_title">Usa quadrante personalizzato</string>
     <string name="watch_state">Stato:\u0020</string>
     <string name="title_activity_about">A riguardo</string>
     <string name="about_description">Questa applicazione è un\'estensione di xDrip che consente di comunicare con diversi orologi e visualizzare la glicemia e gli allarmi direttamente al polso </string>

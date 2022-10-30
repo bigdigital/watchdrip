@@ -52,7 +52,7 @@
     <string name="optional_contact_email">Контактна електронна адреса (оціонально)</string>
     <string name="action_view_log">Зворотній зв\'язок</string>
     <string name="action_scan">Сканування пристроїв</string>
-    <string name="use_custom_watcface_title">Використовувати власний циферблат</string>
+    <string name="use_custom_watchface_title">Використовувати власний циферблат</string>
     <string name="supported_devices_desc">Підтримувані пристрої:</string>
     <string name="watch_disconnected">Відключено</string>
     <string name="notification_channel_name">Загальний</string>

@@ -50,8 +50,11 @@ public class WatchStoreActivity extends AppCompatActivity {
         }
 
         url = getString(R.string.wserviceurl) + DATA_DIR;
+    }
 
-        updateRemoteWathcfaces();
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     public void updateRemoteWathcfaces() {

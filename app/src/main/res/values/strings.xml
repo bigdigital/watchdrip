@@ -125,7 +125,7 @@
     <string name="huami_xdrip_running">Running</string>
     <string name="notification_channel_name">General</string>
     <string name="use_custom_watcface_summary">You should place \'my_watchface.bin\' and \'my_image.png\' (config.json and my_mask.png are optional) files into \'xdrip\' folder on your phone</string>
-    <string name="use_custom_watcface_title">Use custom watchface</string>
+    <string name="use_custom_watchface_title">Use custom watchface</string>
     <string name="watch_state">Status:\u0020</string>
     <string name="title_activity_about">About</string>
     <string name="about_description">This application is extension to xDrip which is allowed to communicate with different watches and display glucose, alarms directly on the watch </string>
@@ -151,5 +151,6 @@
     <string name="download">Download</string>
     <string name="downloadComplete">Downloading completed</string>
     <string name="downloadError">An error occurred during request.</string>
-    <string name="downloadZipError">Could not extract zip.</string>
+    <string name="unZipError">Could not extract zip.</string>
+    <string name="custom_wf_option_enabled">Custom watchface option were enabled</string>
 </resources>

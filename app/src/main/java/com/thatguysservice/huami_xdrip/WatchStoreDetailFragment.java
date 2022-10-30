@@ -2,6 +2,8 @@ package com.thatguysservice.huami_xdrip;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -17,8 +20,10 @@ import androidx.fragment.app.Fragment;
 
 import com.squareup.picasso.Picasso;
 import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.models.watchfaces.WatchFaceInfo;
 import com.thatguysservice.huami_xdrip.utils.FileUtils;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 import com.tonyodev.fetch2.Download;
 import com.tonyodev.fetch2.Error;
 import com.tonyodev.fetch2.Fetch;
@@ -31,9 +36,16 @@ import com.tonyodev.fetch2core.DownloadBlock;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import static com.thatguysservice.huami_xdrip.WatchStoreActivity.DATA_FILES_DIR;
 
@@ -86,13 +98,9 @@ public class WatchStoreDetailFragment extends Fragment {
         public void onCompleted(@NotNull Download download) {
             setProgress(100);
             fetch.removeListener(fetchListener);
-            try {
-                FileUtils.unzip(new File(downloadedFile), new File((FileUtils.getExternalDir())));
-                textDownloadStatus.setText(getString(R.string.downloadComplete));
-            } catch (IOException e) {
-                textDownloadStatus.setText(getString(R.string.downloadZipError));
-            }
-            isDownloading = false;
+
+            startUnzipFile(download.getFile());
+
         }
 
         @Override
@@ -126,7 +134,6 @@ public class WatchStoreDetailFragment extends Fragment {
         }
     };
     private Button btnDownload;
-    private String downloadedFile;
 
     // String result;
     @Override
@@ -155,8 +162,9 @@ public class WatchStoreDetailFragment extends Fragment {
                     Helper.static_toast_short("Watchface downloading not finished, please wait");
                     return;
                 }
-                getParentFragmentManager().popBackStack();
-                //getActivity().onBackPressed();
+                //getActivity().getSupportFragmentManager().popBackStack();
+                this.setEnabled(false);
+                getActivity().onBackPressed();
             }
         };
 
@@ -210,7 +218,10 @@ public class WatchStoreDetailFragment extends Fragment {
 
     private void fetchFile() {
         String urlFile = url + dataModel.file;
-        downloadedFile = FileUtils.getDownloadFolder(getContext()) + "/" + dataModel.file;
+        String downloadedFile = FileUtils.getDownloadFolder(getContext()) + "/" + dataModel.file;
+
+        FileUtils.deleteFile(downloadedFile);
+
         request = new Request(urlFile, downloadedFile);
         request.setPriority(Priority.HIGH);
         request.setNetworkType(NetworkType.ALL);
@@ -237,5 +248,42 @@ public class WatchStoreDetailFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    private void startUnzipFile(String file) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean result = true;
+                String destinationPath = FileUtils.getExternalDir() + "/";
+                try {
+                    FileUtils.unzip(file, destinationPath);
+                } catch (Exception e) {
+                    result = false;
+                    UserError.Log.d("miband", e.getMessage());
+                }
+
+                boolean finalResult = result;
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (finalResult) {
+                            textDownloadStatus.setText(getString(R.string.downloadComplete));
+                            if (!MiBandEntry.isNeedToUseCustomWatchface()) {
+                                Helper.static_toast_short(getString(R.string.custom_wf_option_enabled));
+                                MiBandEntry.setCustomWatchfaceUse(true);
+                                FileUtils.deleteFile(file);
+                            }
+                        } else {
+                            textDownloadStatus.setText(getString(R.string.unZipError));
+                        }
+                        isDownloading = false;
+                    }
+                });
+            }
+        });
     }
 }
