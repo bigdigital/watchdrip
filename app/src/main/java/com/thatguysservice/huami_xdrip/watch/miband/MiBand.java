@@ -1,5 +1,6 @@
 package com.thatguysservice.huami_xdrip.watch.miband;
 
+import com.thatguysservice.huami_xdrip.models.PersistantDevices;
 import com.thatguysservice.huami_xdrip.models.PersistentStore;
 import com.thatguysservice.huami_xdrip.models.Pref;
 import com.thatguysservice.huami_xdrip.models.PropertiesUpdate;
@@ -20,6 +21,7 @@ public class MiBand {
     private static final String PREF_MIBAND_PERSISTANT_AUTH_KEY = "miband_persist_authkey";
     private static final String PREF_MIBAND_MODEL = "miband_model_";
     private static final String PREF_MIBAND_VERSION = "miband_version_";
+    private static final String PREF_MIBAND_DEVICES = "miband_devices_";
 
     public static boolean usingMgDl() {
         return Pref.getString("units", "mgdl").equals("mgdl");
@@ -31,6 +33,15 @@ public class MiBand {
             unitVal = "mmol";
         }
         Pref.setString("units", unitVal);
+    }
+
+    public static void setDevices(PersistantDevices devices) {
+        Pref.setString(PREF_MIBAND_DEVICES,  devices.getJsonSting());
+    }
+
+    public static PersistantDevices getDevices() {
+        String s = Pref.getString(PREF_MIBAND_DEVICES, "");
+        return new PersistantDevices(s);
     }
 
     public static MiBandType getMibandType() {
@@ -45,7 +56,7 @@ public class MiBand {
         return Pref.getString(PREF_MIBAND_MAC, "");
     }
 
-    static void setMacPref(final String mac,  BgDataRepository repo) {
+    public static void setMacPref(final String mac, BgDataRepository repo) {
         Pref.setString(PREF_MIBAND_MAC, mac);
         repo.updatePropData(new PropertiesUpdate(PREF_MIBAND_MAC, mac));
     }

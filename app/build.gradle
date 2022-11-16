@@ -121,4 +121,6 @@ dependencies {
     implementation "androidx.work:work-runtime:$work_version"
     implementation 'com.android.volley:volley:1.1.0'
     implementation "androidx.tonyodev.fetch2:xfetch2:3.1.6"
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+
 }

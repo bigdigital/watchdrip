@@ -15,6 +15,7 @@ import android.os.PowerManager;
 
 import androidx.annotation.RequiresApi;
 
+import com.google.gson.Gson;
 import com.polidea.rxandroidble2.ConnectionParameters;
 import com.polidea.rxandroidble2.RxBleConnection;
 import com.polidea.rxandroidble2.RxBleDeviceServices;
@@ -29,6 +30,7 @@ import com.thatguysservice.huami_xdrip.models.DeviceInfo;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.StatisticInfo;
 import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.webservice.WebServiceData;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
@@ -56,13 +58,17 @@ import com.thatguysservice.huami_xdrip.watch.miband.message.AlertMessage;
 import com.thatguysservice.huami_xdrip.watch.miband.message.DeviceEvent;
 import com.thatguysservice.huami_xdrip.watch.miband.message.DisplayControllMessage;
 import com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes;
+import com.thatguysservice.huami_xdrip.webservice.WebServer;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -155,8 +161,12 @@ public class MiBandService extends BaseBluetoothSequencer {
     private String missingAlertMessage;
     private int ringerModeBackup;
     private BgData bgData;
+    private BgData bgDataLatest;
     private DeviceInfo deviceInfo = new DeviceInfo();
     private BgDataRepository bgDataRepository;
+    private Bundle latestBgDataBundle;
+    private WebServer webServer;
+    private boolean isConnectionStopped = true;
 
     {
         mState = new MiBandState().setLI(I);
@@ -215,18 +225,20 @@ public class MiBandService extends BaseBluetoothSequencer {
     public void onCreate() {
         UserError.Log.e(TAG, "Creating service ");
         bgDataRepository = BgDataRepository.getInstance();
+        updateWebServer();
         super.onCreate();
     }
 
     @Override
     public void onDestroy() {
         UserError.Log.e(TAG, "Killing service ");
+        stopWebServer();
         super.onDestroy();
     }
 
     private boolean readyToProcessCommand(String function) {
         boolean result = I.state.equals(SLEEP) || I.state.equals(CLOSED) || I.state.equals(CLOSE) || I.state.equals(INIT) || I.state.equals(MiBandState.CONNECT_NOW);
-        if (!result && function.equals(CMD_LOCAL_WATCHDOG) && !I.state.equals(MiBandState.AUTHORIZE_FAILED_SLEEP)){
+        if (!result && function.equals(CMD_LOCAL_WATCHDOG) && !I.state.equals(MiBandState.AUTHORIZE_FAILED_SLEEP)) {
             stopConnection();
             changeState(SLEEP);
             UserError.Log.e(TAG, "Watchdog!!!");
@@ -272,23 +284,30 @@ public class MiBandService extends BaseBluetoothSequencer {
         final PowerManager.WakeLock wl = Helper.getWakeLock("Miband service", 60000);
         try {
             if (shouldServiceRun()) {
-                checkDeviceAuthState();
-                String macPref = MiBand.getMacPref();
-                if (emptyString(macPref)) {
-                    // if mac not set then start up a scan and do nothing else
-                    new FindNearby().scan(getBgDataRepository());
-                } else {
-                    if (!setAddress(macPref)) {
-                        return START_STICKY;
+                String function = null;
+                if (intent != null) {
+                    function = intent.getStringExtra(INTENT_FUNCTION_KEY);
+                    if (function != null) {
+                        UserError.Log.d(TAG, "onStartCommand was called with function:" + function);
+                        if (!handleGlobalCommand(function, intent.getExtras())) {
+                            return START_STICKY;
+                        }
                     }
-                    if (intent != null) {
-                        final String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
+                }
+
+                if (MiBandEntry.isDeviceEnabled()) {
+                    isConnectionStopped = false;
+                    checkDeviceAuthState();
+                    String macPref = MiBand.getMacPref();
+                    if (emptyString(macPref)) {
+                        // if mac not set then start up a scan and do nothing else
+                        new FindNearby().scan(getBgDataRepository());
+                    } else {
+                        if (!setAddress(macPref)) {
+                            return START_STICKY;
+                        }
                         if (function != null) {
-                            UserError.Log.d(TAG, "onStartCommand was called with function:" + function);
-                            if (function.equals(CMD_LOCAL_XDRIP_APP_NO_RESPONCE )) {
-                                bgDataRepository.setNewConnectionState( HuamiXdrip.gs(R.string.xdrip_app_no_response));
-                            }
-                            else if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + macPref, 5)) {
+                            if (function.equals(CMD_LOCAL_REFRESH) && !Helper.pratelimit("miband-refresh-" + macPref, 5)) {
                                 return START_STICKY;
                             } else {
                                 if (function.equals(CMD_LOCAL_AFTER_MISSING_ALARM)) {
@@ -306,6 +325,9 @@ public class MiBandService extends BaseBluetoothSequencer {
                         }
                     }
                 }
+                else{
+                    stopConnection();
+                }
                 return START_STICKY;
             } else {
                 deactivateService();
@@ -316,7 +338,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         }
     }
 
-    private void deactivateService(){
+    private void deactivateService() {
         UserError.Log.d(TAG, "Service is NOT set be active - shutting down");
         stopBgUpdateTimer();
         stopConnection();
@@ -324,14 +346,70 @@ public class MiBandService extends BaseBluetoothSequencer {
         stopSelf();
     }
 
-    private void stopWatchdog(){
+    private void stopWatchdog() {
         Helper.cancelAlarm(HuamiXdrip.getAppContext(), watchdogIntent);
     }
 
-    private void resetWatchdog(){
+    private void resetWatchdog() {
         stopWatchdog();
         watchdogIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_WATCHDOG_ID, CMD_LOCAL_WATCHDOG);
         Helper.wakeUpIntent(HuamiXdrip.getAppContext(), WATCHDOG_DELAY, watchdogIntent);
+    }
+
+    private boolean handleGlobalCommand(String functionName, Bundle bundle) {
+        switch (functionName) {
+            case CMD_STAT_INFO:
+                StatisticInfo statisticInfo = new StatisticInfo(bundle);
+                Helper.static_toast_long(statisticInfo.toString());
+                break;
+            case CMD_LOCAL_XDRIP_APP_NO_RESPONCE:
+                bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_no_response));
+                return false;
+            case CMD_UPDATE_BG:
+                updateLatestBgData(bundle);
+                break;
+            case CMD_UPDATE_BG_FORCE:
+                updateLatestBgData(bundle);
+                break;
+            case CMD_LOCAL_REFRESH:
+                updateWebServer();
+                break;
+        }
+        return true;
+    }
+
+    private void updateWebServer() {
+        if (MiBandEntry.isWebServerEnabled()) {
+            if (webServer == null) {
+                try {
+                    webServer = new WebServer();
+                    webServer.registerCGI("/info.json", getInfoResponce);
+                    webServer.start();
+                    UserError.Log.d(TAG, "WebServer started" );
+                } catch (Exception e) {
+                    webServer = null;
+                    UserError.Log.d(TAG, "Cannot create WebServer: " + e.getMessage());
+                }
+            }
+        } else {
+            stopWebServer();
+        }
+    }
+
+    private WebServer.CommonGatewayInterface getInfoResponce = new WebServer.CommonGatewayInterface() {
+        @Override
+        public String run(Map<String, List<String>> params) {
+            if (latestBgDataBundle == null || bgDataLatest == null) return "{}";
+            return new WebServiceData(bgDataLatest, latestBgDataBundle).getGson();
+        }
+    };
+
+    private void stopWebServer() {
+        if (webServer != null) {
+            webServer.stop();
+            webServer = null;
+            UserError.Log.d(TAG, "WebServer stopped");
+        }
     }
 
     private boolean handleCommand() {
@@ -346,10 +424,6 @@ public class MiBandService extends BaseBluetoothSequencer {
         ((MiBandState) mState).resetSequence();
         resetWatchdog();
         switch (queueItem.functionName) {
-            case CMD_STAT_INFO:
-                StatisticInfo statisticInfo = new StatisticInfo(queueItem.bundle);
-                Helper.static_toast_long(statisticInfo.toString());
-                break;
             case CMD_LOCAL_REFRESH:
                 whenToRetryNextBgTimer(); //recalculate isNightMode
                 ((MiBandState) mState).setSettingsSequence();
@@ -383,9 +457,9 @@ public class MiBandService extends BaseBluetoothSequencer {
                 }
                 String alertName = queueItem.bundle.getString("alertName");
                 long nextAlertAt = queueItem.bundle.getLong("nextAlertAt", Helper.tsl());
-                String msgText1 = String.format( HuamiXdrip.gs(R.string.miband_alert_snooze_text), alertName, snoozeMinutes, Helper.hourMinuteString(nextAlertAt));
+                String msgText1 = String.format(HuamiXdrip.gs(R.string.miband_alert_snooze_text), alertName, snoozeMinutes, Helper.hourMinuteString(nextAlertAt));
                 UserError.Log.d(TAG, msgText1);
-                messageQueue.addFirst(getMessageQueue(msgText1,  HuamiXdrip.gs(R.string.miband_alert_snooze_title_text)));
+                messageQueue.addFirst(getMessageQueue(msgText1, HuamiXdrip.gs(R.string.miband_alert_snooze_title_text)));
                 break;
             case CMD_LOCAL_AFTER_MISSING_ALARM:
                 if (!I.state.equals(MiBandState.WAITING_USER_RESPONSE)) break;
@@ -839,7 +913,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         }
 
         AuthOperations authOperations = MiBandType.getAuthOperations(MiBand.getMibandType(), this);
-        UserError.Log.d(TAG,  "authOperations: " + authOperations.getClass().getSimpleName());
+        UserError.Log.d(TAG, "authOperations: " + authOperations.getClass().getSimpleName());
         if (!authOperations.initAuthKey()) {
             changeState(MiBandState.AUTHORIZE_FAILED);
             return;
@@ -883,6 +957,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     private void unsubscribeAuthSubscription() {
         if (authSubscription != null) {
             authSubscription.unsubscribe();
+            authSubscription = null;
         }
     }
 
@@ -952,10 +1027,9 @@ public class MiBandService extends BaseBluetoothSequencer {
                 firmware = new FirmwareOperations2020(fwArray, sequenceState, this);
             } else if (mibandType == MiBandType.AMAZFITGTS || mibandType == MiBandType.AMAZFIT_TREX_PRO) {
                 if (version.compareTo(new Version("0.1.1.16")) >= 0) {
-                    if (mibandType == MiBandType.AMAZFIT_TREX_PRO){
+                    if (mibandType == MiBandType.AMAZFIT_TREX_PRO) {
                         sequenceState = new SequenceStateVerge2();
-                    }
-                    else {
+                    } else {
                         sequenceState = new SequenceStateVergeNew();
                     }
 
@@ -1193,7 +1267,6 @@ public class MiBandService extends BaseBluetoothSequencer {
     }
 
 
-
     @Override
     protected synchronized boolean automata() {
         UserError.Log.d(TAG, "Automata called in " + TAG);
@@ -1313,9 +1386,9 @@ public class MiBandService extends BaseBluetoothSequencer {
                     changeNextState();
                     break;
                 case SLEEP:
-                    if (!handleCommand()){
+                    if (!handleCommand()) {
                         stopWatchdog();
-                    };
+                    }
                     break;
                 case CLOSED:
                     stopConnection();
@@ -1330,13 +1403,33 @@ public class MiBandService extends BaseBluetoothSequencer {
     }
 
     private void stopConnection() {
-        isNeedToAuthenticate = true;
-        isWaitingCallResponse = false;
-        messageQueue.clear();
-        handle = 0;
-        setMTU(GATT_MTU_MINIMUM); //reset mtu
-        setRetryTimerReal(); // local retry strategy
-        bgDataRepository.setNewConnectionState( HuamiXdrip.gs(R.string.watch_disconnected));
+        if (!isConnectionStopped) {
+            if (isConnected()) {
+                unsubscribeAuthSubscription();
+                if (notifSubscriptionDeviceEvent != null) {
+                    notifSubscriptionDeviceEvent.unsubscribe();
+                    notifSubscriptionDeviceEvent = null;
+                }
+                if (notifSubscriptionStepsMeasurement != null) {
+                    notifSubscriptionStepsMeasurement.unsubscribe();
+                    notifSubscriptionStepsMeasurement = null;
+                }
+                if (notifSubscriptionHeartRateMeasurement != null) {
+                    notifSubscriptionHeartRateMeasurement.unsubscribe();
+                    notifSubscriptionHeartRateMeasurement = null;
+                }
+                stopConnect(I.address);
+            }
+            isNeedToAuthenticate = true;
+            isWaitingCallResponse = false;
+            messageQueue.clear();
+            handle = 0;
+            setMTU(GATT_MTU_MINIMUM); //reset mtu
+            setRetryTimerReal(); // local retry strategy
+            bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.watch_disconnected));
+            isConnectionStopped = true;
+            stopWatchdog();
+        }
     }
 
     @Override
@@ -1529,13 +1622,18 @@ public class MiBandService extends BaseBluetoothSequencer {
         }
     }
 
+    private void updateLatestBgData(Bundle bundle) {
+        latestBgDataBundle = bundle;
+        bgDataLatest = new BgData(bundle);
+        bgDataRepository.setNewBgData(bgDataLatest);
+    }
+
     private void updateBgData() {
         bgData = new BgData(queueItem.bundle);
-        bgDataRepository.setNewBgData(bgData);
         MiBand.setUnit(bgData.isDoMgdl());
     }
 
-    public void updateConnectionState(String status ){
+    public void updateConnectionState(String status) {
         bgDataRepository.setNewConnectionState(status);
     }
 

@@ -25,11 +25,14 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
 public class MiBandEntry {
     public static final String PREF_MIBAND_ENABLED = "miband_enabled";
     public static final String PREF_MIBAND_MAC = "miband_data_mac";
+    public static final String PREF_MIBAND_ENABLE_DEVICE = "miband_enable_device";
+    public static final String PREF_MIBAND_ACTIVE_DEVICE = "miband_active_device";
     public static final String PREF_MIBAND_AUTH_KEY = "miband_data_authkey";
     public static final String PREF_MIBAND_SEND_READINGS = "miband_send_readings";
     public static final String PREF_VIBRATE_ON_READINGS = "miband_vibrate_on_readings";
     public static final String PREF_SEND_ALARMS = "miband_send_alarms";
     public static final String PREF_SEND_ALARMS_OTHER = "miband_send_alarms_other";
+    public static final String PREF_ENABLE_WEB_SERVER = "miband_enable_web_server";
     public static final String PREF_MIBAND_SETTINGS = "miband_settings";
     public static final String PREF_MIBAND_PREFERENCES = "miband_preferences";
     public static final String PREF_MIBAND_UPDATE_BG = "update_miband_bg";
@@ -88,8 +91,24 @@ public class MiBandEntry {
         }
     };
 
+    public static boolean isDeviceEnabled() {
+        return isEnabled() && Pref.getBooleanDefaultFalse(PREF_MIBAND_ENABLE_DEVICE);
+    }
+
+    public static int getActiveDeviceIndex() {
+        return Integer.parseInt(Pref.getString(PREF_MIBAND_ACTIVE_DEVICE, "0"));
+    }
+
+    public static void setActiveDeviceIndex(int index) {
+        Pref.setString(PREF_MIBAND_ACTIVE_DEVICE, String.valueOf(index));
+    }
+
     public static boolean isEnabled() {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_ENABLED);
+    }
+
+    public static boolean isWebServerEnabled() {
+        return isEnabled() && Pref.getBooleanDefaultFalse(PREF_ENABLE_WEB_SERVER);
     }
 
     public static boolean areAlertsEnabled() {

@@ -12,6 +12,7 @@ public class BgDataRepository {
     private MutableLiveData<String> watchConnectionStateLiveData = new MutableLiveData<>();
     private MutableLiveData<Boolean> serviceStatusLiveData = new MutableLiveData<>();
     private MutableLiveData<PropertiesUpdate> propLiveData = new MutableLiveData<>();
+    private MutableLiveData<Integer> activeDeviceChangeIndexData = new MutableLiveData<>();
 
     private BgDataRepository() {
     }
@@ -29,6 +30,10 @@ public class BgDataRepository {
 
     public MutableLiveData<Boolean> getServiceStatus() {
         return serviceStatusLiveData;
+    }
+
+    public MutableLiveData<Integer> getActiveDeviceChangeData() {
+        return activeDeviceChangeIndexData;
     }
 
     public void setNewServiceStatus(Boolean serviceStatus) {
@@ -53,5 +58,10 @@ public class BgDataRepository {
 
     public void setNewConnectionState(String status) {
         watchConnectionStateLiveData.postValue(status);
+    }
+
+
+    public void updateActiveDeviceData(Integer activeDeviceIndex) {
+        activeDeviceChangeIndexData.postValue(activeDeviceIndex);
     }
 }

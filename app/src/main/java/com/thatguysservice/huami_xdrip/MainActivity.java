@@ -6,10 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,9 +32,13 @@ import com.thatguysservice.huami_xdrip.databinding.ActivityMainBinding;
 import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.models.PersistantDeviceInfo;
+import com.thatguysservice.huami_xdrip.models.PersistantDevices;
 import com.thatguysservice.huami_xdrip.models.UserError;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 import java.util.List;
 
@@ -44,6 +46,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
+import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_BLUETOOTH_PERMISSIONS;
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_READ_WRITE_PERMISSIONS;
 
@@ -56,6 +59,12 @@ public class MainActivity extends AppCompatActivity implements
     private Handler timerHandler;
     private MainActivity mActivity;
 
+    private PersistantDevices devices;
+    private MenuItem removeDeviceItem;
+    private MenuItem addDeviceItem;
+    private MenuItem renameDeviceItem;
+    private BgDataRepository bgDataRepository;
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -65,12 +74,20 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         // If you don't have res/menu, just create a directory named "menu" inside res
         getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        removeDeviceItem = menu.findItem(R.id.action_remove_device);
+        addDeviceItem = menu.findItem(R.id.action_add_device);
+        renameDeviceItem = menu.findItem(R.id.action_rename_device);
+
+        handleDeviceMenuVisibility();
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Intent intent;
+        FragmentManager fm;
+        PersistantDeviceInfo device;
         switch (item.getItemId()) {
             case R.id.action_view_log:
                 intent = new Intent(this, SendFeedBackActiviy.class);
@@ -87,8 +104,76 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_get_statistic:
                 Helper.startService(BroadcastService.class, BroadcastService.INTENT_FUNCTION_KEY, BroadcastService.CMD_STAT_INFO);
                 return true;
+            case R.id.action_add_device:
+                fm = getSupportFragmentManager();
+                EditDeviceNameDialogFragment addFragment = EditDeviceNameDialogFragment.newInstance("Device name");
+                addFragment.setDialogResultListener(new EditDeviceNameDialogFragment.OnDialogResultListener() {
+                    @Override
+                    public void onDialogResult(String deviceName) {
+                        if (!deviceName.isEmpty()) {
+                            PersistantDeviceInfo device = new PersistantDeviceInfo(deviceName, "", "");
+                            devices.addDevice(device);
+                            int newActiveIndex = devices.count() - 1;
+                            MiBand.setMacPref(device.getMacAddress(), bgDataRepository);
+                            MiBand.setAuthKeyPref(device.getAuthKey(), bgDataRepository);
+                            bgDataRepository.updateActiveDeviceData(newActiveIndex);
+                            handleDeviceMenuVisibility();
+                        }
+                    }
+                });
+                addFragment.show(fm, "EditDeviceNameFragment");
+                return true;
+            case R.id.action_remove_device:
+                Helper.show_ok_dialog(this, gs(R.string.action_remove_device), gs(R.string.confirm_remove_message), new Runnable() {
+                    @Override
+                    public void run() {
+                        devices.removeDevice(MiBandEntry.getActiveDeviceIndex());
+                        int newActiveIndex = devices.count() - 1;
+                        PersistantDeviceInfo deviceInner = devices.getDeviceByIndex(newActiveIndex);
+                        MiBand.setMacPref(deviceInner.getMacAddress(), bgDataRepository);
+                        MiBand.setAuthKeyPref(deviceInner.getAuthKey(), bgDataRepository);
+                        handleDeviceMenuVisibility();
+                        bgDataRepository.updateActiveDeviceData(newActiveIndex);
+                    }
+                }, false);
+
+                return true;
+            case R.id.action_rename_device:
+                fm = getSupportFragmentManager();
+                int deviceEntryIndex = MiBandEntry.getActiveDeviceIndex();
+                device = devices.getDeviceByIndex(deviceEntryIndex);
+                if (device == null) break;
+                EditDeviceNameDialogFragment editFragment = EditDeviceNameDialogFragment.newInstance(device.getName());
+                editFragment.setDialogResultListener(new EditDeviceNameDialogFragment.OnDialogResultListener() {
+                    @Override
+                    public void onDialogResult(String deviceName) {
+                        if (!deviceName.isEmpty()) {
+                            device.setName(deviceName);
+                            devices.updateDevice(device, deviceEntryIndex);
+                            handleDeviceMenuVisibility();
+                            bgDataRepository.updateActiveDeviceData(deviceEntryIndex);
+                        }
+                    }
+                });
+                editFragment.show(fm, "EditDeviceNameFragment");
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void handleDeviceMenuVisibility() {
+        if (removeDeviceItem == null || addDeviceItem == null) return;
+
+        if (MiBandEntry.isDeviceEnabled() && devices != null) {
+            boolean res = (devices.count() > 1) ? true : false;
+            removeDeviceItem.setVisible(res);
+            renameDeviceItem.setVisible(res);
+            addDeviceItem.setVisible(true);
+        } else {
+            removeDeviceItem.setVisible(false);
+            renameDeviceItem.setVisible(false);
+            addDeviceItem.setVisible(false);
+        }
     }
 
     @Override
@@ -96,6 +181,13 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onCreate");
         mActivity = this;
         super.onCreate(savedInstanceState);
+        devices = MiBand.getDevices();
+        if (devices.count() == 0) {
+            //add first device
+            PersistantDeviceInfo device = new PersistantDeviceInfo("Default Device", MiBand.getMacPref(), MiBand.getAuthKeyPref());
+            devices.addDevice(device);
+        }
+
         //setContentView(R.layout.activity_main);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
@@ -106,7 +198,6 @@ public class MainActivity extends AppCompatActivity implements
                     .replace(R.id.settings_fragment, new SettingsFragment())
                     .commit();
         }
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         CollapsingToolbarLayout toolBarLayout = findViewById(R.id.toolbar_layout);
@@ -142,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements
         };
 
         // BgDataModel model = new ViewModelProvider(this).get(BgDataModel.class);
-        BgDataRepository bgDataRepository = BgDataRepository.getInstance();
+        bgDataRepository = BgDataRepository.getInstance();
 
         // Create the observer which updates the UI.
         final Observer<BgData> bgDataObserver = new Observer<BgData>() {
@@ -172,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onChanged(@Nullable final Boolean status) {
                 binding.setFabVisibility(status);
+                handleDeviceMenuVisibility();
             }
         };
 
@@ -213,8 +305,6 @@ public class MainActivity extends AppCompatActivity implements
         alert.show();
     }
 
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
@@ -229,64 +319,6 @@ public class MainActivity extends AppCompatActivity implements
         // EasyPermissions handles the request result.
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
-
-
- /*   public void onRequestPermissionsResulta(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        Log.d(TAG, "Permission callback called-------");
-        switch (requestCode) {
-            case REQUEST_ID_MULTIPLE_PERMISSIONS: {
-
-                Map<String, Integer> perms = new HashMap<>();
-                // Initialize the map with both permissions
-                perms.put(Manifest.permission.SEND_SMS, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.ACCESS_FINE_LOCATION, PackageManager.PERMISSION_GRANTED);
-                // Fill with actual results from user
-                if (grantResults.length > 0) {
-                    for (int i = 0; i < permissions.length; i++)
-                        perms.put(permissions[i], grantResults[i]);
-                    // Check for both permissions
-                    if (perms.get(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
-                            && perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        Log.d(TAG, "sms & location services permission granted");
-                        // process the normal flow
-                        //else any one or both the permissions are not granted
-                    } else {
-                        Log.d(TAG, "Some permissions are not granted ask again ");
-                        //permission is denied (this is the first time, when "never ask again" is not checked) so ask again explaining the usage of permission
-//                        // shouldShowRequestPermissionRationale will return true
-                        //show the dialog or snackbar saying its necessary and try again otherwise proceed with setup.
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.SEND_SMS) || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                            showDialogOK("SMS and Location Services Permission required for this app",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            switch (which) {
-                                                case DialogInterface.BUTTON_POSITIVE:
-                                                    checkAndRequestPermissions();
-                                                    break;
-                                                case DialogInterface.BUTTON_NEGATIVE:
-                                                    // proceed with logic by disabling the related features or quit the app.
-                                                    break;
-                                            }
-                                        }
-                                    });
-                        }
-                        //permission is denied (and never ask again is  checked)
-                        //shouldShowRequestPermissionRationale will return false
-                        else {
-                            Toast.makeText(this, "Go to settings and enable permissions", Toast.LENGTH_LONG)
-                                    .show();
-                            //                            //proceed with logic by disabling the related features or quit the app.
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-*/
-
 
     public String getMinutesAgo(long msSince, boolean includeWords) {
         final int minutes = ((int) (msSince / Constants.MINUTE_IN_MS));
@@ -326,6 +358,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume");
+        devices = MiBand.getDevices();
         super.onResume();
         timerHandler.post(updater);
     }
@@ -366,7 +399,7 @@ public class MainActivity extends AppCompatActivity implements
     private void bluetoothPermissionsGranted() {
         Log.d(TAG, "bluetoothPermissionsGranted");
         SettingsFragment settingsFragment = (SettingsFragment) getSupportFragmentManager().findFragmentById(R.id.settings_fragment);
-        settingsFragment.setServicePref(true);
+        settingsFragment.setDevicePref(true);
     }
 
     @Override

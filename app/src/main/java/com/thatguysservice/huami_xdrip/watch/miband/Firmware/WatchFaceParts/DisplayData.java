@@ -475,7 +475,6 @@ public class DisplayData {
 
             treatment = new ValueTime(treatmentText, timeStamp, isOld);
 
-
             timeStampVal = bundle.getLong("ext_status.timeStamp", -1);
             setExtStatusLine(bundle.getString("ext_status.text"), timeStampVal );
             return DisplayData.this;

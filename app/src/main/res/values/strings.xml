@@ -107,7 +107,7 @@
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="nav_menu_scan">Scan</string>
-
+    <string name="confirm_remove_message">Are you sure you want to remove this device?</string>
     <string name="action_settings">Settings</string>
     <string name="send_logs">Submit</string>
     <string name="please_enter_your_question_or_comments_here">Please describe the issue you have encountered.</string>
@@ -153,4 +153,14 @@
     <string name="downloadError">An error occurred during request.</string>
     <string name="unZipError">Could not extract zip.</string>
     <string name="custom_wf_option_enabled">Custom watchface option were enabled</string>
+    <string name="summary_enable_web_server">Allows to communicate with ZEPP OS based devices</string>
+    <string name="title_enable_web_server">Enable web server</string>
+    <string name="action_add_device">Add device</string>
+    <string name="action_remove_device">Remove device</string>
+    <string name="title_enable_device">Enable device</string>
+    <string name="action_rename_device">Rename device</string>
+    <string name="device_name">Device name</string>
+    <string name="enter_device_name">Enter Name</string>
+    <string name="title_active_device">Active device</string>
+    <string name="summary_active_device">Select the active device</string>
 </resources>
