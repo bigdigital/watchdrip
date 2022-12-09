@@ -15,6 +15,7 @@ public class WebServiceData {
         this.status = new WebServiceStatus(bgData.isDoMgdl(), bgDataBundle);
         this.bg = new WebServiceBgInfo(bgData);
         this.treatment = new WebServiceTreatment(bgDataBundle);
+        this.pump = new WebServicePump(bgDataBundle);
     }
 
     public String getGson() {
