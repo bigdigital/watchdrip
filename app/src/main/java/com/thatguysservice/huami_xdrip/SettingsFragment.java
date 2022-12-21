@@ -55,6 +55,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     BgDataRepository bgDataRepository;
     private TwoStatePreference servicePref;
     private TwoStatePreference deviceEnabledPref;
+    private TwoStatePreference webServerEnabledPref;
     private ListPreference activeDevicePref;
 
     protected void setListPreferenceData() {
@@ -112,8 +113,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
         servicePref = findPreference(MiBandEntry.PREF_MIBAND_ENABLED);
         deviceEnabledPref = findPreference(MiBandEntry.PREF_MIBAND_ENABLE_DEVICE);
-        servicePref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback((Boolean) newValue));
-        deviceEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback((Boolean) newValue));
+        webServerEnabledPref = findPreference(MiBandEntry.PREF_ENABLE_WEB_SERVER);
+        servicePref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
+        deviceEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
+        webServerEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
 
         activeDevicePref = findPreference(MiBandEntry.PREF_MIBAND_ACTIVE_DEVICE);
         activeDevicePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -140,7 +143,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         updateListPreferenceVisibility();
     }
 
-    private boolean prefEnableCallback(Boolean newValue) {
+    private boolean prefEnableCallback(Preference preference, Boolean newValue) {
         if ((Boolean) newValue) {
             boolean result = checkAndRequestBTPermissions();
             if (!result) {

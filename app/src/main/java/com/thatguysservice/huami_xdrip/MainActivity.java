@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements
         final Observer<Boolean> serviceStateObserver = new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable final Boolean status) {
-                binding.setFabVisibility(status);
+                binding.setFabVisibility(MiBandEntry.isWebServerEnabled() || MiBandEntry.isDeviceEnabled());
                 handleDeviceMenuVisibility();
             }
         };
