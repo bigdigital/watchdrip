@@ -16,13 +16,13 @@ public class WebServiceTreatment {
         this.predictIOB = bundle.getString("predict.IOB");
         this.predictBWP = bundle.getString("predict.BWP");
 
-        if (this.predictIOB.isEmpty()) {
+        if (this.predictIOB == null || this.predictIOB.isEmpty()) {
             this.predictIOB = null;
         } else {
             this.predictIOB = this.predictIOB.replace(",", ".");
             this.predictIOB = this.predictIOB + "u".replace(".0u", "u");
         }
-        if (this.predictBWP.isEmpty()) {
+        if (this.predictBWP == null || this.predictBWP.isEmpty()) {
             this.predictBWP = null;
         } else {
             this.predictBWP = this.predictBWP.replace(",", ".");

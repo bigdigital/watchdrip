@@ -61,5 +61,5 @@ public class WatchfaceConfig {
     public SimpleText[] statusText;
 
     @SerializedName("ext_status_line_text")
-    public SimpleText extStatusLineText;
+    public SimpleText extStatusLineText = new SimpleText();
 }

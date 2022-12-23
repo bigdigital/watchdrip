@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume");
-        devices = MiBand.getDevices();
+       // devices = MiBand.getDevices();
         super.onResume();
         timerHandler.post(updater);
     }
