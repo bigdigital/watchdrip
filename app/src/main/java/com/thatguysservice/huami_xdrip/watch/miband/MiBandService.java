@@ -61,6 +61,7 @@ import com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes;
 import com.thatguysservice.huami_xdrip.webservice.WebServer;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -356,7 +357,8 @@ public class MiBandService extends BaseBluetoothSequencer {
         Helper.wakeUpIntent(HuamiXdrip.getAppContext(), WATCHDOG_DELAY, watchdogIntent);
     }
 
-    private boolean handleGlobalCommand(String functionName, Bundle bundle) {
+
+    private boolean handleGlobalCommand(@NotNull String functionName, Bundle bundle) {
         switch (functionName) {
             case CMD_STAT_INFO:
                 StatisticInfo statisticInfo = new StatisticInfo(bundle);
@@ -1269,7 +1271,7 @@ public class MiBandService extends BaseBluetoothSequencer {
 
     @Override
     protected synchronized boolean automata() {
-        UserError.Log.d(TAG, "Automata called in " + TAG);
+        //UserError.Log.d(TAG, "Automata called in " + TAG);
         extendWakeLock(10000);
         if (shouldServiceRun()) {
             bgDataRepository.setNewConnectionState(I.state);
@@ -1652,7 +1654,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         static final String SEND_BG = "Send BG";
         static final String SEND_SETTINGS = "Updating Settings";
         static final String QUEUE_MESSAGE = "Queue Message";
-        static final String WAITING_USER_RESPONSE = "Waiting User Responce";
+        static final String WAITING_USER_RESPONSE = "Waiting User Response";
         static final String WAITING_MIFIT_SILENCE = "Waiting MiFit Silence";
         static final String AUTHENTICATE = "Authenticate";
         static final String AUTHORIZE = "Authorization";
