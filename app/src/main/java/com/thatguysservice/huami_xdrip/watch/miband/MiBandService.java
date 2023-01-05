@@ -216,6 +216,11 @@ public class MiBandService extends BaseBluetoothSequencer {
     }
 
     public void setMTU(int mMTU) {
+        if (MiBandEntry.isNeedToDisableHightMTU()){
+            UserError.Log.e(TAG, "High MTU is not allowed, ignoring");
+            this.mMTU = GATT_MTU_MINIMUM;
+            return;
+        }
         this.mMTU = mMTU;
         if (this.mMTU > GATT_MTU_MAXIMUM) this.mMTU = GATT_MTU_MAXIMUM;
         if (this.mMTU < GATT_MTU_MINIMUM) this.mMTU = GATT_MTU_MINIMUM;
@@ -669,8 +674,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             case DeviceEvent.MTU_REQUEST:
                 int mtu = (value[2] & 0xff) << 8 | value[1] & 0xff;
                 UserError.Log.d(TAG, "device announced MTU of " + mtu);
-                if (!MiBandEntry.isNeedToDisableHightMTU())
-                    setMTU(mtu);
+                setMTU(mtu);
                 break;
             default:
                 UserError.Log.d(TAG, "unhandled event " + value[0]);
@@ -1072,8 +1076,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             requestConnectionPriority(I.connection, BluetoothGatt.CONNECTION_PRIORITY_HIGH);
         }
         int mtu = I.connection.getMtu();
-        if (!MiBandEntry.isNeedToDisableHightMTU())
-            setMTU(mtu);
+        setMTU(mtu);
         firmware.nextSequence();
         firmware.processFirmwareSequence();
         changeNextState();
