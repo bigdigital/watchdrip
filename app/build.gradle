@@ -117,7 +117,7 @@ dependencies {
 
    // implementation "com.evernote:android-job:1.4.2"
 
-    def work_version = "2.7.1"
+    def work_version = "2.5.0"
     // (Java only)
     implementation "androidx.work:work-runtime:$work_version"
     implementation 'com.android.volley:volley:1.1.0'
