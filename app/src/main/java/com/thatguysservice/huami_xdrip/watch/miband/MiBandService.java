@@ -837,12 +837,11 @@ public class MiBandService extends BaseBluetoothSequencer {
         }
         switch (messageType != null ? messageType : "null") {
             case MIBAND_NOTIFY_TYPE_CALL:
-                isWaitingCallResponse = false;
+                isWaitingCallResponse = true;
                 new QueueMe()
                         .setBytes(alertMessage.getAlertMessageOld(message, AlertMessage.AlertCategory.Call))
                         .setDescription("Send call alert: " + message)
                         .setQueueWriteCharacterstic(alertMessage.getCharacteristicUUID())
-                        .setRunnable(() -> isWaitingCallResponse = true)
                         .expireInSeconds(QUEUE_EXPIRED_TIME)
                         .setDelayMs(QUEUE_DELAY)
                         .queue();
@@ -856,14 +855,13 @@ public class MiBandService extends BaseBluetoothSequencer {
                 }
                 break;
             case MIBAND_NOTIFY_TYPE_ALARM:
-                isWaitingCallResponse = false;
+                isWaitingCallResponse = true;
                 new QueueMe()
                         .setBytes(alertMessage.getAlertMessageOld(message, AlertMessage.AlertCategory.Call))
                         .setDescription("Sent glucose alert: " + message)
                         .setQueueWriteCharacterstic(alertMessage.getCharacteristicUUID())
                         .expireInSeconds(QUEUE_EXPIRED_TIME)
                         .setDelayMs(QUEUE_DELAY)
-                        .setRunnable(() -> isWaitingCallResponse = true)
                         .queue();
                 missingAlertMessage = message;
                 stopBgUpdateTimer();
@@ -1274,7 +1272,7 @@ public class MiBandService extends BaseBluetoothSequencer {
 
     @Override
     protected synchronized boolean automata() {
-        //UserError.Log.d(TAG, "Automata called in " + TAG);
+        UserError.Log.d(TAG, "Automata called in " + TAG);
         extendWakeLock(10000);
         if (shouldServiceRun()) {
             bgDataRepository.setNewConnectionState(I.state);

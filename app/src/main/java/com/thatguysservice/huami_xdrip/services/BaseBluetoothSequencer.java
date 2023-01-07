@@ -609,6 +609,7 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
     }
 
     public void startQueueSend() {
+        UserError.Log.d(TAG, "startQueueSend");
         Inevitable.task("sequence-start-queue " + I.address, 0, new Runnable() {
             @Override
             public void run() {
