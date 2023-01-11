@@ -7,7 +7,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 public class CleanupWorker extends Worker {
 

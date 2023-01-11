@@ -10,7 +10,10 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
-import com.activeandroid.ActiveAndroid;
+import com.reactiveandroid.ReActiveAndroid;
+import com.reactiveandroid.ReActiveConfig;
+import com.reactiveandroid.internal.database.DatabaseConfig;
+import com.thatguysservice.huami_xdrip.models.database.AppDatabase;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.utils.jobs.CleanupWorker;
 
@@ -31,9 +34,18 @@ public class HuamiXdrip extends MultiDexApplication {
     public void onCreate() {
         HuamiXdrip.context = getApplicationContext();
         BroadcastService.initialStartIfEnabled();
-        ActiveAndroid.initialize(this);
+        ReactiveAndroidInitialize();
         scheduleTask();
         super.onCreate();
+    }
+
+    private void ReactiveAndroidInitialize(){
+        DatabaseConfig appDatabaseConfig = new DatabaseConfig.Builder(AppDatabase.class)
+                .build();
+
+        ReActiveAndroid.init(new ReActiveConfig.Builder(this)
+                .addDatabaseConfigs(appDatabaseConfig)
+                .build());
     }
 
     private void scheduleTask() {

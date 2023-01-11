@@ -3,18 +3,9 @@ package com.thatguysservice.huami_xdrip.utils;
 import android.content.Context;
 import android.os.Environment;
 
-import com.thatguysservice.huami_xdrip.models.UserError;
-
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 

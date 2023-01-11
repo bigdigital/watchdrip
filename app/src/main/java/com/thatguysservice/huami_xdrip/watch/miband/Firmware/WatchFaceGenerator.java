@@ -15,7 +15,7 @@ import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphBuilder;
 import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphCompontens;
 import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.WatchfaceConfig;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.DisplayData;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Header.Header;

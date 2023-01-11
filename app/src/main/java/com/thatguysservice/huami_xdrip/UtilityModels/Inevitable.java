@@ -4,7 +4,7 @@ import android.os.PowerManager;
 
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 import java.util.concurrent.ConcurrentHashMap;
 

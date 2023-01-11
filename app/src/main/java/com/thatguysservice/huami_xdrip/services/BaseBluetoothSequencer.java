@@ -26,7 +26,7 @@ import com.thatguysservice.huami_xdrip.UtilityModels.RxBleProvider;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.Pref;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.utils.bt.BackgroundScanReceiver;
 import com.thatguysservice.huami_xdrip.utils.bt.BtCallBack;
 import com.thatguysservice.huami_xdrip.utils.bt.BtCallBack2;

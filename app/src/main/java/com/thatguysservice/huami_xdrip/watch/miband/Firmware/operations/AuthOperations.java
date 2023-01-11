@@ -7,7 +7,7 @@ import com.polidea.rxandroidble2.RxBleConnection;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.utils.HexDump;
 import com.thatguysservice.huami_xdrip.utils.chiper.CipherUtils;
 import com.thatguysservice.huami_xdrip.watch.miband.Const;

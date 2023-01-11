@@ -1,26 +1,20 @@
 package com.thatguysservice.huami_xdrip.models;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
-import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,16 +25,14 @@ import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.util.Base64;
 import android.util.Log;
-import android.view.Display;
-import android.view.Surface;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
 
-import com.activeandroid.ActiveAndroid;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -597,24 +589,6 @@ public class Helper {
         wl.acquire(millis);
         if (debug_wakelocks) Log.d(TAG, "fullWakeLock: " + name + " " + wl.toString());
         return wl;
-    }
-
-    public static void fullDatabaseReset() {
-        try {
-            clearCache();
-            ActiveAndroid.dispose();
-            ActiveAndroid.initialize( HuamiXdrip.getAppContext());
-        } catch (Exception e) {
-            Log.e(TAG, "Error restarting active android db");
-        }
-    }
-
-    public static void clearCache() {
-        try {
-            ActiveAndroid.clearCache();
-        } catch (Exception e) {
-            Log.e(TAG, "Error clearing active android cache: " + e);
-        }
     }
 
     public static boolean isScreenOn() {

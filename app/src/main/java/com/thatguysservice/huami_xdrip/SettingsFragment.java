@@ -28,7 +28,7 @@ import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.PersistantDeviceInfo;
 import com.thatguysservice.huami_xdrip.models.PersistantDevices;
 import com.thatguysservice.huami_xdrip.models.PropertiesUpdate;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;

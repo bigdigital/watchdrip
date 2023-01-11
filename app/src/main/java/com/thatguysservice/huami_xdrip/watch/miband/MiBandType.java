@@ -1,6 +1,6 @@
 package com.thatguysservice.huami_xdrip.watch.miband;
 
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.utils.Version;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.AuthOperations;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.AuthOperations2021;

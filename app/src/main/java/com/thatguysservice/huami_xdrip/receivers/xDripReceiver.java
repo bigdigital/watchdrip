@@ -7,14 +7,13 @@ import android.os.Bundle;
 
 import com.thatguysservice.huami_xdrip.BuildConfig;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_PREFIX;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_GOT_RESPONCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_START;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;

@@ -5,7 +5,7 @@ import android.annotation.SuppressLint;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.Const;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandService;

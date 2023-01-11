@@ -15,7 +15,6 @@ import android.os.PowerManager;
 
 import androidx.annotation.RequiresApi;
 
-import com.google.gson.Gson;
 import com.polidea.rxandroidble2.ConnectionParameters;
 import com.polidea.rxandroidble2.RxBleConnection;
 import com.polidea.rxandroidble2.RxBleDeviceServices;
@@ -29,7 +28,7 @@ import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.DeviceInfo;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.StatisticInfo;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.models.webservice.WebServiceData;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer;
@@ -62,9 +61,7 @@ import com.thatguysservice.huami_xdrip.webservice.WebServer;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;

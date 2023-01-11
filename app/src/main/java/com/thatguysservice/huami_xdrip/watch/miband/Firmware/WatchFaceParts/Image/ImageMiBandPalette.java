@@ -3,7 +3,7 @@ package com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Ima
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Utils.PnnQuantizer;
 
 import java.io.ByteArrayOutputStream;

@@ -2,7 +2,7 @@ package com.thatguysservice.huami_xdrip.UtilityModels;
 
 import com.polidea.rxandroidble2.RxBleClient;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 import java.util.concurrent.ConcurrentHashMap;
 

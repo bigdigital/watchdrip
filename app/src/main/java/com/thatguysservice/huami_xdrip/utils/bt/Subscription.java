@@ -1,7 +1,7 @@
 package com.thatguysservice.huami_xdrip.utils.bt;
 
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;

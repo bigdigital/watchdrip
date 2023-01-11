@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.polidea.rxandroidble2.exceptions.BleScanException.*;
 
+import com.thatguysservice.huami_xdrip.models.database.UserError;
+
 public class HandleBleScanException {
 
     public static String handle(String TAG, com.polidea.rxandroidble2.exceptions.BleScanException bleScanException) {

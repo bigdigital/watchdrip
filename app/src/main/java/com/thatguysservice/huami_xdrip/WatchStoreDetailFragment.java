@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -20,7 +19,7 @@ import androidx.fragment.app.Fragment;
 
 import com.squareup.picasso.Picasso;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.models.watchfaces.WatchFaceInfo;
 import com.thatguysservice.huami_xdrip.utils.FileUtils;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
@@ -36,16 +35,9 @@ import com.tonyodev.fetch2core.DownloadBlock;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import static com.thatguysservice.huami_xdrip.WatchStoreActivity.DATA_FILES_DIR;
 

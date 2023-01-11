@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 /**
  * Created by jamorham on 01/01/2018.

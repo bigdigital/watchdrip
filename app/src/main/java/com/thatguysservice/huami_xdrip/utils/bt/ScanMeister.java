@@ -1,6 +1,5 @@
 package com.thatguysservice.huami_xdrip.utils.bt;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
@@ -16,7 +15,7 @@ import com.thatguysservice.huami_xdrip.UtilityModels.RxBleProvider;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.HandleBleScanException;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 import java.util.ArrayList;
 import java.util.List;

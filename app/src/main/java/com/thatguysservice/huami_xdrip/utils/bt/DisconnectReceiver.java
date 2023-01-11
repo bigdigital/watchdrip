@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

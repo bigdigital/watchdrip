@@ -1,14 +1,19 @@
-package com.thatguysservice.huami_xdrip.models;
+package com.thatguysservice.huami_xdrip.models.database;
 
 import android.os.AsyncTask;
 import android.provider.BaseColumns;
 
-import com.activeandroid.Cache;
-import com.activeandroid.annotation.Column;
-import com.activeandroid.annotation.Table;
-import com.activeandroid.query.Delete;
-import com.activeandroid.query.Select;
+import com.reactiveandroid.ReActiveAndroid;
+import com.reactiveandroid.annotation.Column;
+import com.reactiveandroid.annotation.Table;
 import com.google.gson.annotations.Expose;
+import com.reactiveandroid.Model;
+import com.reactiveandroid.annotation.PrimaryKey;
+import com.reactiveandroid.query.Delete;
+import com.reactiveandroid.query.Select;
+import com.thatguysservice.huami_xdrip.models.Constants;
+import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.models.Pref;
 
 import java.util.Date;
 import java.util.Hashtable;
@@ -20,16 +25,11 @@ import java.util.List;
  * Created by Emma Black on 8/3/15.
  */
 
-@Table(name = "UserErrors", id = BaseColumns._ID)
-public class UserError extends PlusModel {
+@Table(name = "UserErrors", database = AppDatabase.class)
+public class UserError extends Model {
 
-    private static boolean patched = false;
-
-    private static final String schema[] = {
-            "CREATE TABLE UserErrors (_id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT, severity INTEGER, shortError TEXT, timestamp REAL)",
-            "CREATE INDEX index_UserErrors_timestamp on UserErrors(timestamp)",
-            "CREATE INDEX index_UserErrors_severity on UserErrors(severity)"
-    };
+    @PrimaryKey
+    private Long id;
 
     private final static String TAG = UserError.class.getSimpleName();
 
@@ -42,14 +42,14 @@ public class UserError extends PlusModel {
     public String message; // Additional text when error is expanded
 
     @Expose
-    @Column(name = "severity", index = true)
+    @Column(name = "severity")
     public int severity; // int between 1 and 3, 3 being most severe
 
     // 5 = internal lower level user events
     // 6 = higher granularity user events
 
     @Expose
-    @Column(name = "timestamp", index = true)
+    @Column(name = "timestamp")
     public long timestamp; // Time the error was raised
 
     //todo: rather than include multiples of the same error, should we have a "Count" and just increase that on duplicates?
@@ -120,22 +120,9 @@ public class UserError extends PlusModel {
         new Cleanup().execute(deletable());
     }
 
-    // used in unit testing
-    public static void cleanup(long timestamp) {
-        patched = fixUpTable(schema, patched);
-        List<UserError> userErrors = new Select()
-                .from(UserError.class)
-                .where("timestamp < ?", timestamp)
-                .orderBy("timestamp desc")
-                .execute();
-        if (userErrors != null) Log.d(TAG, "cleanup UserError size=" + userErrors.size());
-        new Cleanup().execute(userErrors);
-    }
-
     public static void cleanupByTimeAndClause(final long timestamp, final String clause) {
-        new Delete().from(UserError.class)
-                .where("timestamp < ?", timestamp)
-                .where(clause)
+        Delete.from(UserError.class)
+                .where("timestamp < ? AND ?%", timestamp, clause)
                 .execute();
     }
 
@@ -144,36 +131,30 @@ public class UserError extends PlusModel {
         cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS, "severity < 3");
         cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 2, "severity = 3");
         cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 2, "severity > 3");
-        Cache.clear();
+        ReActiveAndroid.getModelAdapter(UserError.class).getModelCache().clear();
     }
 
 
     public static List<UserError> all() {
-        return new Select()
-                .from(UserError.class)
-                .orderBy("timestamp desc")
-                .execute();
+         return Select.from(UserError.class).orderBy("timestamp desc").fetch();
     }
 
     public static List<UserError> deletable() {
-        List<UserError> userErrors = new Select()
+        List<UserError> userErrors = Select
                 .from(UserError.class)
-                .where("severity < ?", 3)
-                .where("timestamp < ?", (new Date().getTime() - 1000 * 60 * 60 * 24))
+                .where("severity < ? AND timestamp < ? ", 3,(new Date().getTime() - 1000 * 60 * 60 * 24))
                 .orderBy("timestamp desc")
-                .execute();
-        List<UserError> highErrors = new Select()
+                .fetch();
+        List<UserError> highErrors = Select
                 .from(UserError.class)
-                .where("severity = ?", 3)
-                .where("timestamp < ?", (new Date().getTime() - 1000*60*60*24*2))
+                .where("severity = ? AND timestamp < ?", 3, (new Date().getTime() - 1000*60*60*24*2))
                 .orderBy("timestamp desc")
-                .execute();
-        List<UserError> events = new Select()
+                .fetch();
+        List<UserError> events = Select
                 .from(UserError.class)
-                .where("severity > ?", 3)
-                .where("timestamp < ?", (new Date().getTime() - 1000*60*60*24*2))
+                .where("severity > ? AND timestamp < ?", 3, (new Date().getTime() - 1000*60*60*24*2))
                 .orderBy("timestamp desc")
-                .execute();
+                .fetch();
         userErrors.addAll(highErrors);
         userErrors.addAll(events);
         return userErrors;
@@ -185,12 +166,12 @@ public class UserError extends PlusModel {
             levelsString += level + ",";
         }
         Log.d("UserError", "severity in ("+levelsString.substring(0,levelsString.length() - 1)+")");
-        return new Select()
+        return Select
                 .from(UserError.class)
                 .where("severity in ("+levelsString.substring(0,levelsString.length() - 1)+")")
                 .orderBy("timestamp desc")
                 .limit(10000)//too many data can kill akp
-                .execute();
+                .fetch();
     }
 
     public static List<UserError> bySeverityNewerThanID(long id, Integer[] levels, int limit) {
@@ -199,31 +180,30 @@ public class UserError extends PlusModel {
             levelsString += level + ",";
         }
         Log.d("UserError", "severity in (" + levelsString.substring(0, levelsString.length() - 1) + ")");
-        return new Select()
+        return Select
                 .from(UserError.class)
-                .where("_ID > ?", id)
-                .where("severity in (" + levelsString.substring(0, levelsString.length() - 1) + ")")
+                .where("id > ? AND severity in (" + levelsString.substring(0, levelsString.length() - 1) + ")", id)
                 .orderBy("timestamp desc")
                 .limit(limit)
-                .execute();
+                .fetch();
     }
 
     public static List<UserError> newerThanID(long id, int limit) {
-        return new Select()
+        return Select
                 .from(UserError.class)
-                .where("_ID > ?", id)
+                .where("id > ?", id)
                 .orderBy("timestamp desc")
                 .limit(limit)
-                .execute();
+                .fetch();
     }
 
     public static List<UserError> olderThanID(long id, int limit) {
-        return new Select()
+        return Select
                 .from(UserError.class)
-                .where("_ID < ?", id)
+                .where("id < ?", id)
                 .orderBy("timestamp desc")
                 .limit(limit)
-                .execute();
+                .fetch();
     }
 
     public static List<UserError> bySeverityOlderThanID(long id, Integer[] levels, int limit) {
@@ -232,24 +212,21 @@ public class UserError extends PlusModel {
             levelsString += level + ",";
         }
         Log.d("UserError", "severity in (" + levelsString.substring(0, levelsString.length() - 1) + ")");
-        return new Select()
+        return Select
                 .from(UserError.class)
-                .where("_ID < ?", id)
-                .where("severity in (" + levelsString.substring(0, levelsString.length() - 1) + ")")
+                .where("id < ? AND severity in (" + levelsString.substring(0, levelsString.length() - 1) + ")", id)
                 .orderBy("timestamp desc")
                 .limit(limit)
-                .execute();
+                .fetch();
     }
 
 
     public static UserError getForTimestamp(UserError error) {
         try {
-            return new Select()
+            return Select
                     .from(UserError.class)
-                    .where("timestamp = ?", error.timestamp)
-                    .where("shortError = ?", error.shortError)
-                    .where("message = ?", error.message)
-                    .executeSingle();
+                    .where("timestamp = ? AND shortError = ? AND message = ?", error.timestamp, error.shortError, error.message)
+                    .fetchSingle();
         } catch (Exception e) {
             Log.e(TAG,"getForTimestamp() Got exception on Select : "+e.toString());
             return null;

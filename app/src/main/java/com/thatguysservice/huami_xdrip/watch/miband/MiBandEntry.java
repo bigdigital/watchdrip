@@ -1,26 +1,21 @@
 package com.thatguysservice.huami_xdrip.watch.miband;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
 
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
-import com.thatguysservice.huami_xdrip.UtilityModels.Intents;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.Pref;
-import com.thatguysservice.huami_xdrip.models.UserError;
 
 import java.util.Date;
 
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
 
 public class MiBandEntry {
     public static final String PREF_MIBAND_ENABLED = "miband_enabled";

@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.util.Log;
 
 import com.eveningoutpost.dexdrip.services.broadcastservice.models.Settings;
 import com.thatguysservice.huami_xdrip.BuildConfig;
@@ -14,7 +13,7 @@ import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.utils.framework.WakeLockTrampoline;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandService;

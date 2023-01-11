@@ -7,9 +7,8 @@ import android.os.Build;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
 import com.thatguysservice.huami_xdrip.models.Helper;
-import com.thatguysservice.huami_xdrip.models.UserError;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static com.thatguysservice.huami_xdrip.UtilityModels.Notifications.ongoingNotificationId;
 
 public class ForegroundServiceStarter {
