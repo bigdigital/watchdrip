@@ -33,8 +33,8 @@ public class HuamiXdrip extends MultiDexApplication {
     @Override
     public void onCreate() {
         HuamiXdrip.context = getApplicationContext();
-        BroadcastService.initialStartIfEnabled();
         ReactiveAndroidInitialize();
+        BroadcastService.initialStartIfEnabled();
         scheduleTask();
         super.onCreate();
     }
