@@ -33,6 +33,7 @@ public class Notifications {
                     NOTIFICATION_CHANNEL_ID,
                     context.getString(R.string.notification_channel_name),
                     NotificationManager.IMPORTANCE_LOW);
+            channelGeneral.setShowBadge(false);
             notificationManager.createNotificationChannel(channelGeneral);
         }
         notificationChannelsCreated = true;
