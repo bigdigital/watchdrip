@@ -12,6 +12,7 @@ import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.Ba
 import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SLEEP;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_HR;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_STEPS;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_TREATMENT;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ALERT;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_AFTER_MISSING_ALARM;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_BG_FORCE_REMOTE;
@@ -109,40 +110,6 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import lombok.Getter;
 
-import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MAXIMUM;
-import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MINIMUM;
-import static com.polidea.rxandroidble2.RxBleConnection.GATT_WRITE_MTU_OVERHEAD;
-import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
-import static com.thatguysservice.huami_xdrip.models.Helper.bytesToHex;
-import static com.thatguysservice.huami_xdrip.models.Helper.emptyString;
-import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSE;
-import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSED;
-import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.INIT;
-import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SLEEP;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_HR;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_STEPS;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ALERT;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_AFTER_MISSING_ALARM;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_BG_FORCE_REMOTE;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_WATCHDOG;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_NO_RESPONCE;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_MESSAGE;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_SNOOZE_ALERT;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_STAT_INFO;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
-import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_ALARM;
-import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_CALL;
-import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_CANCEL;
-import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_MESSAGE;
-import static com.thatguysservice.huami_xdrip.watch.miband.Const.PREFERRED_MTU_SIZE;
-import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_ACK_FIND_PHONE_IN_PROGRESS;
-import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_DISABLE_CALL;
-
 /**
  * <p>
  * Data communication with MiBand compatible bands/watches
@@ -199,16 +166,35 @@ public class MiBandService extends BaseBluetoothSequencer {
     private Bundle latestBgDataBundle;
     private WebServer webServer;
     private boolean isConnectionStopped = true;
-    private WebServer.CommonGatewayInterface getInfoResponce = new WebServer.CommonGatewayInterface() {
+    private WebServer.CommonGatewayInterface CGI_getInfoResponse = new WebServer.CommonGatewayInterface() {
         @Override
         public String run(Map<String, List<String>> params) {
             if (latestBgDataBundle == null || bgDataLatest == null) {
-                UserError.Log.d(TAG, "WebServer started");
+                UserError.Log.d(TAG, "CGI_getInfoResponse: No data");
                 return "{}";
             }
             String resp = new WebServiceData(bgDataLatest, latestBgDataBundle).getGson();
-            UserError.Log.d(TAG, "getInfoResponce: " + resp);
+            UserError.Log.d(TAG, "CGI_getInfoResponse: " + resp);
             return resp;
+        }
+    };
+
+    private WebServer.CommonGatewayInterface CGI_addTreatments = new WebServer.CommonGatewayInterface() {
+        @Override
+        public String run(Map<String, List<String>> params) {
+//            List<String> carbs = params.get("carbs");
+//            String insulin = params.get("insulin");
+//
+//            Double.valueOf(str)
+//            if
+//            addTreatment(carbs, insulin);
+//            if (latestBgDataBundle == null || bgDataLatest == null) {
+//                UserError.Log.d(TAG, "WebServer No data to responce");
+//                return "{}";
+//            }
+//            String resp = new WebServiceData(bgDataLatest, latestBgDataBundle).getGson();
+//            UserError.Log.d(TAG, "WebServer getInfoResponce: " + resp);
+            return "";
         }
     };
 
@@ -430,7 +416,8 @@ public class MiBandService extends BaseBluetoothSequencer {
             if (webServer == null) {
                 try {
                     webServer = new WebServer();
-                    webServer.registerCGI("/info.json", getInfoResponce);
+                    webServer.registerCGI("/info.json", CGI_getInfoResponse);
+                    webServer.registerCGI("/add_treatments", CGI_addTreatments);
                     webServer.start();
                     UserError.Log.d(TAG, "WebServer started");
                 } catch (Exception e) {
@@ -1165,6 +1152,15 @@ public class MiBandService extends BaseBluetoothSequencer {
                 HuamiXdrip.getAppContext().startService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class).putExtra(INTENT_FUNCTION_KEY, CMD_ADD_HR).putExtra("value", hrValue));
             }
         }
+    }
+
+    private void addTreatment(Double carbs,Double insulin){
+        Intent intent = new Intent(HuamiXdrip.getAppContext(), BroadcastService.class)
+                .putExtra(INTENT_FUNCTION_KEY, CMD_ADD_TREATMENT)
+                .putExtra("timeStamp", Helper.tsl())
+                .putExtra("carbs", carbs)
+                .putExtra("insulin", insulin);
+        HuamiXdrip.getAppContext().startService(intent);
     }
 
     private void handleRealtimeSteps(byte[] value) {
