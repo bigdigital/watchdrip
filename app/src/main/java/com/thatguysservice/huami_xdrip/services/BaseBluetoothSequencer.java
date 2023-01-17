@@ -55,6 +55,7 @@ import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.Ba
 import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CONNECT_NOW;
 import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.DISCOVER;
 import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.INIT;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.QUEUE_SENDING;
 import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SEND_QUEUE;
 import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SLEEP;
 import static com.thatguysservice.huami_xdrip.utils.bt.ScanMeister.SCAN_FOUND_CALLBACK;
@@ -527,7 +528,9 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
                 case SEND_QUEUE:
                     startQueueSend();
                     break;
-
+                case QUEUE_SENDING:
+                    //wait here while sending messages
+                    break;
                 case CLOSE:
                     stopConnect(I.address);
                     changeState(CLOSED);
@@ -586,7 +589,6 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
 
             }
         }
-        if (queueMe.start_now) startQueueSend();
     }
 
     private boolean doesWriteQueueContainBytes(final byte[] bytes) {
@@ -616,6 +618,7 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
                 writeMultipleFromQueue(I.write_queue);
             }
         });
+        changeState(mState.next());
     }
 
     private synchronized void writeMultipleFromQueue(final PoorMansConcurrentLinkedDeque<QueueItem> queue) {
@@ -673,7 +676,7 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
                     if (!item.expectReply) {
                         writeMultipleFromQueue(queue); // start next item immediately
                     }
-                    throw new OperationSuccess("write complete: " + item.description);
+                    //throw new OperationSuccess("write complete: " + item.description);
                 }, throwable -> {
                     if (!(throwable instanceof OperationSuccess)) {
                         UserError.Log.d(TAG, "Throwable in: " + item.description + " -> " + throwable);
@@ -828,6 +831,7 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
         public static final String INIT = "Initializing";
         public static final String CONNECT_NOW = "Connecting";
         public static final String SEND_QUEUE = "Sending Queue";
+        public static final String QUEUE_SENDING = "Wait Sending Queue";
         public static final String DISCOVER = "Discover Services";
         public static final String SLEEP = "Sleeping";
         public static final String CLOSE = "Closing";
@@ -839,6 +843,7 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
             sequence.add(INIT);
             sequence.add(CONNECT_NOW);
             sequence.add(SEND_QUEUE);
+            sequence.add(QUEUE_SENDING);
             //sequence.add(DISCOVER); // handled by initial connection callback
             sequence.add(SLEEP);
         }
@@ -899,7 +904,6 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
         long delay_ms = 100;
         int timeout_seconds = 10;
         long expireAt;
-        boolean start_now;
         boolean expect_reply;
         String description = "Vanilla Queue Item";
         UUID queueWriteCharacterstic;
@@ -959,29 +963,17 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
         }
 
 
-        public QueueMe now() {
-            this.start_now = true;
-            return this;
-        }
-
         public QueueMe expectReply() {
             this.expect_reply = true;
             return this;
         }
 
         public void queue() {
-            this.start_now = false; // make sure disabled
             add();
         }
 
         public void queueUnique() {
-            this.start_now = false; // make sure disabled
             add(true);
-        }
-
-        public void send() {
-            this.start_now = true; // make sure enabled
-            add();
         }
 
         private void add() {
@@ -993,7 +985,6 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
         }
 
         private void add(final boolean unique) {
-            //addToWriteQueue(byteslist, delay_ms, timeout_seconds, start_now, description, expect_reply, expireAt, runnable);
             addToWriteQueue(this, unique, false);
         }
 
