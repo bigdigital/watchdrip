@@ -1,6 +1,7 @@
 package com.thatguysservice.huami_xdrip.utils.time;
 
 import android.content.Context;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.TimePicker;
 
@@ -18,6 +19,7 @@ public class TimePreferenceDialogFragmentCompat extends PreferenceDialogFragment
     @Override
     protected View onCreateDialogView(Context context) {
         picker = new TimePicker(context);
+        picker.setIs24HourView(DateFormat.is24HourFormat(getActivity()));
         return picker;
     }
 
