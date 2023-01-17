@@ -1,5 +1,39 @@
 package com.thatguysservice.huami_xdrip.watch.miband;
 
+import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MAXIMUM;
+import static com.polidea.rxandroidble2.RxBleConnection.GATT_MTU_MINIMUM;
+import static com.polidea.rxandroidble2.RxBleConnection.GATT_WRITE_MTU_OVERHEAD;
+import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
+import static com.thatguysservice.huami_xdrip.models.Helper.bytesToHex;
+import static com.thatguysservice.huami_xdrip.models.Helper.emptyString;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSE;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.CLOSED;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.INIT;
+import static com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer.BaseState.SLEEP;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_HR;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ADD_STEPS;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_ALERT;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_AFTER_MISSING_ALARM;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_BG_FORCE_REMOTE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_WATCHDOG;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_NO_RESPONCE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_MESSAGE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_SNOOZE_ALERT;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_STAT_INFO;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
+import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_ALARM;
+import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_CALL;
+import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_CANCEL;
+import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_MESSAGE;
+import static com.thatguysservice.huami_xdrip.watch.miband.Const.PREFERRED_MTU_SIZE;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_ACK_FIND_PHONE_IN_PROGRESS;
+import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_DISABLE_CALL;
+
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothGatt;
@@ -165,6 +199,18 @@ public class MiBandService extends BaseBluetoothSequencer {
     private Bundle latestBgDataBundle;
     private WebServer webServer;
     private boolean isConnectionStopped = true;
+    private WebServer.CommonGatewayInterface getInfoResponce = new WebServer.CommonGatewayInterface() {
+        @Override
+        public String run(Map<String, List<String>> params) {
+            if (latestBgDataBundle == null || bgDataLatest == null) {
+                UserError.Log.d(TAG, "WebServer started");
+                return "{}";
+            }
+            String resp = new WebServiceData(bgDataLatest, latestBgDataBundle).getGson();
+            UserError.Log.d(TAG, "getInfoResponce: " + resp);
+            return resp;
+        }
+    };
 
     {
         mState = new MiBandState().setLI(I);
@@ -213,7 +259,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     }
 
     public void setMTU(int mMTU) {
-        if (MiBandEntry.isNeedToDisableHightMTU()){
+        if (MiBandEntry.isNeedToDisableHightMTU()) {
             UserError.Log.e(TAG, "High MTU is not allowed, ignoring");
             this.mMTU = GATT_MTU_MINIMUM;
             return;
@@ -222,7 +268,6 @@ public class MiBandService extends BaseBluetoothSequencer {
         if (this.mMTU > GATT_MTU_MAXIMUM) this.mMTU = GATT_MTU_MAXIMUM;
         if (this.mMTU < GATT_MTU_MINIMUM) this.mMTU = GATT_MTU_MINIMUM;
     }
-
 
     @Override
     public void onCreate() {
@@ -327,8 +372,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                             // no specific function
                         }
                     }
-                }
-                else{
+                } else {
                     stopConnection();
                 }
                 return START_STICKY;
@@ -359,7 +403,6 @@ public class MiBandService extends BaseBluetoothSequencer {
         Helper.wakeUpIntent(HuamiXdrip.getAppContext(), WATCHDOG_DELAY, watchdogIntent);
     }
 
-
     private boolean handleGlobalCommand(@NotNull String functionName, Bundle bundle) {
         switch (functionName) {
             case CMD_STAT_INFO:
@@ -389,7 +432,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                     webServer = new WebServer();
                     webServer.registerCGI("/info.json", getInfoResponce);
                     webServer.start();
-                    UserError.Log.d(TAG, "WebServer started" );
+                    UserError.Log.d(TAG, "WebServer started");
                 } catch (Exception e) {
                     webServer = null;
                     UserError.Log.d(TAG, "Cannot create WebServer: " + e.getMessage());
@@ -399,14 +442,6 @@ public class MiBandService extends BaseBluetoothSequencer {
             stopWebServer();
         }
     }
-
-    private WebServer.CommonGatewayInterface getInfoResponce = new WebServer.CommonGatewayInterface() {
-        @Override
-        public String run(Map<String, List<String>> params) {
-            if (latestBgDataBundle == null || bgDataLatest == null) return "{}";
-            return new WebServiceData(bgDataLatest, latestBgDataBundle).getGson();
-        }
-    };
 
     private void stopWebServer() {
         if (webServer != null) {

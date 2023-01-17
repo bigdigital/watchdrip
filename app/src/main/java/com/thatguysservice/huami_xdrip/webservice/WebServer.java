@@ -1,5 +1,7 @@
 package com.thatguysservice.huami_xdrip.webservice;
 
+import com.thatguysservice.huami_xdrip.models.database.UserError;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ public class WebServer extends NanoHTTPD {
     }
 
     public Response serveCGI(String uri, NanoHTTPD.Method method, Map<String, String> header, Map<String, List<String>> params) {
+        UserError.Log.d(TAG, "serveCGI: " + uri );
         CommonGatewayInterface cgi = cgiEntries.get(uri);
         if (cgi == null)
             return newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Not Found");

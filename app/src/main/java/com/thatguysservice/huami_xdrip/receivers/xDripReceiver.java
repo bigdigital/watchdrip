@@ -27,8 +27,7 @@ public class xDripReceiver extends BroadcastReceiver {
            if (!BroadcastService.shouldServiceRun()) return;
             String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
             String receiver = intent.getPackage();
-            UserError.Log.e(TAG, "got intent");
-            UserError.Log.d(TAG, String.format("functionName: %s, receiver: %s", function, receiver));
+            UserError.Log.e(TAG, String.format("got intent functionName: %s, receiver: %s", function, receiver));
             Helper.getWakeLock(TAG, 1000);
             if (function.equals(CMD_START)) {
                 Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
