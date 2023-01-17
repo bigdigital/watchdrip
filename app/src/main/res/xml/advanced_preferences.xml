@@ -37,12 +37,14 @@
             android:key="miband_nightmode_start"
             android:dependency="miband_nightmode_enabled"
             app:allowDividerAbove="false"
+            android:defaultValue="22"
             app:iconSpaceReserved="true"
             android:title="@string/title_miband_nightmode_start">
         </com.thatguysservice.huami_xdrip.utils.time.TimePreference>
         <com.thatguysservice.huami_xdrip.utils.time.TimePreference
             android:key="miband_nightmode_end"
             app:iconSpaceReserved="true"
+            android:defaultValue="7"
             app:allowDividerAbove="false"
             android:dependency="miband_nightmode_enabled"
             android:title="@string/title_miband_nightmode_end">

@@ -51,13 +51,15 @@ public class TimePreference extends DialogPreference {
             if (defaultValue == null) {
                 calendar.setTimeInMillis(getPersistedLong(System.currentTimeMillis()));
             } else {
-                calendar.setTimeInMillis(Long.parseLong(getPersistedString((String) defaultValue)));
+                calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(getPersistedString((String) defaultValue)));
+                calendar.set(Calendar.MINUTE, 0);
             }
         } else {
             if (defaultValue == null) {
                 calendar.setTimeInMillis(System.currentTimeMillis());
             } else {
-                calendar.setTimeInMillis(Long.parseLong((String) defaultValue));
+                calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(getPersistedString((String) defaultValue)));
+                calendar.set(Calendar.MINUTE, 0);
             }
         }
         updateSummary();
