@@ -31,6 +31,7 @@ public class BroadcastService extends Service {
     public static final String CMD_SET_SETTINGS = "set_settings";
     public static final String CMD_UPDATE_BG_FORCE = "update_bg_force";
     public static final String CMD_ALERT = "alarm";
+    public static final String CMD_CANCEL_ALERT = "cancel_alarm";
     public static final String CMD_SNOOZE_ALERT = "snooze_alarm";
     public static final String CMD_ADD_STEPS = "add_steps";
     public static final String CMD_ADD_HR = "add_hrs";
@@ -179,6 +180,10 @@ public class BroadcastService extends Service {
                 break;
             case CMD_STAT_INFO:
                 intent.putExtra(INTENT_STAT_HOURS, intentIn.getIntExtra(INTENT_STAT_HOURS, 24));
+                break;
+            case CMD_ADD_TREATMENT:
+                intent.putExtra("timeStamp", Helper.tsl());
+                intent.putExtras(intentIn);
                 break;
             default:
                 return;

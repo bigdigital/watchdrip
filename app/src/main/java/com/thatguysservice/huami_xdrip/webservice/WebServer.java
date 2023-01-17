@@ -5,6 +5,7 @@ import com.thatguysservice.huami_xdrip.models.database.UserError;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -28,8 +29,17 @@ public class WebServer extends NanoHTTPD {
         CommonGatewayInterface cgi = cgiEntries.get(uri);
         if (cgi == null)
             return newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Not Found");
-
-        String msg = cgi.run(params);
+        String msg = null;
+        try {
+            msg = cgi.run(params);
+        } catch (TimeoutException e) {
+            UserError.Log.d(TAG, "CGIResp TimeoutException: " + e.getMessage());
+            return newFixedLengthResponse(Response.Status.REQUEST_TIMEOUT, MIME_PLAINTEXT, e.getMessage());
+        } catch (Exception e) {
+            UserError.Log.d(TAG, "CGIResp Exception: " + e.getMessage());
+            return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, e.getMessage());
+        }
+        UserError.Log.d(TAG, "CGIResp: " + msg);
         if (msg == null)
             return newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, msg);
 
@@ -42,6 +52,6 @@ public class WebServer extends NanoHTTPD {
     }
 
     public interface CommonGatewayInterface {
-        public String run(Map<String, List<String>> params);
+        public String run(Map<String, List<String>> params) throws Exception;
     }
 }

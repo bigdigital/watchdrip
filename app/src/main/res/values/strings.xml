@@ -75,6 +75,7 @@
     <string name="miband_bg_dialog_title">Update bg data now?</string>
     <string name="miband_alert_snooze_text">Alert %1$s snoozed for %2$d min until %3$s</string>
     <string name="miband_alert_snooze_title_text">Alert snoozed</string>
+    <string name="miband_alert_snoozed_remotely_text">Alert snoozed remotely</string>
     <string name="miband_alert_missing_text">Missing alert: </string>
     <string name="miband_alert_missing_title_text">Missing alert</string>
 

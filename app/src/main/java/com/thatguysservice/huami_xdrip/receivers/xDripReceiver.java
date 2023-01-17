@@ -42,16 +42,11 @@ public class xDripReceiver extends BroadcastReceiver {
 
             if (function.equals(BroadcastService.CMD_REPLY_MSG)) {
                 String replyMsg = intent.getStringExtra(BroadcastService.INTENT_REPLY_MSG);
-                String replyCode = intent.getStringExtra(BroadcastService.INTENT_REPLY_CODE);
-                if (replyCode.equals(BroadcastService.INTENT_REPLY_CODE_NOT_REGISTERED)){
-                    bgForce();
-                }
                 UserError.Log.e(TAG, "replyMsg:" + replyMsg);
-                return;
             }
             if (function.equals(BroadcastService.CMD_SNOOZE_ALERT)) {
                 String replyMsg = intent.getStringExtra(BroadcastService.INTENT_REPLY_MSG);
-                UserError.Log.e(TAG, "replyMsg:" + replyMsg);
+                UserError.Log.e(TAG, "Snooze replyMsg:" + replyMsg);
             }
             Bundle extras = intent.getExtras();
 
