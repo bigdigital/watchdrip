@@ -7,6 +7,7 @@ import android.content.Intent;
 
 
 import com.thatguysservice.huami_xdrip.models.database.UserError;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,6 +41,7 @@ public class DisconnectReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         try {
+            if (!MiBandEntry.isDeviceEnabled()) return;
             //noinspection ConstantConditions
             if (intent.getAction().equals("android.bluetooth.device.action.ACL_DISCONNECTED")) {
                 final String address = ((BluetoothDevice) intent.getParcelableExtra("android.bluetooth.device.extra.DEVICE")).getAddress();

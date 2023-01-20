@@ -20,7 +20,7 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCA
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_WATCHDOG;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_NO_RESPONCE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_NO_RESPONSE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_MESSAGE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_REPLY_MSG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_SNOOZE_ALERT;
@@ -124,6 +124,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     static final List<UUID> huntCharacterstics = new ArrayList<>();
     private static final long RETRY_PERIOD_MS = Constants.SECOND_IN_MS * 30; // sleep for max ms if we have had no signal
     private static final long BG_UPDATE_NO_DATA_INTERVAL = 30 * Constants.MINUTE_IN_MS; //minutes
+    private static final long BG_WEB_SERVER_NO_DATA_INTERVAL = 12 * Constants.MINUTE_IN_MS; //minutes
     private static final long CONNECTION_TIMEOUT = 5 * Constants.MINUTE_IN_MS; //minutes
     private static final long RESTORE_NIGHT_MODE_DELAY = (Constants.SECOND_IN_MS * 7);
     private static final int QUEUE_EXPIRED_TIME = 30; //second
@@ -411,17 +412,23 @@ public class MiBandService extends BaseBluetoothSequencer {
                 StatisticInfo statisticInfo = new StatisticInfo(bundle);
                 Helper.static_toast_long(statisticInfo.toString());
                 break;
-            case CMD_LOCAL_XDRIP_APP_NO_RESPONCE:
+            case CMD_LOCAL_XDRIP_APP_NO_RESPONSE:
                 bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_no_response));
                 return false;
             case CMD_UPDATE_BG:
                 updateLatestBgData(bundle);
+                startBgTimer();
                 break;
             case CMD_UPDATE_BG_FORCE:
                 updateLatestBgData(bundle);
+                startBgTimer();
                 break;
+            case CMD_LOCAL_BG_FORCE_REMOTE:
+                bgForce();
+                return false;
             case CMD_LOCAL_REFRESH:
                 updateWebServer();
+                whenToRetryNextBgTimer(); //recalculate isNightMode
                 break;
             case CMD_REPLY_MSG:
                 String replyMsg = bundle.getString(BroadcastService.INTENT_REPLY_MSG);
@@ -480,7 +487,6 @@ public class MiBandService extends BaseBluetoothSequencer {
         resetWatchdog();
         switch (queueItem.functionName) {
             case CMD_LOCAL_REFRESH:
-                whenToRetryNextBgTimer(); //recalculate isNightMode
                 ((MiBandState) mState).setSettingsSequence();
                 break;
             case CMD_MESSAGE:
@@ -549,16 +555,12 @@ public class MiBandService extends BaseBluetoothSequencer {
                 }
 
                 prevReadingStatusIsStale = curReadingStatusIsStale;
-                startBgTimer();
                 ((MiBandState) mState).setSendReadingSequence();
                 break;
             case CMD_UPDATE_BG_FORCE:
                 updateBgData();
-                startBgTimer();
+
                 ((MiBandState) mState).setSendReadingSequence();
-                break;
-            case CMD_LOCAL_BG_FORCE_REMOTE:
-                bgForce();
                 break;
             case CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION:
                 ((MiBandState) mState).setSendReadingSequence();
@@ -586,7 +588,13 @@ public class MiBandService extends BaseBluetoothSequencer {
 
         Calendar expireDate = Calendar.getInstance();
         long currTimeMillis = Helper.tsl();
-        expireDate.setTimeInMillis(System.currentTimeMillis() + BG_UPDATE_NO_DATA_INTERVAL);
+
+        long interval = BG_UPDATE_NO_DATA_INTERVAL;
+        if (MiBandEntry.isWebServerEnabled() && !MiBandEntry.isDeviceEnabled()) {
+            interval = BG_WEB_SERVER_NO_DATA_INTERVAL;
+        }
+
+        expireDate.setTimeInMillis(System.currentTimeMillis() + interval);
         isNightMode = false;
         if (MiBandEntry.isNightModeEnabled()) {
             int nightModeInterval = MiBandEntry.getNightModeInterval();
@@ -625,7 +633,7 @@ public class MiBandService extends BaseBluetoothSequencer {
 
     private void startBgTimer() {
         stopBgUpdateTimer();
-        if (shouldServiceRun() && MiBand.isAuthenticated() && !MiBandEntry.isNeedSendReadingAsNotification()) {
+        if (shouldServiceRun()) {
             final long retry_in = whenToRetryNextBgTimer();
             UserError.Log.d(TAG, "Scheduling next BgTimer in: " + Helper.niceTimeScalar(retry_in) + " @ " + Helper.dateTimeText(retry_in + Helper.tsl()));
             bgServiceIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_BG_RETRY_ID, CMD_LOCAL_BG_FORCE_REMOTE);

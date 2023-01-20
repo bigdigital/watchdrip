@@ -12,11 +12,10 @@ import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_PREFIX;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_GOT_RESPONCE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_GOT_RESPONSE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_START;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
-import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
 
 public class xDripReceiver extends BroadcastReceiver {
     protected String TAG = this.getClass().getSimpleName();
@@ -34,7 +33,7 @@ public class xDripReceiver extends BroadcastReceiver {
                 return;
             }
             if (function.equals(CMD_UPDATE_BG_FORCE)) {
-                Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_XDRIP_APP_GOT_RESPONCE);
+                Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_XDRIP_APP_GOT_RESPONSE);
             }
             if (!BuildConfig.APPLICATION_ID.equals(receiver)) return;
             if (function.startsWith(CMD_LOCAL_PREFIX))

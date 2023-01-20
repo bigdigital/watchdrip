@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.thatguysservice.huami_xdrip.models.database.UserError;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +34,7 @@ public class ConnectReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         try {
+            if (!MiBandEntry.isDeviceEnabled()) return;
             //noinspection ConstantConditions
             if (intent.getAction().equals("android.bluetooth.device.action.ACL_CONNECTED")) {
                 final BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra("android.bluetooth.device.extra.DEVICE");

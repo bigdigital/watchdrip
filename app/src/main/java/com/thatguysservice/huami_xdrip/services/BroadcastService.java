@@ -52,8 +52,8 @@ public class BroadcastService extends Service {
     public static final String CMD_LOCAL_AFTER_MISSING_ALARM = CMD_LOCAL_PREFIX + "after_alarm";
     public static final String CMD_LOCAL_BG_FORCE_REMOTE = CMD_LOCAL_PREFIX + "bg_force";
     public static final String CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION = CMD_LOCAL_PREFIX + "update_bg_as_notification";
-    public static final String CMD_LOCAL_XDRIP_APP_NO_RESPONCE = CMD_LOCAL_PREFIX + "xdrip_app_no_responce";
-    public static final String CMD_LOCAL_XDRIP_APP_GOT_RESPONCE = CMD_LOCAL_PREFIX + "xdrip_app_got_responce";
+    public static final String CMD_LOCAL_XDRIP_APP_NO_RESPONSE = CMD_LOCAL_PREFIX + "xdrip_app_no_responce";
+    public static final String CMD_LOCAL_XDRIP_APP_GOT_RESPONSE = CMD_LOCAL_PREFIX + "xdrip_app_got_responce";
     public static final String CMD_LOCAL_WATCHDOG = CMD_LOCAL_PREFIX + "watchdog";
 
     private static final int XDRIP_APP_RESPONCE_DELAY = (int) (Constants.SECOND_IN_MS * 10);
@@ -153,14 +153,14 @@ public class BroadcastService extends Service {
         Intent intent = new Intent(ACTION_WATCH_COMMUNICATION_RECEIVER);
         int value;
         switch (function) {
-            case CMD_LOCAL_XDRIP_APP_GOT_RESPONCE:
+            case CMD_LOCAL_XDRIP_APP_GOT_RESPONSE:
                 Helper.cancelAlarm(HuamiXdrip.getAppContext(), xdripResponceIntend);
                 break;
             case CMD_UPDATE_BG_FORCE:
                 if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
                     return;
                 }
-                xdripResponceIntend = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONCE);
+                xdripResponceIntend = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONSE);
                 Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, xdripResponceIntend);
                 Settings settings = getSettings();
                 intent.putExtra(INTENT_SETTINGS, settings);
