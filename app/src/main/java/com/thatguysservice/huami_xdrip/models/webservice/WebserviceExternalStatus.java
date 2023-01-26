@@ -8,7 +8,9 @@ public class WebServiceExternalStatus {
 
     public WebServiceTreatment(Bundle bundle) {
         this.externalStatusLine = bundle.getString("external.statusline", "");
+        this.time = bundle.getDouble("external.timeStamp", -1);
      
         if (this.externalStatusLine.equals("")) this.externalStatusLine = null;
+        if (this.time == -1) this.time = null;
     }
 }
