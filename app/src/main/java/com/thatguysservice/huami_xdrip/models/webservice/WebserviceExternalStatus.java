@@ -6,7 +6,7 @@ public class WebServiceExternalStatus {
     public Long time;
     public String externalStatusLine;
 
-    public WebServiceTreatment(Bundle bundle) {
+    public WebServiceExternalStatus(Bundle bundle) {
         this.externalStatusLine = bundle.getString("external.statusline", "");
         this.time = bundle.getLong("external.timeStamp", -1);
      
