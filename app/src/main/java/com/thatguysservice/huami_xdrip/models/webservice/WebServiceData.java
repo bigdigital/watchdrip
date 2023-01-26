@@ -10,12 +10,14 @@ public class WebServiceData {
     public WebServiceBgInfo bg;
     public WebServiceTreatment treatment;
     public WebServicePump pump;
+    public WebserviceExternalStatisLine externalStatusLine;
 
     public WebServiceData(BgData bgData, Bundle bgDataBundle) {
         this.status = new WebServiceStatus(bgData.isDoMgdl(), bgDataBundle);
         this.bg = new WebServiceBgInfo(bgData);
         this.treatment = new WebServiceTreatment(bgDataBundle);
         this.pump = new WebServicePump(bgDataBundle);
+        this.externalStatusLine = new WebserviceExternalStatusLine(bgDataBundle);
     }
 
     public String getGson() {
