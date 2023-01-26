@@ -4,13 +4,13 @@ import android.os.Bundle;
 
 public class WebServiceExternalStatus {
     public Long time;
-    public String externalStatusLine;
+    public String statusLine;
 
     public WebServiceExternalStatus(Bundle bundle) {
-        this.externalStatusLine = bundle.getString("external.statusline", "");
+        this.statusLine = bundle.getString("external.statusLine", "");
         this.time = bundle.getLong("external.timeStamp", -1);
      
-        if (this.externalStatusLine.equals("")) this.externalStatusLine = null;
+        if (this.statusLine.equals("")) this.statusLine = null;
         if (this.time == -1) this.time = null;
     }
 }
