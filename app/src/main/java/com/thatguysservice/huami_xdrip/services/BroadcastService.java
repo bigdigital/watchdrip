@@ -66,7 +66,7 @@ public class BroadcastService extends Service {
     private PendingIntent serviceIntent;
 
     public static final int SERVICE_RESTART_MINUTES = 1;
-    private PendingIntent xdripResponceIntend;
+    private PendingIntent xdripResponseIntend;
 
     public static boolean shouldServiceRun() {
         return MiBandEntry.isEnabled();
@@ -154,14 +154,14 @@ public class BroadcastService extends Service {
         int value;
         switch (function) {
             case CMD_LOCAL_XDRIP_APP_GOT_RESPONSE:
-                Helper.cancelAlarm(HuamiXdrip.getAppContext(), xdripResponceIntend);
+                Helper.cancelAlarm(HuamiXdrip.getAppContext(), xdripResponseIntend);
                 break;
             case CMD_UPDATE_BG_FORCE:
                 if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
                     return;
                 }
-                xdripResponceIntend = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONSE);
-                Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, xdripResponceIntend);
+                xdripResponseIntend = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONSE);
+                Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, xdripResponseIntend);
                 Settings settings = getSettings();
                 intent.putExtra(INTENT_SETTINGS, settings);
                 break;

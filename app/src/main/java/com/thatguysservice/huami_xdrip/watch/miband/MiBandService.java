@@ -414,6 +414,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 break;
             case CMD_LOCAL_XDRIP_APP_NO_RESPONSE:
                 bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_no_response));
+                startBgTimer();
                 return false;
             case CMD_UPDATE_BG:
                 updateLatestBgData(bundle);
