@@ -597,7 +597,7 @@ public class MiBandService extends BaseBluetoothSequencer {
 
         expireDate.setTimeInMillis(System.currentTimeMillis() + interval);
         isNightMode = false;
-        if (MiBandEntry.isNightModeEnabled()) {
+        if (MiBandEntry.isDeviceEnabled() && MiBandEntry.isNightModeEnabled()) {
             int nightModeInterval = MiBandEntry.getNightModeInterval();
             if (nightModeInterval != MiBandEntry.NIGHT_MODE_INTERVAL_STEP) {
                 Calendar currCal = Calendar.getInstance();

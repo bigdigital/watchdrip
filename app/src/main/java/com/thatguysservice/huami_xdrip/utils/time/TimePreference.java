@@ -61,6 +61,7 @@ public class TimePreference extends DialogPreference {
                 calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(getPersistedString((String) defaultValue)));
                 calendar.set(Calendar.MINUTE, 0);
             }
+            persistCalendarValue();
         }
         updateSummary();
     }
