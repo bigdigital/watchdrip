@@ -77,8 +77,12 @@ public class BgData extends BaseObservable {
     }
   //  @Bindable
     public String getSlopeArrow(){
-        double slope = getSlope(deltaName);
-        return getTrend(slope).Symbol();
+        try {
+            double slope = getSlope(deltaName);
+            return getTrend(slope).Symbol();
+        }catch (IllegalArgumentException e){
+            return BgGraphBuilder.TREND_ARROW_VALUES.NOT_COMPUTABLE.Symbol();
+        }
     }
 
     public String getDeltaName() {

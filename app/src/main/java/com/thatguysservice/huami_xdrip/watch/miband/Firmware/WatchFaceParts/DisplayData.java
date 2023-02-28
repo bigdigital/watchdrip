@@ -399,11 +399,14 @@ public class DisplayData {
                 }
             }
             if (arrowStream == null) {
-                arrowStream = assetManager.open("miband_watchface_parts/arrows/" + arrowImageName);
+                try {
+                    arrowStream = assetManager.open("miband_watchface_parts/arrows/" + arrowImageName);
+                }catch (Exception e){
+                    arrowStream = assetManager.open("miband_watchface_parts/arrows/NaN.png");
+                }
             }
             arrowBitmap = BitmapFactory.decodeStream(arrowStream);
             arrowStream.close();
-
 
             //fill delta
             boolean isOld = false;
