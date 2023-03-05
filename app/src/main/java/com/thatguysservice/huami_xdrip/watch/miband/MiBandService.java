@@ -341,6 +341,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                     if (function != null) {
                         UserError.Log.d(TAG, "onStartCommand, function:" + function);
                         if (!handleGlobalCommand(function, intent.getExtras())) {
+                            resetWatchdog();
                             return START_STICKY;
                         }
                     }
@@ -418,6 +419,9 @@ public class MiBandService extends BaseBluetoothSequencer {
                 return false;
             case CMD_UPDATE_BG:
                 updateLatestBgData(bundle);
+                if (isNightMode) {
+                    break;
+                }
                 startBgTimer();
                 break;
             case CMD_UPDATE_BG_FORCE:
@@ -623,6 +627,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             }
         }
         bg_time = expireDate.getTimeInMillis() - currTimeMillis;
+        UserError.Log.d(TAG, "isNightMode: " + isNightMode);
         return bg_time;
     }
 

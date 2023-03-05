@@ -98,9 +98,7 @@ public class Inevitable {
         Task(String id, long offset, Runnable what) {
             this.what = what;
             this.id = id;
-            if (offset > 0) {
-                extendTime(offset); // make when 0 if offset is 0
-            }
+            extendTime(offset);
         }
 
         public void extendTime(long offset) {
