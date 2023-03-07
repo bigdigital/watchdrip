@@ -31,6 +31,11 @@ public class BgGraphCompontens {
     private final GraphLine lowValues;
     private final GraphLine highValues;
     private final GraphLine iobValues;
+
+    public GraphLine getTreatmentValues() {
+        return treatmentValues;
+    }
+
     private final GraphLine treatmentValues;
     private final GraphLine predictedBgValues;
     private final GraphLine cobValues;
@@ -38,13 +43,10 @@ public class BgGraphCompontens {
     private final GraphLine lowLineValues;
     private final GraphLine highLineValues;
     public boolean doMgdl;
-    double end_time;
-    double start_time;
     private int fuzzer;
     private Bundle bundle;
     private int axisTextSize = 12;
     private Context context;
-    private int predictivehours = 1; // todo check this
     private long start;
     private long end;
 
@@ -64,9 +66,6 @@ public class BgGraphCompontens {
         if (start == 0) {
             start = end - (60000 * 180 / fuzzer); // 3h
         }
-        end_time = end / fuzzer;
-        start_time = start / fuzzer;
-
         doMgdl = bundle.getBoolean("doMgdl", true);
         lowLineValues = parseGraphLine("graph.lowLine");
         highLineValues = parseGraphLine("graph.highLine");
@@ -81,6 +80,34 @@ public class BgGraphCompontens {
         this.bundle = null;
     }
 
+    public GraphLine getInRangeValues() {
+        return inRangeValues;
+    }
+
+    public GraphLine getLowValues() {
+        return lowValues;
+    }
+
+    public GraphLine getHighValues() {
+        return highValues;
+    }
+
+    public GraphLine getPredictedBgValues() {
+        return predictedBgValues;
+    }
+
+    public GraphLine getLowLineValues() {
+        return lowLineValues;
+    }
+
+    public GraphLine getHighLineValues() {
+        return highLineValues;
+    }
+
+    public int getFuzzer() {
+        return fuzzer;
+    }
+
     public long getStart() {
         return start / fuzzer;
     }
@@ -91,7 +118,7 @@ public class BgGraphCompontens {
     }
 
 
-    private GraphLine parseGraphLine(String key) {
+    public GraphLine parseGraphLine(String key) {
         GraphLine graphLine = bundle.getParcelable(key);
         if (graphLine == null) {
             graphLine = new GraphLine();
@@ -268,7 +295,7 @@ public class BgGraphCompontens {
         line.setPointRadius(1);
         line.setHasPoints(true);
         line.setStrokeWidth(1); //bolus line
-     return line;
+        return line;
     }
 
     public Line bolusValues() {

@@ -179,7 +179,14 @@ public class MiBandService extends BaseBluetoothSequencer {
             if (latestBgDataBundle == null || bgDataLatest == null) {
                 return "{}";
             }
-            return new WebServiceData(bgDataLatest, latestBgDataBundle).getGson();
+            boolean includeGraph = false;
+            if (params.containsKey("graph")){
+                List<String> graph = params.get("graph");
+                if (graph.get(0).equals("1")) {
+                    includeGraph = true;
+                }
+            }
+            return new WebServiceData(bgDataLatest, latestBgDataBundle, includeGraph).getGson();
         }
     };
 
@@ -1713,6 +1720,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         latestBgDataBundle = bundle;
         bgDataLatest = new BgData(bundle);
         bgDataRepository.setNewBgData(bgDataLatest);
+        bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_received_data));
     }
 
     private void updateBgData() {

@@ -11,13 +11,17 @@ public class WebServiceData {
     public WebServiceTreatment treatment;
     public WebServicePump pump;
     public WebServiceExternalStatus external;
+    public WebServiceGraphData graph;
 
-    public WebServiceData(BgData bgData, Bundle bgDataBundle) {
+    public WebServiceData(BgData bgData, Bundle bgDataBundle, Boolean includeGraph) {
         this.status = new WebServiceStatus(bgData.isDoMgdl(), bgDataBundle);
         this.bg = new WebServiceBgInfo(bgData);
         this.treatment = new WebServiceTreatment(bgDataBundle);
         this.pump = new WebServicePump(bgDataBundle);
         this.external = new WebServiceExternalStatus(bgDataBundle);
+        if (includeGraph) {
+            this.graph = new WebServiceGraphData(bgDataBundle);
+        }
     }
 
     public String getGson() {
