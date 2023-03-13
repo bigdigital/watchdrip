@@ -28,6 +28,7 @@ import java.io.InputStream;
 
 import static com.thatguysservice.huami_xdrip.models.Helper.hourMinuteString;
 import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
+import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceGenerator.ASSETS_DIR;
 
 public class DisplayData {
     private ValueTime unitizedDelta;
@@ -51,6 +52,12 @@ public class DisplayData {
     private BgData bgData;
 
     private AssetManager assetManager;
+
+    public long getBgTimestamp() {
+        return bgTimestamp;
+    }
+
+    private long bgTimestamp;
 
     public DisplayData(Bundle intent, BgData bgData, WatchfaceConfig config, AssetManager assetManager) {
         this.bundle = intent;
@@ -109,6 +116,10 @@ public class DisplayData {
 
     public ValueTime getBatteryLevel() {
         return new ValueTime(String.valueOf(batteryLevel));
+    }
+
+    public int getBatteryLevelRaw() {
+        return batteryLevel;
     }
 
     public ValueTime getNoReadings() {
@@ -386,7 +397,7 @@ public class DisplayData {
             arrowImageName = getEmptyIfNull(bgData.getDeltaName()) + ".png";
             //fill bg
             bgValueUnitized = bgData.unitizedBgValue();
-            long timeStampVal = bgData.getTimeStamp();
+            bgTimestamp = bgData.getTimeStamp();
             bgIsStale = bgData.isStale();
             pluginSource = getEmptyIfNull(bundle.getString("bg.plugin"));
 
@@ -400,9 +411,9 @@ public class DisplayData {
             }
             if (arrowStream == null) {
                 try {
-                    arrowStream = assetManager.open("miband_watchface_parts/arrows/" + arrowImageName);
+                    arrowStream = assetManager.open(ASSETS_DIR + "arrows/" + arrowImageName);
                 }catch (Exception e){
-                    arrowStream = assetManager.open("miband_watchface_parts/arrows/NaN.png");
+                    arrowStream = assetManager.open(ASSETS_DIR + "arrows/NaN.png");
                 }
             }
             arrowBitmap = BitmapFactory.decodeStream(arrowStream);
@@ -410,13 +421,13 @@ public class DisplayData {
 
             //fill delta
             boolean isOld = false;
-            long since = Helper.msSince(timeStampVal);
+            long since = Helper.msSince(bgTimestamp);
             Long timeStamp;
             if (since < Constants.DAY_IN_MS) {
-                timeStamp = timeStampVal;
+                timeStamp = bgTimestamp;
             } else {
                 isOld = true;
-                timeStamp = timeStampVal;
+                timeStamp = bgTimestamp;
             }
             unitizedDelta = new ValueTime(bgData.unitizedDelta(), timeStamp, isOld);
 
@@ -453,7 +464,7 @@ public class DisplayData {
 
             double insulin = bundle.getDouble("treatment.insulin", -1);
             double carbs = bundle.getDouble("treatment.carbs", -1);
-            timeStampVal = bundle.getLong("treatment.timeStamp", -1);
+            long treatmentTimestamp = bundle.getLong("treatment.timeStamp", -1);
 
             timeStamp = null;
             isOld = false;
@@ -465,12 +476,12 @@ public class DisplayData {
             }
 
             if (treatmentText.length() > 0) {
-                since = Helper.msSince(timeStampVal);
+                since = Helper.msSince(treatmentTimestamp);
                 if (since < Constants.HOUR_IN_MS * 6) {
-                    timeStamp = timeStampVal;
+                    timeStamp = treatmentTimestamp;
                 } else if (since < Constants.HOUR_IN_MS * 12) {
                     isOld = true;
-                    timeStamp = timeStampVal;
+                    timeStamp = treatmentTimestamp;
                 } else {
                     treatmentText = "";
                 }
@@ -478,8 +489,8 @@ public class DisplayData {
 
             treatment = new ValueTime(treatmentText, timeStamp, isOld);
 
-            timeStampVal = bundle.getLong("external.timeStamp", -1);
-            setExtStatusLine(bundle.getString("external.statusLine"), timeStampVal );
+            long statusTimestamp = bundle.getLong("external.timeStamp", -1);
+            setExtStatusLine(bundle.getString("external.statusLine"), statusTimestamp);
             return DisplayData.this;
         }
     }

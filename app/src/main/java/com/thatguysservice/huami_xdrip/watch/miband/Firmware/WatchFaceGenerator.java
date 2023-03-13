@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 
+import com.faendir.rhino_android.RhinoAndroidHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
@@ -16,6 +17,7 @@ import com.thatguysservice.huami_xdrip.UtilityModels.BgGraphCompontens;
 import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.database.UserError;
+import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.ConditionImage;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.WatchfaceConfig;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.DisplayData;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Header.Header;
@@ -36,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +55,8 @@ import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
 import static com.thatguysservice.huami_xdrip.utils.FileUtils.makeSureDirectoryExists;
 import static com.thatguysservice.huami_xdrip.watch.miband.Firmware.operations.FirmwareOperationsNew.fromUint32;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
 public class WatchFaceGenerator {
     public final static int VERGE2_HEADERLEN = 40;
     private static final boolean debug = true; //need only for debug to save resulting image and firmware
@@ -68,6 +73,8 @@ public class WatchFaceGenerator {
     private WatchfaceConfig watchfaceConfig;
     private ArrayList<byte[]> resources;
     private int resourcesTableOffset;
+
+    public static String ASSETS_DIR = "miband_watchface_parts/";
 
     public WatchFaceGenerator(AssetManager assetManager, MiBandType bandType) throws Exception {
         this.assetManager = assetManager;
@@ -102,26 +109,26 @@ public class WatchFaceGenerator {
         }
 
         String filePrefix = MiBandType.getModelPrefix(bandType);
-        String assetWatcfaceDir = "miband_watchface_parts/" + filePrefix + "/";
+        String assetWatchfaceDir = ASSETS_DIR + filePrefix + "/";
 
         if (configFileStream == null) {
-            configFileStream = assetManager.open(assetWatcfaceDir + "config.json");
+            configFileStream = assetManager.open(assetWatchfaceDir + "config.json");
         }
         if (maskImageStream == null) {
             try {
-                maskImageStream = assetManager.open(assetWatcfaceDir + "mask.png");
+                maskImageStream = assetManager.open(assetWatchfaceDir + "mask.png");
             } catch (IOException e) {
             }
         }
 
         if (!customFilesFound) {
-            String firmwareFileName = assetWatcfaceDir + "watchface";
+            String firmwareFileName = assetWatchfaceDir + "watchface";
             if (MiBandType.supportDateFormat(bandType) && !MiBandEntry.isUS_DateFormat()) {
                 firmwareFileName += "_eu";
             }
             firmwareFileName += ".bin";
             firmwareFileStream = assetManager.open(firmwareFileName);
-            mainImageStream = assetManager.open(assetWatcfaceDir + "canvas.png");
+            mainImageStream = assetManager.open(assetWatchfaceDir + "canvas.png");
         }
 
         Gson gson = new Gson();
@@ -145,6 +152,26 @@ public class WatchFaceGenerator {
             imageMask = BitmapFactory.decodeStream(maskImageStream);
             maskImageStream.close();
         }
+    }
+
+    private Bitmap getImage(String path) throws IOException {
+        InputStream imageStream = null;
+        if ((MiBandEntry.isNeedToUseCustomWatchface())) {
+            final String dir = getExternalDir();
+            final File imageFile = new File(dir + "/" + path);
+            if (imageFile.exists()) {
+                imageStream = new FileInputStream(imageFile);
+            }
+        }
+        if (imageStream == null) {
+            imageStream = assetManager.open(ASSETS_DIR + "/" + path);
+        }
+        if (imageStream != null) {
+            Bitmap image = BitmapFactory.decodeStream(imageStream);
+            imageStream.close();
+            return image;
+        }
+        throw new FileNotFoundException("File not found");
     }
 
     private void parseWatchfaceFile() throws IOException {
@@ -462,6 +489,46 @@ public class WatchFaceGenerator {
         //draw ext status data
         data.drawFormattedTextOnCanvas(canvas, data.getExtStatusLine(), config.extStatusLineText);
 
+        if ((config.conditionImages != null) && config.conditionImages.size() != 0){
+            Context context = new RhinoAndroidHelper(HuamiXdrip.getAppContext()).enterContext();
+            context.setOptimizationLevel(-1);
+            Scriptable scope = context.initStandardObjects();
+
+            String preCondString = "bgVal=" + data.getBgValueString() + ";";
+            preCondString += "bgTimestamp=" + data.getBgTimestamp() + ";";
+            preCondString += "batLevel=" + data.getBatteryLevelRaw() + ";";
+            preCondString += "now=" + Helper.tsl() + ";";
+
+            for (ConditionImage image:config.conditionImages) {
+                if (image == null) continue;
+                boolean result = false;
+                if (image.condition.isEmpty()){
+                    result = true;
+                }
+                else{
+                    String condition = preCondString + image.condition + ";";
+                    try{
+                        result = (boolean) context.evaluateString(scope, condition, "eval", 1, null);
+                    }
+                    catch (Exception e){
+                        UserError.Log.e(TAG, "Condition error: " + e.getMessage());
+                    }
+                }
+                if (result){
+                    canvas.save();
+                    try {
+                        canvas.rotate(image.position.rotate, image.position.x, image.position.y);
+                        canvas.drawBitmap(getImage(image.image), image.position.x, image.position.y, null);
+                    } catch (IOException e) {
+                        UserError.Log.e(TAG, "Image draw error: " + e.getMessage());
+                    }
+                    finally {
+                        canvas.restore();
+                    }
+                }
+            }
+            org.mozilla.javascript.Context.exit();
+        }
         return resultBitmap;
     }
 

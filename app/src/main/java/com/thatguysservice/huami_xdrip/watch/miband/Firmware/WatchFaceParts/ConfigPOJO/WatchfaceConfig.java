@@ -2,6 +2,8 @@ package com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.Con
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+
 public class WatchfaceConfig {
     @SerializedName("info")
     public Info info = new Info();
@@ -58,8 +60,11 @@ public class WatchfaceConfig {
     public SimpleText batteryLevel = new SimpleText();
 
     @SerializedName("status_text")
-    public SimpleText[] statusText;
+    public ArrayList<SimpleText[]> statusText;
 
     @SerializedName("ext_status_line_text")
     public SimpleText extStatusLineText = new SimpleText();
+
+    @SerializedName("condition_images")
+    public ArrayList<ConditionImage> conditionImages;
 }
