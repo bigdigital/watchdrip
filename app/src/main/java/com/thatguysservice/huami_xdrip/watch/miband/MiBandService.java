@@ -130,7 +130,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     private static final int QUEUE_EXPIRED_TIME = 30; //second
     private static final int QUEUE_DELAY = 0; //ms
     private static final int CALL_ALERT_DELAY = (int) (Constants.SECOND_IN_MS * 10);
-    private static final int WATCHDOG_DELAY = (int) (Constants.MINUTE_IN_MS * 2);
+    private static final int WATCHDOG_DELAY = (int) (Constants.MINUTE_IN_MS * 5);
     private static final int MESSAGE_DELAY = (int) (Constants.SECOND_IN_MS * 5);
     private static final int CGI_WAIT_TIMEOUT = (int) (Constants.SECOND_IN_MS * 5);
     private static final int CGI_WAIT_DELAY = 100;
@@ -297,7 +297,7 @@ public class MiBandService extends BaseBluetoothSequencer {
 
     private boolean readyToProcessCommand(String function) {
         boolean result = I.state.equals(SLEEP) || I.state.equals(CLOSED) || I.state.equals(CLOSE) || I.state.equals(INIT) || I.state.equals(MiBandState.CONNECT_NOW);
-        if (!result && function.equals(CMD_LOCAL_WATCHDOG) && !I.state.equals(MiBandState.AUTHORIZE_FAILED_SLEEP)) {
+        if (!result && function.equals(CMD_LOCAL_WATCHDOG)) {
             stopConnection();
             changeState(SLEEP);
             UserError.Log.e(TAG, "Watchdog!!!");
