@@ -536,7 +536,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 break;
             case CMD_CANCEL_ALERT:
                 if (!I.state.equals(MiBandState.WAITING_USER_RESPONSE)) break;
-                isWaitingCallResponse = false;
+                setWaitingCallResponse(false);
                 vibrateAlert(AlertLevelMessage.AlertLevelType.NoAlert); //disable call
                 String msgText2 = HuamiXdrip.gs(R.string.miband_alert_snoozed_remotely_text);
                 messageQueue.addFirst(getMessageQueue(msgText2, HuamiXdrip.gs(R.string.miband_alert_snooze_title_text)));
@@ -544,7 +544,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 break;
             case CMD_LOCAL_AFTER_MISSING_ALARM:
                 if (!I.state.equals(MiBandState.WAITING_USER_RESPONSE)) break;
-                isWaitingCallResponse = false;
+                setWaitingCallResponse(false);
                 vibrateAlert(AlertLevelMessage.AlertLevelType.NoAlert); //disable call
                 if (!missingAlertMessage.isEmpty()) {
                     String msgText = HuamiXdrip.getAppContext().getString(R.string.miband_alert_missing_text) + missingAlertMessage;
@@ -679,14 +679,14 @@ public class MiBandService extends BaseBluetoothSequencer {
                     startBgTimer();
                     changeState(SLEEP);
                 }
-                isWaitingCallResponse = false;
+                setWaitingCallResponse(false);
                 break;
             case DeviceEvent.CALL_IGNORE:
                 UserError.Log.d(TAG, "call ignored");
                 if (I.state.equals(MiBandState.WAITING_USER_RESPONSE)) {
                     changeState(MiBandState.WAITING_MIFIT_SILENCE);
                 }
-                isWaitingCallResponse = false;
+                setWaitingCallResponse(false);
                 break;
             case DeviceEvent.BUTTON_PRESSED:
                 UserError.Log.d(TAG, "button pressed");
@@ -909,18 +909,26 @@ public class MiBandService extends BaseBluetoothSequencer {
         setNightMode();
     }
 
+    private void setWaitingCallResponse(boolean state){
+        if (isWaitingCallResponse != state) {
+            isWaitingCallResponse = state;
+            UserError.Log.d(TAG, "change isWaitingCallResponse:" + isWaitingCallResponse);
+        }
+    }
+
+
     private void queueMessage() {
         String message = queueItem.bundle.getString("message");
         AlertMessage alertMessage = new AlertMessage();
         String messageType = queueItem.getMessageType();
         if (message == null) {
-            isWaitingCallResponse = false;
+            setWaitingCallResponse(false);
             changeNextState();
             return;
         }
         switch (messageType != null ? messageType : "null") {
             case MIBAND_NOTIFY_TYPE_CALL:
-                isWaitingCallResponse = true;
+                setWaitingCallResponse(true);
                 new QueueMe()
                         .setBytes(alertMessage.getAlertMessageOld(message, AlertMessage.AlertCategory.Call))
                         .setDescription("Send call alert: " + message)
@@ -933,12 +941,12 @@ public class MiBandService extends BaseBluetoothSequencer {
             case MIBAND_NOTIFY_TYPE_CANCEL:
                 if (isWaitingCallResponse) {
                     vibrateAlert(AlertLevelMessage.AlertLevelType.NoAlert); //disable call
-                    isWaitingCallResponse = false;
+                    setWaitingCallResponse(false);
                     UserError.Log.d(TAG, "Call disabled");
                 }
                 break;
             case MIBAND_NOTIFY_TYPE_ALARM:
-                isWaitingCallResponse = true;
+                setWaitingCallResponse(true);
                 new QueueMe()
                         .setBytes(alertMessage.getAlertMessageOld(message, AlertMessage.AlertCategory.Call))
                         .setDescription("Sent glucose alert: " + message)
@@ -1517,7 +1525,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 stopConnect(I.address);
             }
             isNeedToAuthenticate = true;
-            isWaitingCallResponse = false;
+            setWaitingCallResponse(false);
             messageQueue.clear();
             handle = 0;
             setMTU(GATT_MTU_MINIMUM); //reset mtu
