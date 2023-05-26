@@ -1522,6 +1522,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                     notifSubscriptionHeartRateMeasurement.unsubscribe();
                     notifSubscriptionHeartRateMeasurement = null;
                 }
+                I.isNotificationEnabled = false;
                 stopConnect(I.address);
             }
             isNeedToAuthenticate = true;
