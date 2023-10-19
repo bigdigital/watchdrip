@@ -151,11 +151,8 @@ public enum MiBandType {
     public static AuthOperations getAuthOperations(MiBandType bandType, MiBandService service) {
         String versionString = MiBand.getVersion();
         try {
-            Version version = new Version(versionString);
-            if (bandType == MiBandType.MI_BAND6) {
-                if ((version.compareTo(new Version("1.0.4.1")) >= 0)) {
+            if (service.getCharacteristic(Const.UUID_CHARACTERISTIC_CHUNKEDTRANSFER_V2_READ) != null ){
                     return new AuthOperations2021(bandType, service);
-                }
             }
         } catch (IllegalArgumentException e) {
             UserError.Log.e("MiBandService", e + "versionString : " + versionString );

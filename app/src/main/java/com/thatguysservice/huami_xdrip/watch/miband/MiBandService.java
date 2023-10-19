@@ -1533,6 +1533,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             setRetryTimerReal(); // local retry strategy
             bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.watch_disconnected));
             isConnectionStopped = true;
+            isNeedToCheckRevision = true;
             stopWatchdog();
         }
     }

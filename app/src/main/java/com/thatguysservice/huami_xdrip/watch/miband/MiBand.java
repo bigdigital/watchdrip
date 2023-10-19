@@ -114,13 +114,15 @@ public class MiBand {
     }
 
     public static void setModel(final String model, String mac) {
+        String model_fix = model.replace("\u0000", "");
+
         if (mac.isEmpty()) mac = getMacPref();
-        if (model.isEmpty()) {
+        if (model_fix.isEmpty()) {
             PersistentStore.removeItem(PREF_MIBAND_MODEL + mac);
             return;
         }
         if (!mac.isEmpty()) {
-            PersistentStore.setString(PREF_MIBAND_MODEL + mac, model);
+            PersistentStore.setString(PREF_MIBAND_MODEL + mac, model_fix);
         }
     }
 

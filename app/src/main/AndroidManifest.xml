@@ -41,7 +41,9 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Huamixdrip">
+        android:theme="@style/Theme.Huamixdrip"
+        android:hardwareAccelerated="false"
+        android:largeHeap="true">
         <activity
             android:name=".WatchStoreActivity"
             android:parentActivityName=".MainActivity"

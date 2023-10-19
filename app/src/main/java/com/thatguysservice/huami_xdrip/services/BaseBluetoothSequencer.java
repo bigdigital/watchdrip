@@ -446,6 +446,13 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
         }
     }
 
+    public Object getCharacteristic(UUID uuid){
+        if ( I.characteristics == null) {
+            return null;
+        }
+        return  I.characteristics.get(uuid);
+    }
+
     protected void onDiscoverFailed(Throwable throwable) {
         UserError.Log.e(TAG, "Discover failure: " + throwable.toString());
         tryGattRefresh(I.connection);

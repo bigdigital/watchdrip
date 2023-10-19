@@ -9,9 +9,11 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
+import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.models.BgData;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
+import com.thatguysservice.huami_xdrip.utils.PowerStateReceiver;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.Position;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.SimpleText;
 import com.thatguysservice.huami_xdrip.watch.miband.Firmware.WatchFaceParts.ConfigPOJO.TextSettings;
@@ -460,7 +462,8 @@ public class DisplayData {
             setPumpReservoir(String.valueOf(pumpReservoir));
             setPumpBattery(String.valueOf(pumpBattery));
 
-            setBatteryLevel(bundle.getInt("phoneBattery"));
+            //setBatteryLevel(bundle.getInt("phoneBattery"));
+            setBatteryLevel(PowerStateReceiver.getBatteryPercentage(HuamiXdrip.getAppContext()));
 
             double insulin = bundle.getDouble("treatment.insulin", -1);
             double carbs = bundle.getDouble("treatment.carbs", -1);
