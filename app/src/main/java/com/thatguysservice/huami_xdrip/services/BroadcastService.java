@@ -10,6 +10,7 @@ import com.eveningoutpost.dexdrip.services.broadcastservice.models.Settings;
 import com.thatguysservice.huami_xdrip.BuildConfig;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.R;
+import com.thatguysservice.huami_xdrip.UtilityModels.ForegroundServiceStarter;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
@@ -67,6 +68,7 @@ public class BroadcastService extends Service {
 
     public static final int SERVICE_RESTART_MINUTES = 1;
     private PendingIntent xdripResponseIntend;
+    private ForegroundServiceStarter foregroundServiceStarter;
 
     public static boolean shouldServiceRun() {
         return MiBandEntry.isEnabled();
@@ -106,6 +108,11 @@ public class BroadcastService extends Service {
         }*/
     }
 
+    protected void startInForeground() {
+        foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), this);
+        foregroundServiceStarter.start();
+    }
+
     @Override
     public void onCreate() {
         UserError.Log.e(TAG, "starting service");
@@ -113,6 +120,8 @@ public class BroadcastService extends Service {
         if (shouldServiceRun()) {
             setReceiversEnableState(true);
         }
+        startInForeground();
+
         super.onCreate();
     }
 
@@ -120,6 +129,7 @@ public class BroadcastService extends Service {
     public void onDestroy() {
         UserError.Log.e(TAG, "killing service");
         setReceiversEnableState(false);
+        foregroundServiceStarter.stop();
         super.onDestroy();
     }
 

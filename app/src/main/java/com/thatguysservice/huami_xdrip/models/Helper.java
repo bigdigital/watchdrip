@@ -86,7 +86,16 @@ public class Helper {
         for (int i = 0; i < args.length; i += 2) {
             intent.putExtra(args[i], args[i + 1]);
         }
-        HuamiXdrip.getAppContext().startService(intent);
+        startService(intent);
+    }
+
+    public static void startService(final Intent intent) {
+        Context context = HuamiXdrip.getAppContext();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
     }
 
     public static String qs(double x, int digits) {

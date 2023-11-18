@@ -743,6 +743,7 @@ public abstract class BaseBluetoothSequencer extends BaseBluetoothService implem
         DisconnectReceiver.removeCallBack(TAG);
         //ConnectReceiver.removeCallBack(TAG);
         unregisterScanReceiver();
+        foregroundServiceStarter.stop();
         super.onDestroy();
     }
 

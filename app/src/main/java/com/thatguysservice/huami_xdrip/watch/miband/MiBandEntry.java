@@ -1,6 +1,8 @@
 package com.thatguysservice.huami_xdrip.watch.miband;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.preference.Preference;
@@ -200,7 +202,8 @@ public class MiBandEntry {
             Intent serviceIntent = new Intent(HuamiXdrip.getAppContext(), MiBandService.class);
             serviceIntent.putExtra(INTENT_FUNCTION_KEY, function);
             serviceIntent.putExtras(bundle);
-            HuamiXdrip.getAppContext().startService(serviceIntent);
+
+            Helper.startService(serviceIntent);
         }
     }
 

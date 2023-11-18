@@ -675,7 +675,10 @@ public class MiBandService extends BaseBluetoothSequencer {
             case DeviceEvent.CALL_REJECT:
                 UserError.Log.d(TAG, "call rejected");
                 if (I.state.equals(MiBandState.WAITING_USER_RESPONSE)) {
-                    HuamiXdrip.getAppContext().startService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class).putExtra(INTENT_FUNCTION_KEY, CMD_SNOOZE_ALERT).putExtra(BroadcastService.INTENT_ALERT_TYPE, activeAlertType));
+                    Intent intent = new Intent(HuamiXdrip.getAppContext(), BroadcastService.class)
+                            .putExtra(INTENT_FUNCTION_KEY, CMD_SNOOZE_ALERT)
+                            .putExtra(BroadcastService.INTENT_ALERT_TYPE, activeAlertType);
+                    Helper.startService(intent);
                     startBgTimer();
                     changeState(SLEEP);
                 }
@@ -1221,7 +1224,10 @@ public class MiBandService extends BaseBluetoothSequencer {
         if (Helper.ratelimit("miband-heartrate-limit", 60)) {
             if (value.length == 2 && value[0] == 0) {
                 int hrValue = (value[1] & 0xff);
-                HuamiXdrip.getAppContext().startService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class).putExtra(INTENT_FUNCTION_KEY, CMD_ADD_HR).putExtra("value", hrValue));
+                Intent intent = new Intent(HuamiXdrip.getAppContext(), BroadcastService.class)
+                        .putExtra(INTENT_FUNCTION_KEY, CMD_ADD_HR)
+                        .putExtra("value", hrValue);
+                Helper.startService(intent);
             }
         }
     }
@@ -1232,7 +1238,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 .putExtra(INTENT_FUNCTION_KEY, CMD_ADD_TREATMENT)
                 .putExtra("carbs", carbs)
                 .putExtra("insulin", insulin);
-        HuamiXdrip.getAppContext().startService(intent);
+        Helper.startService(intent);
         return true;
     }
 
@@ -1244,7 +1250,11 @@ public class MiBandService extends BaseBluetoothSequencer {
             if (value.length == 13) {
                 byte[] stepsValue = new byte[]{value[1], value[2]};
                 int steps = FirmwareOperationsNew.toUint16(stepsValue);
-                HuamiXdrip.getAppContext().startService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class).putExtra(INTENT_FUNCTION_KEY, CMD_ADD_STEPS).putExtra("value", steps));
+
+                Intent intent = new Intent(HuamiXdrip.getAppContext(), BroadcastService.class)
+                        .putExtra(INTENT_FUNCTION_KEY, CMD_ADD_STEPS)
+                        .putExtra("value", steps);
+                Helper.startService(intent);
             } else {
                 UserError.Log.d(TAG, "Unrecognized realtime steps value: " + bytesToHex(value));
             }

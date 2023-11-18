@@ -70,12 +70,14 @@
             android:enabled="true"
             android:exported="true" />
 
-        <receiver android:name=".utils.bt.ConnectReceiver">
+        <receiver android:name=".utils.bt.ConnectReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.bt.DisconnectReceiver">
+        <receiver android:name=".utils.bt.DisconnectReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
             </intent-filter>
@@ -88,7 +90,8 @@
                 <action android:name="com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_SENDER" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.AutoStart">
+        <receiver android:name=".receivers.AutoStart"
+            android:exported="true">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
