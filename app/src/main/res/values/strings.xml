@@ -165,4 +165,10 @@
     <string name="enter_device_name">Enter Name</string>
     <string name="title_active_device">Active device</string>
     <string name="summary_active_device">Select the active device</string>
+
+    <string name="summary_force_new_protocol">Enable if your device no longer connects after a firmware upgrade</string>
+    <string name="title_force_new_protocol">New Auth Protocol</string>
+
+    <string name="title_all_day_update_interval">All day update interval</string>
+    <string name="summary_all_day_update_interval">Defines how often the BG data would be synchronized. Leave empty to receive live data</string>
 </resources>

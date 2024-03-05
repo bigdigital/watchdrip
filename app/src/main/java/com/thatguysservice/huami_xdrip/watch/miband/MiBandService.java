@@ -35,6 +35,7 @@ import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_T
 import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_CANCEL;
 import static com.thatguysservice.huami_xdrip.watch.miband.Const.MIBAND_NOTIFY_TYPE_MESSAGE;
 import static com.thatguysservice.huami_xdrip.watch.miband.Const.PREFERRED_MTU_SIZE;
+import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.isForceNewProtocol;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_ACK_FIND_PHONE_IN_PROGRESS;
 import static com.thatguysservice.huami_xdrip.watch.miband.message.OperationCodes.COMMAND_DISABLE_CALL;
 
@@ -180,7 +181,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 return "{}";
             }
             boolean includeGraph = false;
-            if (params.containsKey("graph")){
+            if (params.containsKey("graph")) {
                 List<String> graph = params.get("graph");
                 if (graph.get(0).equals("1")) {
                     includeGraph = true;
@@ -198,13 +199,13 @@ public class MiBandService extends BaseBluetoothSequencer {
             Double insulin = 0.0;
             try {
                 carbs = Double.valueOf(params.get("carbs").get(0));
+            } catch (Exception e) {
             }
-            catch (Exception e){}
 
             try {
                 insulin = Double.valueOf(params.get("insulin").get(0));
+            } catch (Exception e) {
             }
-            catch (Exception e){}
             if (addTreatment(carbs, insulin)) {
                 isWaitingAddTreatmentResponse = true;
                 int i = 0;
@@ -447,11 +448,11 @@ public class MiBandService extends BaseBluetoothSequencer {
                 String replyCode = bundle.getString(BroadcastService.INTENT_REPLY_CODE);
                 UserError.Log.e(TAG, "replyMsg:" + replyMsg);
                 UserError.Log.e(TAG, "replyCode:" + replyCode);
-                if (replyCode.equals(BroadcastService.INTENT_REPLY_CODE_NOT_REGISTERED)){
+                if (replyCode.equals(BroadcastService.INTENT_REPLY_CODE_NOT_REGISTERED)) {
                     bgForce();
                     break;
                 }
-                if (isWaitingAddTreatmentResponse && replyCode.equals(INTENT_REPLY_CODE_OK)){
+                if (isWaitingAddTreatmentResponse && replyCode.equals(INTENT_REPLY_CODE_OK)) {
                     isWaitingAddTreatmentResponse = false;
                 }
                 break;
@@ -605,9 +606,15 @@ public class MiBandService extends BaseBluetoothSequencer {
         if (MiBandEntry.isWebServerEnabled() && !MiBandEntry.isDeviceEnabled()) {
             interval = BG_WEB_SERVER_NO_DATA_INTERVAL;
         }
+        isNightMode = false;
+        int dayInterval = MiBandEntry.getDayModeInterval();
+        if (dayInterval != 0) {
+            interval = dayInterval * Constants.MINUTE_IN_MS;
+            isNightMode = true;
+        }
 
         expireDate.setTimeInMillis(System.currentTimeMillis() + interval);
-        isNightMode = false;
+
         if (MiBandEntry.isDeviceEnabled() && MiBandEntry.isNightModeEnabled()) {
             int nightModeInterval = MiBandEntry.getNightModeInterval();
             if (nightModeInterval != MiBandEntry.NIGHT_MODE_INTERVAL_STEP) {
@@ -912,7 +919,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         setNightMode();
     }
 
-    private void setWaitingCallResponse(boolean state){
+    private void setWaitingCallResponse(boolean state) {
         if (isWaitingCallResponse != state) {
             isWaitingCallResponse = state;
             UserError.Log.d(TAG, "change isWaitingCallResponse:" + isWaitingCallResponse);
@@ -1016,7 +1023,14 @@ public class MiBandService extends BaseBluetoothSequencer {
             changeState(MiBandState.AUTHORIZE_FAILED);
             return;
         }
-        useV2ChunkedProtocol = authOperations.isV2Protocol();
+
+        useV2ChunkedProtocol = MiBandEntry.isForceNewProtocol();
+        if (!useV2ChunkedProtocol) {
+            useV2ChunkedProtocol = authOperations.isV2Protocol();
+        }
+
+        MiBandEntry.isForceNewProtocol();
+
         authSubscription = new Subscription(
                 connection.setupNotification(authOperations.getCharacteristicUUID())
                         .timeout(20, TimeUnit.SECONDS)
@@ -1232,7 +1246,7 @@ public class MiBandService extends BaseBluetoothSequencer {
         }
     }
 
-    private boolean addTreatment(Double carbs, Double insulin){
+    private boolean addTreatment(Double carbs, Double insulin) {
         if (carbs == 0 && insulin == 0) return false;
         Intent intent = new Intent(HuamiXdrip.getAppContext(), BroadcastService.class)
                 .putExtra(INTENT_FUNCTION_KEY, CMD_ADD_TREATMENT)

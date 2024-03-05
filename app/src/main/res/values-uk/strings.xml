@@ -58,4 +58,7 @@
     <string name="notification_channel_name">Загальний</string>
     <string name="set_value">Set</string>
     <string name="close_value">Close</string>
+
+    <string name="summary_force_new_protocol">Увімкніть, якщо ваш пристрій більше не під\'єднується після оновлення мікропрограми</string>
+    <string name="title_force_new_protocol">Новий протокол автентифікації</string>
 </resources>

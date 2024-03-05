@@ -37,10 +37,12 @@ public class MiBandEntry {
     public static final String PREF_MIBAND_NIGHTMODE_START = "miband_nightmode_start";
     public static final String PREF_MIBAND_NIGHTMODE_END = "miband_nightmode_end";
     public static final String PREF_MIBAND_NIGHTMODE_INTERVAL = "miband_nightmode_interval";
+    public static final String PREF_MIBAND_ALL_DAY_INTERVAL = "miband_all_day_update_interval";
     public static final String PREF_MIBAND_GRAPH_HOURS = "miband_graph_hours";
     public static final String PREF_MIBAND_GRAPH_LIMIT = "miband_graph_limit";
     public static final String PREF_MIBAND_TREATMENT_ENBALE = "miband_graph_treatment_enable";
     public static final String PREF_MIBAND_DISABLE_HIGH_MTU = "debug_miband_disable_high_mtu";
+    public static final String PREF_MIBAND_FORCE_NEW_PROTOCOL = "debug_miband_force_new_protocol";
     public static final String PREF_MIBAND_RSSI_TRESHOLD = "advanced_rssi_threshold";
     public static final String PREF_MIBAND_USE_CUSTOM_WATHCFACE = "debug_miband_use_custom_watchface";
     public static final String PREF_MIBAND_COLLECT_HEARTRATE = "miband_collect_heartrate";
@@ -62,10 +64,16 @@ public class MiBandEntry {
                     final String title_text = HuamiXdrip.gs(R.string.title_miband_interval_in_nightmode);
 
                     int nightModeInterval = MiBandEntry.getNightModeInterval();
-                    if (nightModeInterval == MiBandEntry.NIGHT_MODE_INTERVAL_STEP)
+                    preference.setTitle(String.format("%s (%d %s)", title_text, nightModeInterval, minutes));
+
+                } else if (key.equals(MiBandEntry.PREF_MIBAND_ALL_DAY_INTERVAL)) {
+                    int dayModeInterval = Helper.tolerantParseInt((String) value, 0);
+                    final String minutes = HuamiXdrip.gs(R.string.unit_minutes);
+                    final String title_text = HuamiXdrip.gs(R.string.title_all_day_update_interval);
+                    if (dayModeInterval == 0)
                         preference.setTitle(String.format("%s (%s)", title_text, "live"));
                     else
-                        preference.setTitle(String.format("%s (%d %s)", title_text, nightModeInterval, minutes));
+                        preference.setTitle(String.format("%s (%d %s)", title_text, dayModeInterval, minutes));
                 } else if (key.equals(MiBandEntry.PREF_MIBAND_GRAPH_LIMIT)) {
                     final int ivalue = (int) value;
                     setGraphLimit(ivalue);
@@ -145,6 +153,10 @@ public class MiBandEntry {
         return (Pref.getInt(PREF_MIBAND_NIGHTMODE_INTERVAL, 0) + 1) * NIGHT_MODE_INTERVAL_STEP;
     }
 
+    public static int getDayModeInterval() {
+        return (Pref.getStringToInt(PREF_MIBAND_ALL_DAY_INTERVAL, 0));
+    }
+
     public static void setNightModeInterval(int val) {
         Pref.setInt(PREF_MIBAND_NIGHTMODE_INTERVAL, val);
     }
@@ -171,6 +183,10 @@ public class MiBandEntry {
 
     public static boolean isNeedToDisableHightMTU() {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_DISABLE_HIGH_MTU);
+    }
+
+    public static boolean isForceNewProtocol() {
+        return Pref.getBooleanDefaultFalse(PREF_MIBAND_FORCE_NEW_PROTOCOL);
     }
 
     public static boolean setCustomWatchfaceUse(boolean val) {

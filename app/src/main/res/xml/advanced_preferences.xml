@@ -10,6 +10,14 @@
         android:key="miband_vibrate_on_readings"
         android:title="@string/title_vibrate_on_readings" />
 
+    <EditTextPreference
+        android:defaultValue=""
+        android:digits="0123456789"
+        android:inputType="number"
+        android:key="miband_all_day_update_interval"
+        android:summary="@string/summary_all_day_update_interval"
+        android:title="@string/title_all_day_update_interval" />
+
     <PreferenceCategory
         android:title="@string/title_miband_graph_category"
         android:key="miband_graph_category">
@@ -28,6 +36,7 @@
     <PreferenceCategory
         android:key="miband_nightmode_category"
         android:title="@string/title_miband_nightmode_category">
+
         <SwitchPreference
             android:defaultValue="false"
             android:key="miband_nightmode_enabled"
@@ -50,7 +59,7 @@
             android:title="@string/title_miband_nightmode_end">
         </com.thatguysservice.huami_xdrip.utils.time.TimePreference>
         <SeekBarPreference
-            android:defaultValue="6"
+            android:defaultValue="10"
             app:allowDividerAbove="false"
             android:dependency="miband_nightmode_enabled"
             android:key="miband_nightmode_interval"
@@ -80,4 +89,11 @@
         android:key="advanced_rssi_threshold"
         android:summary="@string/advanced_rssi_threshold_summary"
         android:title="@string/advanced_rssi_threshold_title" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="debug_miband_force_new_protocol"
+        android:summary="@string/summary_force_new_protocol"
+        android:switchTextOff="@string/short_off_text_for_switches"
+        android:switchTextOn="@string/short_on_text_for_switches"
+        android:title="@string/title_force_new_protocol" />
 </PreferenceScreen>

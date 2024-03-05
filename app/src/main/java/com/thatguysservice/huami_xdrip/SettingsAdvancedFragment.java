@@ -68,6 +68,19 @@ public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
             }
         });
+
+        EditTextPreference alldayIntervaleditTextPreference = getPreferenceManager().findPreference(MiBandEntry.PREF_MIBAND_ALL_DAY_INTERVAL);
+        alldayIntervaleditTextPreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            @Override
+            public void onBindEditText(@NonNull EditText editText) {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+            }
+        });
+
+        if (alldayIntervaleditTextPreference != null) {
+            alldayIntervaleditTextPreference.setOnPreferenceChangeListener(MiBandEntry.sBindMibandPreferenceChangeListener);
+            MiBandEntry.sBindMibandPreferenceChangeListener.onPreferenceChange(alldayIntervaleditTextPreference, Integer.toString( MiBandEntry.getDayModeInterval()));
+        }
     }
 
     private boolean checkAndRequestFilePermissions() {
