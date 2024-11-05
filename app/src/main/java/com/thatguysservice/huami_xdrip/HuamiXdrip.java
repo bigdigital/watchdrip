@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.StringRes;
 import androidx.multidex.MultiDexApplication;
 import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -50,16 +51,17 @@ public class HuamiXdrip extends MultiDexApplication {
 
     private void scheduleTask() {
         Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.UNMETERED)
-                .setRequiresCharging(false)
+                .setRequiresCharging(true)
                 .build();
 
-        WorkRequest workRequest =
+        PeriodicWorkRequest workRequest =
                 new PeriodicWorkRequest.Builder(CleanupWorker.class, 24, TimeUnit.HOURS)
                         .setConstraints(constraints)
                         .build();
 
-        WorkManager.getInstance(context).enqueue(workRequest);
+        WorkManager instance =  WorkManager.getInstance(context);
+
+        instance.enqueueUniquePeriodicWork("WATHCDRIP_WORKER",  ExistingPeriodicWorkPolicy.KEEP, workRequest);
     }
 
 

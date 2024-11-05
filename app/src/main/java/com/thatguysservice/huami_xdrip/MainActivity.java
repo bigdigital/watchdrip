@@ -47,6 +47,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_BLUETOOTH_PERMISSIONS;
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_READ_WRITE_PERMISSIONS;
+import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.isLoggingEnabled;
 
 public class MainActivity extends AppCompatActivity implements
         PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, EasyPermissions.PermissionCallbacks {
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements
     private MenuItem addDeviceItem;
     private MenuItem renameDeviceItem;
     private BgDataRepository bgDataRepository;
+    private MenuItem viewLog;
 
     @Override
     protected void onStop() {
@@ -76,9 +78,15 @@ public class MainActivity extends AppCompatActivity implements
         removeDeviceItem = menu.findItem(R.id.action_remove_device);
         addDeviceItem = menu.findItem(R.id.action_add_device);
         renameDeviceItem = menu.findItem(R.id.action_rename_device);
+        viewLog = menu.findItem(R.id.action_view_log);
 
-        handleDeviceMenuVisibility();
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        handleMenusVisibility();
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -115,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements
                             MiBand.setMacPref(device.getMacAddress(), bgDataRepository);
                             MiBand.setAuthKeyPref(device.getAuthKey(), bgDataRepository);
                             bgDataRepository.updateActiveDeviceData(newActiveIndex);
-                            handleDeviceMenuVisibility();
+                            handleMenusVisibility();
                         }
                     }
                 });
@@ -130,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements
                         PersistantDeviceInfo deviceInner = devices.getDeviceByIndex(newActiveIndex);
                         MiBand.setMacPref(deviceInner.getMacAddress(), bgDataRepository);
                         MiBand.setAuthKeyPref(deviceInner.getAuthKey(), bgDataRepository);
-                        handleDeviceMenuVisibility();
+                        handleMenusVisibility();
                         bgDataRepository.updateActiveDeviceData(newActiveIndex);
                     }
                 }, false);
@@ -148,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements
                         if (!deviceName.isEmpty()) {
                             device.setName(deviceName);
                             devices.updateDevice(device, deviceEntryIndex);
-                            handleDeviceMenuVisibility();
+                            handleMenusVisibility();
                             bgDataRepository.updateActiveDeviceData(deviceEntryIndex);
                         }
                     }
@@ -159,7 +167,10 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    private void handleDeviceMenuVisibility() {
+    private void handleMenusVisibility() {
+
+        viewLog.setVisible(isLoggingEnabled());
+
         if (removeDeviceItem == null || addDeviceItem == null) return;
 
         if (MiBandEntry.isDeviceEnabled() && devices != null) {
@@ -261,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onChanged(@Nullable final Boolean status) {
                 binding.setFabVisibility(MiBandEntry.isWebServerEnabled() || MiBandEntry.isDeviceEnabled());
-                handleDeviceMenuVisibility();
+                handleMenusVisibility();
             }
         };
 

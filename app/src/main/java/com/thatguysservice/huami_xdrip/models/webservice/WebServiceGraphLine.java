@@ -11,19 +11,23 @@ import lombok.Setter;
 
 public class WebServiceGraphLine {
     @Getter
-    private List<long[]> points;
+    private List<Object[]> points;
     @Getter
     @Setter
     private String color;
     private String name;
 
-    public WebServiceGraphLine(String name , GraphLine line) {
+    public WebServiceGraphLine(String name, GraphLine line, boolean doMgdl) {
         points = new ArrayList<>();
-        long pointVal[];
+        Object pointVal[];
         for (GraphPoint point : line.getValues()) {
-            pointVal = new long[2];
-            pointVal[0] = (long)point.getX();
-            pointVal[1] = (long)point.getY();
+            pointVal = new Object[2];
+            pointVal[0] = (long) point.getX();
+            if (doMgdl) {
+                pointVal[1] = (long) point.getY();
+            } else {
+                pointVal[1] = (float) (Math.floor(point.getY() * 10) / 10);
+            }
             points.add(pointVal);
         }
         this.name = name;

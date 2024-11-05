@@ -18,21 +18,22 @@ public class WebServiceGraphData {
     public WebServiceGraphData(Bundle bundle) {
         lines = new ArrayList<>();
         BgGraphCompontens graphComponent = new BgGraphCompontens(bundle, HuamiXdrip.getAppContext());
-        addLine("high", graphComponent.getHighValues());
-        addLine("inRange", graphComponent.getInRangeValues());
-        addLine("low", graphComponent.getLowValues());
-        addLine("predict", graphComponent.getPredictedBgValues());
-        addLine("lineLow", graphComponent.getLowLineValues());
-        addLine("lineHigh", graphComponent.getHighLineValues());
-        addLine("treatment", graphComponent.getTreatmentValues());
+        boolean doMgdl = graphComponent.doMgdl;
+        addLine("high", graphComponent.getHighValues(), doMgdl);
+        addLine("inRange", graphComponent.getInRangeValues(), doMgdl);
+        addLine("low", graphComponent.getLowValues(), doMgdl);
+        addLine("predict", graphComponent.getPredictedBgValues(), doMgdl);
+        addLine("lineLow", graphComponent.getLowLineValues(), doMgdl);
+        addLine("lineHigh", graphComponent.getHighLineValues(), doMgdl);
+        addLine("treatment", graphComponent.getTreatmentValues(), doMgdl);
         start = graphComponent.getStart();
         end = graphComponent.getEnd();
         fuzzer = graphComponent.getFuzzer();
     }
 
-    private void addLine(String name, GraphLine line){
-        if (line.getValues().size() != 0 ) {
-            lines.add(new WebServiceGraphLine(name, line));
+    private void addLine(String name, GraphLine line, boolean doMgdl) {
+        if (line.getValues().size() != 0) {
+            lines.add(new WebServiceGraphLine(name, line, doMgdl));
         }
     }
 }

@@ -43,6 +43,7 @@ public class MiBandEntry {
     public static final String PREF_MIBAND_TREATMENT_ENBALE = "miband_graph_treatment_enable";
     public static final String PREF_MIBAND_DISABLE_HIGH_MTU = "debug_miband_disable_high_mtu";
     public static final String PREF_MIBAND_FORCE_NEW_PROTOCOL = "debug_miband_force_new_protocol";
+    public static final String PREF_MIBAND_ENABLE_LOGS = "debug_miband_enable_logs";
     public static final String PREF_MIBAND_RSSI_TRESHOLD = "advanced_rssi_threshold";
     public static final String PREF_MIBAND_USE_CUSTOM_WATHCFACE = "debug_miband_use_custom_watchface";
     public static final String PREF_MIBAND_COLLECT_HEARTRATE = "miband_collect_heartrate";
@@ -183,6 +184,10 @@ public class MiBandEntry {
 
     public static boolean isNeedToDisableHightMTU() {
         return Pref.getBooleanDefaultFalse(PREF_MIBAND_DISABLE_HIGH_MTU);
+    }
+
+    public static boolean isLoggingEnabled() {
+        return Pref.getBooleanDefaultFalse(PREF_MIBAND_ENABLE_LOGS);
     }
 
     public static boolean isForceNewProtocol() {
