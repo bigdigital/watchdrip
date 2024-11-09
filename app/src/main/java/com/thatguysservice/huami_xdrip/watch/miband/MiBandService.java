@@ -72,6 +72,7 @@ import com.thatguysservice.huami_xdrip.models.webservice.WebServiceData;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
+import com.thatguysservice.huami_xdrip.services.XiaomiWearService;
 import com.thatguysservice.huami_xdrip.utils.Version;
 import com.thatguysservice.huami_xdrip.utils.bt.Subscription;
 import com.thatguysservice.huami_xdrip.utils.framework.PoorMansConcurrentLinkedDeque;
@@ -1755,6 +1756,8 @@ public class MiBandService extends BaseBluetoothSequencer {
         bgDataLatest = new BgData(bundle);
         bgDataRepository.setNewBgData(bgDataLatest);
         bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_received_data));
+
+        XiaomiWearService.bgForce(new WebServiceData(bgDataLatest, latestBgDataBundle, true).getGson());
     }
 
     private void updateBgData() {

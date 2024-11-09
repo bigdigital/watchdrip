@@ -27,12 +27,12 @@ android {
 
     defaultConfig {
         applicationId "com.thatguysservice.huami_xdrip"
-        minSdkVersion 18
+        minSdkVersion 24
         targetSdkVersion 29
 
         // Note: always bump BOTH versionCode and versionName!
-        versionName "0.3.3"
-        versionCode 23
+        versionName "0.4.0"
+        versionCode 24
         buildConfigField "long", "buildTimestamp", generateTimestamp()
         buildConfigField "int", "targetSDK", targetSdkVersion.mApiLevel.toString()
 
@@ -76,6 +76,7 @@ android {
 dependencies {
     //the build based on pull request for AndroidX support https://github.com/ImangazalievM/ReActiveAndroid/pull/68
     implementation files('libs/reactiveandroid-release.aar')
+    implementation project(':SDK')
     def lifecycle_version = "2.2.0"
 
     // ViewModel

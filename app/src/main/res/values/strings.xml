@@ -157,6 +157,9 @@
     <string name="custom_wf_option_enabled">Custom watchface option were enabled</string>
     <string name="summary_enable_web_server">Allows to communicate with ZEPP OS based devices</string>
     <string name="title_enable_web_server">Enable web server</string>
+
+    <string name="summary_enable_xiaomi_service">Allows to communicate with Xiaomi HyperOS based devices</string>
+    <string name="title_enable_xiaomi_service">Enable Xiaomi Service</string>
     <string name="action_add_device">Add device</string>
     <string name="action_remove_device">Remove device</string>
     <string name="title_enable_device">Enable device</string>

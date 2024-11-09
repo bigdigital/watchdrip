@@ -16,6 +16,12 @@
         android:key="miband_enable_web_server"
         android:summary="@string/summary_enable_web_server"
         android:title="@string/title_enable_web_server" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:dependency="miband_enabled"
+        android:key="miband_enable_xiaomi_service"
+        android:summary="@string/summary_enable_xiaomi_service"
+        android:title="@string/title_enable_xiaomi_service" />
     <PreferenceCategory
         android:title="Device settings"
         android:key="device_settings">

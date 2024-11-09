@@ -30,6 +30,7 @@ public class MiBandEntry {
     public static final String PREF_SEND_ALARMS = "miband_send_alarms";
     public static final String PREF_SEND_ALARMS_OTHER = "miband_send_alarms_other";
     public static final String PREF_ENABLE_WEB_SERVER = "miband_enable_web_server";
+    public static final String PREF_ENABLE_XIAOMI_SERVICE = "miband_enable_xiaomi_service";
     public static final String PREF_MIBAND_SETTINGS = "miband_settings";
     public static final String PREF_MIBAND_PREFERENCES = "miband_preferences";
     public static final String PREF_MIBAND_UPDATE_BG = "update_miband_bg";
@@ -115,6 +116,10 @@ public class MiBandEntry {
 
     public static boolean isWebServerEnabled() {
         return isEnabled() && Pref.getBooleanDefaultFalse(PREF_ENABLE_WEB_SERVER);
+    }
+
+    public static boolean isXiaomiServiceEnabled() {
+        return isEnabled() && Pref.getBooleanDefaultFalse(PREF_ENABLE_XIAOMI_SERVICE);
     }
 
     public static boolean areAlertsEnabled() {

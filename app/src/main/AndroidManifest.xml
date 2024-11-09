@@ -36,18 +36,18 @@
     <application
         android:name=".HuamiXdrip"
         android:allowBackup="true"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Huamixdrip"
-        android:hardwareAccelerated="false"
-        android:largeHeap="true">
+        android:theme="@style/Theme.Huamixdrip">
         <activity
             android:name=".WatchStoreActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="@string/title_activity_watch_store"/>
+            android:label="@string/title_activity_watch_store"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".AboutActivity"
             android:parentActivityName=".MainActivity" />
@@ -69,14 +69,25 @@
             android:name=".services.BroadcastService"
             android:enabled="true"
             android:exported="true" />
+        <service
+            android:name=".services.XiaomiWearService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".watch.miband.MiBandService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice|location" />
 
-        <receiver android:name=".utils.bt.ConnectReceiver"
+        <receiver
+            android:name=".utils.bt.ConnectReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.bt.DisconnectReceiver"
+        <receiver
+            android:name=".utils.bt.DisconnectReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
@@ -84,17 +95,17 @@
         </receiver>
         <receiver
             android:name=".receivers.xDripReceiver"
-            android:exported="true"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_SENDER" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.AutoStart"
+        <receiver
+            android:name=".receivers.AutoStart"
             android:exported="true">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.REBOOT" />
@@ -105,12 +116,5 @@
         </receiver>
         <receiver android:name=".utils.bt.BackgroundScanReceiver" />
         <receiver android:name=".utils.framework.WakeLockTrampoline" />
-
-        <service
-            android:name=".watch.miband.MiBandService"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="connectedDevice|location" />
     </application>
-
 </manifest>
