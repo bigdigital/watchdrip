@@ -94,75 +94,76 @@ public class MainActivity extends AppCompatActivity implements
         Intent intent;
         FragmentManager fm;
         PersistantDeviceInfo device;
-        switch (item.getItemId()) {
-            case R.id.action_view_log:
-                intent = new Intent(this, SendFeedBackActiviy.class);
-                startActivity(intent);
-                return true;
-            case R.id.action_wf_store:
-                intent = new Intent(this, WatchStoreActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.action_view_about:
-                intent = new Intent(this, AboutActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.action_get_statistic:
-                Helper.startService(BroadcastService.class, BroadcastService.INTENT_FUNCTION_KEY, BroadcastService.CMD_STAT_INFO);
-                return true;
-            case R.id.action_add_device:
-                fm = getSupportFragmentManager();
-                EditDeviceNameDialogFragment addFragment = EditDeviceNameDialogFragment.newInstance("Device name");
-                addFragment.setDialogResultListener(new EditDeviceNameDialogFragment.OnDialogResultListener() {
-                    @Override
-                    public void onDialogResult(String deviceName) {
-                        if (!deviceName.isEmpty()) {
-                            PersistantDeviceInfo device = new PersistantDeviceInfo(deviceName, "", "");
-                            devices.addDevice(device);
-                            int newActiveIndex = devices.count() - 1;
-                            MiBand.setMacPref(device.getMacAddress(), bgDataRepository);
-                            MiBand.setAuthKeyPref(device.getAuthKey(), bgDataRepository);
-                            bgDataRepository.updateActiveDeviceData(newActiveIndex);
-                            handleMenusVisibility();
-                        }
-                    }
-                });
-                addFragment.show(fm, "EditDeviceNameFragment");
-                return true;
-            case R.id.action_remove_device:
-                Helper.show_ok_dialog(this, gs(R.string.action_remove_device), gs(R.string.confirm_remove_message), new Runnable() {
-                    @Override
-                    public void run() {
-                        devices.removeDevice(MiBandEntry.getActiveDeviceIndex());
-                        int newActiveIndex = devices.count() - 1;
-                        PersistantDeviceInfo deviceInner = devices.getDeviceByIndex(newActiveIndex);
-                        MiBand.setMacPref(deviceInner.getMacAddress(), bgDataRepository);
-                        MiBand.setAuthKeyPref(deviceInner.getAuthKey(), bgDataRepository);
-                        handleMenusVisibility();
-                        bgDataRepository.updateActiveDeviceData(newActiveIndex);
-                    }
-                }, false);
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_view_log) {
+            intent = new Intent(this, SendFeedBackActiviy.class);
+            startActivity(intent);
+            return true;
+        } else if (itemId == R.id.action_wf_store) {
+            intent = new Intent(this, WatchStoreActivity.class);
+            startActivity(intent);
+            return true;
 
-                return true;
-            case R.id.action_rename_device:
-                fm = getSupportFragmentManager();
-                int deviceEntryIndex = MiBandEntry.getActiveDeviceIndex();
-                device = devices.getDeviceByIndex(deviceEntryIndex);
-                if (device == null) break;
-                EditDeviceNameDialogFragment editFragment = EditDeviceNameDialogFragment.newInstance(device.getName());
-                editFragment.setDialogResultListener(new EditDeviceNameDialogFragment.OnDialogResultListener() {
-                    @Override
-                    public void onDialogResult(String deviceName) {
-                        if (!deviceName.isEmpty()) {
-                            device.setName(deviceName);
-                            devices.updateDevice(device, deviceEntryIndex);
-                            handleMenusVisibility();
-                            bgDataRepository.updateActiveDeviceData(deviceEntryIndex);
-                        }
+        } else if (itemId == R.id.action_view_about) {
+            intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (itemId == R.id.action_get_statistic) {
+            Helper.startService(BroadcastService.class, BroadcastService.INTENT_FUNCTION_KEY, BroadcastService.CMD_STAT_INFO);
+            return true;
+        } else if (itemId == R.id.action_add_device) {
+            fm = getSupportFragmentManager();
+            EditDeviceNameDialogFragment addFragment = EditDeviceNameDialogFragment.newInstance("Device name");
+            addFragment.setDialogResultListener(new EditDeviceNameDialogFragment.OnDialogResultListener() {
+                @Override
+                public void onDialogResult(String deviceName) {
+                    if (!deviceName.isEmpty()) {
+                        PersistantDeviceInfo device = new PersistantDeviceInfo(deviceName, "", "");
+                        devices.addDevice(device);
+                        int newActiveIndex = devices.count() - 1;
+                        MiBand.setMacPref(device.getMacAddress(), bgDataRepository);
+                        MiBand.setAuthKeyPref(device.getAuthKey(), bgDataRepository);
+                        bgDataRepository.updateActiveDeviceData(newActiveIndex);
+                        handleMenusVisibility();
                     }
-                });
-                editFragment.show(fm, "EditDeviceNameFragment");
-                return true;
+                }
+            });
+            addFragment.show(fm, "EditDeviceNameFragment");
+            return true;
+        } else if (itemId == R.id.action_remove_device) {
+            Helper.show_ok_dialog(this, gs(R.string.action_remove_device), gs(R.string.confirm_remove_message), new Runnable() {
+                @Override
+                public void run() {
+                    devices.removeDevice(MiBandEntry.getActiveDeviceIndex());
+                    int newActiveIndex = devices.count() - 1;
+                    PersistantDeviceInfo deviceInner = devices.getDeviceByIndex(newActiveIndex);
+                    MiBand.setMacPref(deviceInner.getMacAddress(), bgDataRepository);
+                    MiBand.setAuthKeyPref(deviceInner.getAuthKey(), bgDataRepository);
+                    handleMenusVisibility();
+                    bgDataRepository.updateActiveDeviceData(newActiveIndex);
+                }
+            }, false);
+
+            return true;
+        } else if (itemId == R.id.action_rename_device) {
+            fm = getSupportFragmentManager();
+            int deviceEntryIndex = MiBandEntry.getActiveDeviceIndex();
+            device = devices.getDeviceByIndex(deviceEntryIndex);
+            if (device == null) return super.onOptionsItemSelected(item);
+            EditDeviceNameDialogFragment editFragment = EditDeviceNameDialogFragment.newInstance(device.getName());
+            editFragment.setDialogResultListener(new EditDeviceNameDialogFragment.OnDialogResultListener() {
+                @Override
+                public void onDialogResult(String deviceName) {
+                    if (!deviceName.isEmpty()) {
+                        device.setName(deviceName);
+                        devices.updateDevice(device, deviceEntryIndex);
+                        handleMenusVisibility();
+                        bgDataRepository.updateActiveDeviceData(deviceEntryIndex);
+                    }
+                }
+            });
+            editFragment.show(fm, "EditDeviceNameFragment");
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -367,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume");
-       // devices = MiBand.getDevices();
+        // devices = MiBand.getDevices();
         super.onResume();
         timerHandler.post(updater);
     }
@@ -419,9 +420,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
         Log.d(TAG, "onPermissionsDenied " + perms);
+
         // Check whether the user denied any permissions and checked "NEVER ASK AGAIN."
         // This will display a dialog directing them to enable the permission in app settings.
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+
             new AppSettingsDialog.Builder(mActivity).setRationale(R.string.permission_dialog_enable_permissions_in_settings).build().show();
         }
     }

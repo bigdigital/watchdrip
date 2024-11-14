@@ -64,7 +64,6 @@ public class XiaomiWearService extends Service {
 
 
     private void handleCommand(String function, Intent intentIn) {
-        int value;
         switch (function) {
             case CMD_UPDATE_BG_FORCE:
                 String json = intentIn.getStringExtra("json");
@@ -81,6 +80,7 @@ public class XiaomiWearService extends Service {
 
 
     private void updateWearBg(String jsonString) {
+        UserError.Log.e(TAG, "updateWearBg");
         xiaomiWatchHelper.launchApp("com.application.watch.watchdrip", obj -> {
             if (obj.isSuccess()) {
                 UserError.Log.e(TAG, "Init message send");

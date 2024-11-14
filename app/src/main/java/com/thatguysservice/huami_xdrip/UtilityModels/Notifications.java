@@ -9,6 +9,7 @@ import android.content.Intent;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.MainActivity;
@@ -45,7 +46,7 @@ public class Notifications {
                 .setContentText(text)
                 .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .setContentIntent(getContentIntent(context))
-                .setColor(context.getResources().getColor(R.color.design_default_color_on_primary))
+                .setColor(ContextCompat.getColor(context, R.color.white))
                 .setShowWhen(false)
                 .setOngoing(true);
         if (Helper.isRunningLollipopOrLater()) {
@@ -60,7 +61,7 @@ public class Notifications {
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
-                notificationIntent, 0);
+                notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         return pendingIntent;
     }

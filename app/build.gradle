@@ -3,6 +3,8 @@ plugins {
 }
 
 repositories {
+    google()
+    mavenCentral()
     maven {
         url "https://maven.google.com"
     }
@@ -22,13 +24,14 @@ def generateTimestamp = { ->
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "30.0.3"
+    namespace 'com.thatguysservice.huami_xdrip'
+    ndkVersion "21.4.7075529"
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.thatguysservice.huami_xdrip"
-        minSdkVersion 24
-        targetSdkVersion 29
+        minSdk 24
+        targetSdk 31
 
         // Note: always bump BOTH versionCode and versionName!
         versionName "0.4.0"
@@ -37,6 +40,10 @@ android {
         buildConfigField "int", "targetSDK", targetSdkVersion.mApiLevel.toString()
 
         multiDexEnabled true
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     dataBinding {
@@ -76,7 +83,7 @@ android {
 dependencies {
     //the build based on pull request for AndroidX support https://github.com/ImangazalievM/ReActiveAndroid/pull/68
     implementation files('libs/reactiveandroid-release.aar')
-    implementation project(':SDK')
+    implementation project(path: ':SDK')
     def lifecycle_version = "2.2.0"
 
     // ViewModel
@@ -108,7 +115,7 @@ dependencies {
 
     implementation "androidx.fragment:fragment:1.3.6"
     implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'com.google.code.gson:gson:2.8.6'
     //implementation 'com.google.guava:guava:24.1-android'
@@ -124,11 +131,11 @@ dependencies {
 
    // implementation "com.evernote:android-job:1.4.2"
 
-    def work_version = "2.5.0"
+    def work_version = "2.9.1"
     // (Java only)
     implementation "androidx.work:work-runtime:$work_version"
-    implementation 'com.android.volley:volley:1.1.0'
-    implementation "androidx.tonyodev.fetch2:xfetch2:3.1.6"
+    implementation 'com.android.volley:volley:1.2.1'
+    implementation 'com.github.tonyofrancis.Fetch:fetch2:3.3.0'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
     implementation 'com.faendir.rhino:rhino-android:1.6.0'
 }

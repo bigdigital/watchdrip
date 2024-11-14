@@ -34,7 +34,9 @@ import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -166,49 +168,53 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         FragmentActivity context = this.getActivity();
         List<String> listPermissionsNeeded = new ArrayList<>();
         // Location needs to be enabled for Bluetooth discovery on Marshmallow.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                listPermissionsNeeded.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            listPermissionsNeeded.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+            if  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+               if(!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_COARSE_LOCATION)){
+                   listPermissionsNeeded.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
+                }
             }
-            if (!EasyPermissions.hasPermissions(context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                listPermissionsNeeded.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
+        }
+        if (!EasyPermissions.hasPermissions(context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            listPermissionsNeeded.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
            /* In order to be able to set ringer mode to silent
            the permission to access notifications is needed above Android M
            ACCESS_NOTIFICATION_POLICY is also needed in the manifest */
-            if (!((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).isNotificationPolicyAccessGranted()) {
-                // Put up a dialog explaining why we need permissions (Polite, but also Play Store policy)
-                // When accepted, we open the Activity for Notification access
-                DialogFragment dialog = new NotifyPolicyPermissionsDialogFragment();
-                dialog.show(getActivity().getSupportFragmentManager(), "PermissionsDialogFragment");
-            }
-        } else {
-            // Android 10 check additional permissions
-            if (Build.VERSION.SDK_INT >= 29) {
-                if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                    listPermissionsNeeded.add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-                }
-                if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    listPermissionsNeeded.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
-                }
+        if (!((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).isNotificationPolicyAccessGranted()) {
+            // Put up a dialog explaining why we need permissions (Polite, but also Play Store policy)
+            // When accepted, we open the Activity for Notification access
+            DialogFragment dialog = new NotifyPolicyPermissionsDialogFragment();
+            dialog.show(getActivity().getSupportFragmentManager(), "PermissionsDialogFragment");
+        }
+        // Android 10 check additional permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                listPermissionsNeeded.add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION);
             }
         }
         if (!listPermissionsNeeded.isEmpty()) {
 
-            String dialogContent = "";
-            if (listPermissionsNeeded.contains(android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                dialogContent = dialogContent + context.getString(R.string.permission_location_info);
-            }
-            if (listPermissionsNeeded.contains(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                dialogContent = dialogContent + context.getString(R.string.permissions_background_location_info);
-            }
-            if (listPermissionsNeeded.contains(android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                dialogContent = dialogContent + context.getString(R.string.permissions_file_system_read);
+            // Map each permission to its corresponding string resource ID
+            Map<String, Integer> permissionMap = new HashMap<>();
+            permissionMap.put(android.Manifest.permission.ACCESS_FINE_LOCATION, R.string.permission_location_info);
+            permissionMap.put(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION, R.string.permissions_background_location_info);
+            permissionMap.put(android.Manifest.permission.READ_EXTERNAL_STORAGE, R.string.permissions_file_system_read);
+
+            // Generate the dialog content based on the permissions needed
+            StringBuilder dialogContent = new StringBuilder();
+            for (String permission : listPermissionsNeeded) {
+                Integer stringResId = permissionMap.get(permission);
+                if (stringResId != null) {
+                    dialogContent.append(context.getString(stringResId)).append("\n");
+                }
             }
 
-            String rationaleText = context.getString(R.string.permission_dialog_start) + dialogContent;
+            // Trim the final content to remove any trailing space
+            String rationaleText = context.getString(R.string.permission_dialog_start) + dialogContent.toString().trim();
 
-            EasyPermissions.requestPermissions(context, rationaleText, REQUEST_ID_BLUETOOTH_PERMISSIONS, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]));
+            EasyPermissions.requestPermissions(context, rationaleText, REQUEST_ID_BLUETOOTH_PERMISSIONS, listPermissionsNeeded.toArray(new String[0]));
 
             return false;
         }
@@ -271,8 +277,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             Context context = getContext();
             builder.setMessage(context.getString(R.string.permission_notification_policy_access,
-                    getContext().getString(R.string.app_name),
-                    getContext().getString(R.string.ok)))
+                            getContext().getString(R.string.app_name),
+                            getContext().getString(R.string.ok)))
                     .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

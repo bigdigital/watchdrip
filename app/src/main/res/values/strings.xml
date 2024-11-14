@@ -88,7 +88,7 @@
     <string name="miband_found_auth_text">Found appropriate authorization key for %s</string>
     <string name="miband_auth_fail">Authentication failed due to authentication timeout. When your Band vibrates and blinks, tap it a few times in a row.</string>
 
-    <string name="permission_dialog_start">To ensure all features function properly, these permissions need to be granted:\n\n</string>
+    <string name="permission_dialog_start">To ensure all features function properly, these permissions need to be granted: \n\n</string>
     <string name="please_allow_permission">Please allow the following permissions</string>
     <string name="permission_location_info">Location information. Without Location permission Android Bluetooth scan doesn\'t work\n</string>
     <string name="permissions_background_location_info">Background location information. Android 10 and above need background location for Bluetooth to work\n</string>
