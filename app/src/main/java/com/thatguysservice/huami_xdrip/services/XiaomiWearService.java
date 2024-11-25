@@ -1,14 +1,17 @@
 package com.thatguysservice.huami_xdrip.services;
 
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
 
 import com.eveningoutpost.dexdrip.services.broadcastservice.models.Settings;
+import com.google.gson.Gson;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
 import com.thatguysservice.huami_xdrip.UtilityModels.ForegroundServiceStarter;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
@@ -16,8 +19,12 @@ import com.thatguysservice.huami_xdrip.models.Constants;
 import com.thatguysservice.huami_xdrip.models.Helper;
 import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.utils.framework.WakeLockTrampoline;
+import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandService;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import test.invoke.sdk.XiaomiWatchHelper;
 
@@ -27,6 +34,10 @@ public class XiaomiWearService extends Service {
     private ForegroundServiceStarter foregroundServiceStarter;
     private XiaomiWatchHelper xiaomiWatchHelper;
     private long lastTime;
+    private PendingIntent serviceIntent;
+
+    private static final int SEND_DELAY = (int) (Constants.SECOND_IN_MS * 5);
+    private String json;
 
     public static boolean shouldServiceRun() {
         return MiBandEntry.isXiaomiServiceEnabled();
@@ -34,7 +45,7 @@ public class XiaomiWearService extends Service {
 
     public static void bgForce(String jsonString) {
         if (shouldServiceRun()) {
-            Helper.startService(XiaomiWearService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE, "json", jsonString);
+            Helper.startService(XiaomiWearService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG, "json", jsonString);
         }
     }
 
@@ -66,11 +77,15 @@ public class XiaomiWearService extends Service {
     private void handleCommand(String function, Intent intentIn) {
         switch (function) {
             case CMD_UPDATE_BG_FORCE:
-                String json = intentIn.getStringExtra("json");
+                UserError.Log.d(TAG, "retry send last data");
                 updateWearBg(json);
-                if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
-                    return;
-                }
+                break;
+
+            case CMD_UPDATE_BG:
+                json = intentIn.getStringExtra("json");
+                cancelRetryTimer();
+                setRetryTimer();
+                updateWearBg(json);
                 break;
 
             default:
@@ -79,15 +94,32 @@ public class XiaomiWearService extends Service {
     }
 
 
+    protected void setRetryTimer() {
+        if (shouldServiceRun()) {
+            serviceIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.XIAOMI_SERVICE_RETRY_ID, CMD_UPDATE_BG_FORCE);
+            Helper.wakeUpIntent(HuamiXdrip.getAppContext(), SEND_DELAY, serviceIntent);
+        }
+    }
+
+    private void cancelRetryTimer() {
+        Helper.cancelAlarm(HuamiXdrip.getAppContext(), serviceIntent);
+    }
+
     private void updateWearBg(String jsonString) {
-        UserError.Log.e(TAG, "updateWearBg");
+        if (!Helper.ratelimit("xiaomi-bg_force-limit", 2)) {
+            return;
+        }
+        UserError.Log.d(TAG, "updateWearBg");
         xiaomiWatchHelper.launchApp("com.application.watch.watchdrip", obj -> {
+            UserError.Log.d(TAG, "launchApp code: " + obj.getCode());
             if (obj.isSuccess()) {
-                UserError.Log.e(TAG, "Init message send");
+                UserError.Log.d(TAG, "Init message send");
                 Helper.threadSleep(1000);
                 xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
+                    UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
                     if (obj2.isSuccess()) {
-                        UserError.Log.e(TAG, "send -> " + obj.isSuccess());
+                        UserError.Log.d(TAG, "send -> " + obj.isSuccess());
+                        cancelRetryTimer();
                     }
                 });
             }
@@ -107,7 +139,7 @@ public class XiaomiWearService extends Service {
 
     @Override
     public void onCreate() {
-        UserError.Log.e(TAG, "starting service");
+        UserError.Log.d(TAG, "starting service");
 
         startInForeground();
 
@@ -115,20 +147,27 @@ public class XiaomiWearService extends Service {
 
         xiaomiWatchHelper.setReceiver((id, message) -> {
             try {
-                lastTime = Long.parseLong(message.toString());
+                Gson gson = new Gson();
+                Map<String, String> map = gson.fromJson(new String(message, StandardCharsets.UTF_8), Map.class);
+                String dataValue = map.get("data");
+                lastTime = Long.parseLong(dataValue);
+                UserError.Log.d(TAG, "got data: " + lastTime);
             } catch (Exception e) {
+                UserError.Log.e(TAG, "parse error: " + e.getMessage());
             }
         });
 
         xiaomiWatchHelper.registerMessageReceiver();
+        xiaomiWatchHelper.sendUpdateMessageToWear();
 
         super.onCreate();
     }
 
     @Override
     public void onDestroy() {
-        UserError.Log.e(TAG, "killing service");
+        UserError.Log.d(TAG, "killing service");
         foregroundServiceStarter.stop();
+        cancelRetryTimer();
         xiaomiWatchHelper.unRegisterWatchHelper();
         super.onDestroy();
     }

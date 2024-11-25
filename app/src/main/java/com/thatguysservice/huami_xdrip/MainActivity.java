@@ -170,7 +170,9 @@ public class MainActivity extends AppCompatActivity implements
 
     private void handleMenusVisibility() {
 
-        viewLog.setVisible(isLoggingEnabled());
+        if (viewLog != null) {
+            viewLog.setVisible(isLoggingEnabled());
+        }
 
         if (removeDeviceItem == null || addDeviceItem == null) return;
 
@@ -272,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements
         final Observer<Boolean> serviceStateObserver = new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable final Boolean status) {
-                binding.setFabVisibility(MiBandEntry.isWebServerEnabled() || MiBandEntry.isDeviceEnabled());
+                binding.setFabVisibility(MiBandEntry.isWebServerEnabled() || MiBandEntry.isDeviceEnabled() || MiBandEntry.isXiaomiServiceEnabled());
                 handleMenusVisibility();
             }
         };

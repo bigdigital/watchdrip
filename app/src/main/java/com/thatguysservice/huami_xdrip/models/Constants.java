@@ -21,6 +21,8 @@ public class Constants {
     public static final int MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID = 1028;
     public static final int MIBAND_SERVICE_WATCHDOG_ID = 1029;
 
+    public static final int XIAOMI_SERVICE_RETRY_ID = 1030;
+
     public static final int REQUEST_ID_READ_WRITE_PERMISSIONS = 1023;
     public static final int REQUEST_ID_BLUETOOTH_PERMISSIONS = 1024;
 }

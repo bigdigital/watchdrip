@@ -1,0 +1,5 @@
+<resources>
+    <style name="CustomPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@color/white</item> <!-- Your desired color -->
+    </style>
+</resources>

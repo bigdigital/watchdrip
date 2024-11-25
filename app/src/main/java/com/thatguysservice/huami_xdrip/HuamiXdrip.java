@@ -15,6 +15,7 @@ import com.reactiveandroid.ReActiveAndroid;
 import com.reactiveandroid.ReActiveConfig;
 import com.reactiveandroid.internal.database.DatabaseConfig;
 import com.thatguysservice.huami_xdrip.models.database.AppDatabase;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.utils.jobs.CleanupWorker;
 
@@ -40,7 +41,7 @@ public class HuamiXdrip extends MultiDexApplication {
         super.onCreate();
     }
 
-    private void ReactiveAndroidInitialize(){
+    private void ReactiveAndroidInitialize() {
         DatabaseConfig appDatabaseConfig = new DatabaseConfig.Builder(AppDatabase.class)
                 .build();
 
@@ -59,9 +60,9 @@ public class HuamiXdrip extends MultiDexApplication {
                         .setConstraints(constraints)
                         .build();
 
-        WorkManager instance =  WorkManager.getInstance(context);
+        WorkManager instance = WorkManager.getInstance(context);
 
-        instance.enqueueUniquePeriodicWork("WATHCDRIP_WORKER",  ExistingPeriodicWorkPolicy.KEEP, workRequest);
+        instance.enqueueUniquePeriodicWork("WATHCDRIP_WORKER", ExistingPeriodicWorkPolicy.KEEP, workRequest);
     }
 
 

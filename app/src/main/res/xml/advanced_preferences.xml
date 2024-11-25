@@ -96,11 +96,4 @@
         android:switchTextOff="@string/short_off_text_for_switches"
         android:switchTextOn="@string/short_on_text_for_switches"
         android:title="@string/title_force_new_protocol" />
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="debug_miband_enable_logs"
-        android:summary="@string/summary_enable_loggin"
-        android:switchTextOff="@string/short_off_text_for_switches"
-        android:switchTextOn="@string/short_on_text_for_switches"
-        android:title="@string/title_enable_logging" />
 </PreferenceScreen>

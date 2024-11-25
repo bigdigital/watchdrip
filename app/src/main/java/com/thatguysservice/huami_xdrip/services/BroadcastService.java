@@ -63,10 +63,8 @@ public class BroadcastService extends Service {
     protected static final String ACTION_WATCH_COMMUNICATION_RECEIVER = "com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_RECEIVER";
     //listen
     protected static final String ACTION_WATCH_COMMUNICATION_SENDER = "com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_SENDER";
-    protected String TAG = this.getClass().getSimpleName();
-    private PendingIntent serviceIntent;
+    protected static String TAG = "BroadcastService";
 
-    public static final int SERVICE_RESTART_MINUTES = 1;
     private PendingIntent xdripResponseIntend;
     private ForegroundServiceStarter foregroundServiceStarter;
 
@@ -76,17 +74,17 @@ public class BroadcastService extends Service {
 
     public static void initialStartIfEnabled() {
         if (shouldServiceRun()) {
-            Inevitable.task("mb-full-initial-start", 500, new Runnable() {
-                @Override
-                public void run() {
-                    bgForce();
-                }
-            });
+            bgForce();
         }
     }
 
     public static void bgForce() {
-        Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
+        try {
+            Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
+        } catch (Exception e) {
+
+            UserError.Log.wtf(TAG, "Failed to start BroadcastService: " + e);
+        }
     }
 
     @Override
@@ -94,19 +92,6 @@ public class BroadcastService extends Service {
         return null;
     }
 
-    private void setReceiversEnableState(boolean enable) {
-        /*if (enable) {
-            if (newDataReceiver == null) {
-                newDataReceiver = new xDripReceiver();
-                registerReceiver(newDataReceiver, new IntentFilter(ACTION_WATCH_COMMUNICATION_SENDER));
-            }
-        } else {
-            if (newDataReceiver != null) {
-                unregisterReceiver(newDataReceiver);
-                newDataReceiver = null;
-            }
-        }*/
-    }
 
     protected void startInForeground() {
         foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), this);
@@ -116,47 +101,41 @@ public class BroadcastService extends Service {
     @Override
     public void onCreate() {
         UserError.Log.e(TAG, "starting service");
-
-        if (shouldServiceRun()) {
-            setReceiversEnableState(true);
-        }
         startInForeground();
-
         super.onCreate();
     }
 
     @Override
+    public void onTimeout(int startId) {
+        super.onTimeout(startId);
+        foregroundServiceStarter.stop();
+    }
+
+    @Override
     public void onDestroy() {
-        UserError.Log.e(TAG, "killing service");
-        setReceiversEnableState(false);
+        UserError.Log.d(TAG, "Destroy service");
         foregroundServiceStarter.stop();
         super.onDestroy();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        final PowerManager.WakeLock wl = Helper.getWakeLock("Miband service", 60000);
+        final PowerManager.WakeLock wl = Helper.getWakeLock("Broadcast service", 5000);
+        foregroundServiceStarter.start();
         try {
             if (shouldServiceRun()) {
                 if (intent != null) {
                     final String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
                     if (function != null) {
                         handleCommand(function, intent);
-                    } else {
-                        // no specific function
                     }
                 }
-                return START_STICKY;
-            } else {
-                //notify MiBandService about diconnection
-                Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_REFRESH);
-                UserError.Log.d(TAG, "Service is NOT set be active - shutting down");
-                stopSelf();
-                return START_NOT_STICKY;
             }
         } finally {
+            foregroundServiceStarter.stop();
             Helper.releaseWakeLock(wl);
         }
+        return START_NOT_STICKY;
     }
 
     private void handleCommand(String function, Intent intentIn) {

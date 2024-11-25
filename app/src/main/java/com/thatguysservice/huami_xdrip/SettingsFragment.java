@@ -58,6 +58,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private TwoStatePreference servicePref;
     private TwoStatePreference deviceEnabledPref;
     private TwoStatePreference webServerEnabledPref;
+    private TwoStatePreference xiaomiServerEnabledPref;
     private ListPreference activeDevicePref;
 
     protected void setListPreferenceData() {
@@ -118,9 +119,11 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         servicePref = findPreference(MiBandEntry.PREF_MIBAND_ENABLED);
         deviceEnabledPref = findPreference(MiBandEntry.PREF_MIBAND_ENABLE_DEVICE);
         webServerEnabledPref = findPreference(MiBandEntry.PREF_ENABLE_WEB_SERVER);
+        xiaomiServerEnabledPref = findPreference(MiBandEntry.PREF_ENABLE_XIAOMI_SERVICE);
         servicePref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
         deviceEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
         webServerEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
+        xiaomiServerEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
 
         activeDevicePref = findPreference(MiBandEntry.PREF_MIBAND_ACTIVE_DEVICE);
         activeDevicePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -148,7 +151,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     }
 
     private boolean prefEnableCallback(Preference preference, Boolean newValue) {
-        if ((Boolean) newValue) {
+       if (preference == deviceEnabledPref && (Boolean) newValue) {
             boolean result = checkAndRequestBTPermissions();
             if (!result) {
                 return false;
