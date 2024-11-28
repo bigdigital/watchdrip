@@ -19,7 +19,7 @@ import com.thatguysservice.huami_xdrip.utils.framework.WakeLockTrampoline;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandService;
 
-public class BroadcastService extends Service {
+public class BroadcastService {
 
     public static final String INTENT_FUNCTION_KEY = "FUNCTION";
     public static final String INTENT_PACKAGE_KEY = "PACKAGE";
@@ -65,7 +65,7 @@ public class BroadcastService extends Service {
     protected static final String ACTION_WATCH_COMMUNICATION_SENDER = "com.eveningoutpost.dexdrip.watch.wearintegration.BROADCAST_SERVICE_SENDER";
     protected static String TAG = "BroadcastService";
 
-    private PendingIntent xdripResponseIntend;
+    private static PendingIntent xdripResponseIntend;
     private ForegroundServiceStarter foregroundServiceStarter;
 
     public static boolean shouldServiceRun() {
@@ -73,72 +73,20 @@ public class BroadcastService extends Service {
     }
 
     public static void initialStartIfEnabled() {
-        if (shouldServiceRun()) {
-            bgForce();
-        }
+        bgForce();
     }
 
     public static void bgForce() {
-        try {
-            Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
-        } catch (Exception e) {
-
-            UserError.Log.wtf(TAG, "Failed to start BroadcastService: " + e);
+        if (shouldServiceRun()) {
+            handleCommand(CMD_UPDATE_BG_FORCE);
         }
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public static void handleCommand(String function) {
+        handleCommand(function,null);
     }
 
-
-    protected void startInForeground() {
-        foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), this);
-        foregroundServiceStarter.start();
-    }
-
-    @Override
-    public void onCreate() {
-        UserError.Log.e(TAG, "starting service");
-        startInForeground();
-        super.onCreate();
-    }
-
-    @Override
-    public void onTimeout(int startId) {
-        super.onTimeout(startId);
-        foregroundServiceStarter.stop();
-    }
-
-    @Override
-    public void onDestroy() {
-        UserError.Log.d(TAG, "Destroy service");
-        foregroundServiceStarter.stop();
-        super.onDestroy();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        final PowerManager.WakeLock wl = Helper.getWakeLock("Broadcast service", 5000);
-        foregroundServiceStarter.start();
-        try {
-            if (shouldServiceRun()) {
-                if (intent != null) {
-                    final String function = intent.getStringExtra(INTENT_FUNCTION_KEY);
-                    if (function != null) {
-                        handleCommand(function, intent);
-                    }
-                }
-            }
-        } finally {
-            foregroundServiceStarter.stop();
-            Helper.releaseWakeLock(wl);
-        }
-        return START_NOT_STICKY;
-    }
-
-    private void handleCommand(String function, Intent intentIn) {
+    public static void handleCommand(String function, Intent intentIn) {
         Intent intent = new Intent(ACTION_WATCH_COMMUNICATION_RECEIVER);
         int value;
         switch (function) {
@@ -158,10 +106,6 @@ public class BroadcastService extends Service {
                 intent.putExtra(INTENT_ALERT_TYPE, intentIn.getStringExtra(INTENT_ALERT_TYPE));
                 break;
             case CMD_ADD_STEPS:
-                value = intentIn.getIntExtra("value", 0);
-                intent.putExtra("timeStamp", Helper.tsl());
-                intent.putExtra("value", value);
-                break;
             case CMD_ADD_HR:
                 value = intentIn.getIntExtra("value", 0);
                 intent.putExtra("timeStamp", Helper.tsl());
@@ -180,16 +124,16 @@ public class BroadcastService extends Service {
         sendBroadcast(function, intent);
     }
 
-    public Settings getSettings() {
+    private static Settings getSettings() {
         Settings settings = new Settings();
         settings.setGraphStart(Constants.HOUR_IN_MS * MiBandEntry.getGraphHours());
         settings.setGraphEnd(Constants.MINUTE_IN_MS * 30);
-        settings.setApkName(getString(R.string.app_name));
+        settings.setApkName(HuamiXdrip.getAppContext().getString(R.string.app_name));
         settings.setDisplayGraph(true);
         return settings;
     }
 
-    public void sendBroadcast(String functionName, Intent intent) {
+    private static void sendBroadcast(String functionName, Intent intent) {
         intent.putExtra(INTENT_FUNCTION_KEY, functionName);
         intent.putExtra(INTENT_PACKAGE_KEY, BuildConfig.APPLICATION_ID);
         UserError.Log.d(TAG, String.format("sendBroadcast functionName:%s", functionName));

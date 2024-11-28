@@ -36,7 +36,7 @@ public class XiaomiWearService extends Service {
     private long lastTime;
     private PendingIntent serviceIntent;
 
-    private static final int SEND_DELAY = (int) (Constants.SECOND_IN_MS * 5);
+    private static final int SEND_DELAY = (int) (Constants.SECOND_IN_MS * 10);
     private String json;
 
     public static boolean shouldServiceRun() {

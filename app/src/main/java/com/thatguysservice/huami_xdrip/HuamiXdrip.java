@@ -15,7 +15,6 @@ import com.reactiveandroid.ReActiveAndroid;
 import com.reactiveandroid.ReActiveConfig;
 import com.reactiveandroid.internal.database.DatabaseConfig;
 import com.thatguysservice.huami_xdrip.models.database.AppDatabase;
-import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.utils.jobs.CleanupWorker;
 
@@ -34,11 +33,11 @@ public class HuamiXdrip extends MultiDexApplication {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         HuamiXdrip.context = getApplicationContext();
         ReactiveAndroidInitialize();
         BroadcastService.initialStartIfEnabled();
         scheduleTask();
-        super.onCreate();
     }
 
     private void ReactiveAndroidInitialize() {

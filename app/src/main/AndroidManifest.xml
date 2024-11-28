@@ -66,11 +66,6 @@
         </activity>
 
         <service
-            android:name=".services.BroadcastService"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="shortService" />
-        <service
             android:name=".services.XiaomiWearService"
             android:enabled="true"
             android:exported="true" />

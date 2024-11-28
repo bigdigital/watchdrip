@@ -29,11 +29,11 @@ public class xDripReceiver extends BroadcastReceiver {
             UserError.Log.e(TAG, String.format("got intent functionName: %s, receiver: %s", function, receiver));
             Helper.getWakeLock(TAG, 1000);
             if (function.equals(CMD_START)) {
-                Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_UPDATE_BG_FORCE);
+                BroadcastService.handleCommand(CMD_UPDATE_BG_FORCE);
                 return;
             }
             if (function.equals(CMD_UPDATE_BG_FORCE)) {
-                Helper.startService(BroadcastService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_XDRIP_APP_GOT_RESPONSE);
+                BroadcastService.handleCommand(CMD_LOCAL_XDRIP_APP_GOT_RESPONSE);
             }
             if (!BuildConfig.APPLICATION_ID.equals(receiver)) return;
             if (function.startsWith(CMD_LOCAL_PREFIX))

@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements
             startActivity(intent);
             return true;
         } else if (itemId == R.id.action_get_statistic) {
-            Helper.startService(BroadcastService.class, BroadcastService.INTENT_FUNCTION_KEY, BroadcastService.CMD_STAT_INFO);
+            BroadcastService.handleCommand(BroadcastService.CMD_STAT_INFO);
             return true;
         } else if (itemId == R.id.action_add_device) {
             fm = getSupportFragmentManager();
@@ -378,7 +378,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy");
-        HuamiXdrip.getAppContext().stopService(new Intent(HuamiXdrip.getAppContext(), BroadcastService.class));
         super.onDestroy();
     }
 

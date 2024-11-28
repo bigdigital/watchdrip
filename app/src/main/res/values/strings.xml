@@ -129,15 +129,17 @@
     <string name="use_custom_watchface_title">Use custom watchface</string>
     <string name="watch_state">Status:\u0020</string>
     <string name="title_activity_about">About</string>
-    <string name="about_description">This application is extension to xDrip which is allowed to communicate with different watches and display glucose, alarms directly on the watch </string>
-    <string name="supported_devices" translatable="false">\u0020MiBand 2\n MiBand 3\n MiBand 4\n MiBand 5\n MiBand 6\n Amazfit GTR 47mm\n Amazfit GTR 42mm\n  Amazfit GTR2\n Amazfit GTR2e\n Amazfit GTS2\n Amazfit GTS2e\n Amazfit GTS2 Mini\n Amazfit Band5\n Amazfit Bip\n Amazfit Bip Lite\n Amazfit Bip S\n  Amazfit Bip S Lite\n Amazfit T-Rex Pro\n ZEPP OS based devices </string>
+    <string name="about_description">This application is an extension of xDrip, allowing it to communicate with various watches and display glucose levels and alarms directly on the watch. \n
+        Special thanks to Nimrod100 for help with testing and implementing support for Xiaomi 8 and 9.\n
+Additional thanks to all patrons for supporting this project and making it possible</string>
+    <string name="supported_devices" translatable="false">\u0020MiBand 2\n MiBand 3\n MiBand 4\n MiBand 5\n MiBand 6\n Amazfit GTR 47mm\n Amazfit GTR 42mm\n  Amazfit GTR2\n Amazfit GTR2e\n Amazfit GTS2\n Amazfit GTS2e\n Amazfit GTS2 Mini\n Amazfit Band5\n Amazfit Bip\n Amazfit Bip Lite\n Amazfit Bip S\n  Amazfit Bip S Lite\n Amazfit T-Rex Pro\n ZEPP OS based devices (using web server)\n Xiaomi 8,9 (by using Xiaomi service) </string>
     <string name="supported_devices_desc">Supported devices:</string>
     <string name="about_version">Version: %s, Build date:\u0020</string>
     <string name="action_view_about">About</string>
     <string name="Advanced">Advanced</string>
     <string name="action_get_statistic">Get statistic</string>
     <string name="xdrip_app_no_response">No response from xDrip App. Please check xDrip settings</string>
-    <string name="xdrip_app_received_data">Received data from Xdrip</string>
+    <string name="xdrip_app_received_data">Received data from xDrip</string>
     <string name="watch_disconnected">Disconnected</string>
     <string name="permission_notification_policy_access">%1$s needs access to Do Not Disturb settings in order to restore initial phone mode after alarm were silenced .\n\nPlease tap \'%2$s\' then \'%1$s\' and enable \'Allow Do Not Disturb\', then tap \'Back\' to return to %1$s</string>
     <string name="set_value">Set</string>
