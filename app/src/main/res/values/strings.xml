@@ -90,10 +90,12 @@
 
     <string name="permission_dialog_start">To ensure all features function properly, these permissions need to be granted: \n\n</string>
     <string name="please_allow_permission">Please allow the following permissions</string>
-    <string name="permission_location_info">Location information. Without Location permission Android Bluetooth scan doesn\'t work\n</string>
-    <string name="permissions_background_location_info">Background location information. Android 10 and above need background location for Bluetooth to work\n</string>
-    <string name="permissions_file_system_read">"Access to photos, media and files on your device. To auto-populate authentication code from freemyband "</string>
-    <string name="permissions_file_system">Access to photos, media and files on your device. To be able to read custom watchface\n</string>
+    <string name="permission_location_info">Location information. Without Location permission Android Bluetooth scan doesn\'t work</string>
+    <string name="permissions_background_location_info">Background location information. Android 10 and above need background location for Bluetooth to work.</string>
+    <string name="permissions_bt_connect">"Bluetooth connect. Android 12 needs Bluetooth Connect permission to connect to devices."</string>
+    <string name="permissions_bt_scan">"Bluetooth scan. Android 12 needs Bluetooth Connect permission to connect to devices."</string>
+    <string name="permissions_file_system_read">"Access to photos, media and files on your device. To auto-populate authentication code from freemyband."</string>
+    <string name="permissions_file_system">Access to photos, media and files on your device. To be able to read custom watchface.</string>
     <string name="permission_dialog_enable_permissions_in_settings">The permission were permanently disabled. Please go to application system settings and enable permissions</string>
 
     <!-- Location Settings -->

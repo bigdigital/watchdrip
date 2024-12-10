@@ -11,9 +11,15 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <item name="popupMenuStyle">@style/CustomPopupMenu</item>
-        <item name="android:itemBackground">@color/white</item>
+<!--        <item name="android:itemBackground">@color/black</item>-->
+
+        <item name="android:itemTextAppearance">@style/menuItem</item>
+
         <!-- Customize your theme here. -->
+    </style>
+
+    <style name="menuItem" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:textColor">@color/menu_text_color_secondary</item>
     </style>
 
     <style name="Theme.Huamixdrip.NoActionBar">
@@ -23,5 +29,5 @@
 
     <style name="Theme.Huamixdrip.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="Theme.Huamixdrip.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.Huamixdrip.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 </resources>

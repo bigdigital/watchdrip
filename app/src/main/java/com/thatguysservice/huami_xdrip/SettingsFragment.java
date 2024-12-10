@@ -168,8 +168,30 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     }
 
     private boolean checkAndRequestBTPermissions() {
+
+        // Map each permission to its corresponding string resource ID
+        Map<String, Integer> permissionMap = new HashMap<>();
+
+        permissionMap.put(android.Manifest.permission.ACCESS_FINE_LOCATION, R.string.permission_location_info);
+        permissionMap.put(android.Manifest.permission.READ_EXTERNAL_STORAGE, R.string.permissions_file_system_read);
+
+
         FragmentActivity context = this.getActivity();
         List<String> listPermissionsNeeded = new ArrayList<>();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        {
+            if (!EasyPermissions.hasPermissions(context, Manifest.permission.BLUETOOTH_CONNECT)) {
+                listPermissionsNeeded.add(android.Manifest.permission.BLUETOOTH_CONNECT);
+            }
+            if (!EasyPermissions.hasPermissions(context, Manifest.permission.BLUETOOTH_SCAN)) {
+                listPermissionsNeeded.add(android.Manifest.permission.BLUETOOTH_SCAN);
+            }
+
+            permissionMap.put(android.Manifest.permission.BLUETOOTH_CONNECT, R.string.permissions_bt_connect);
+            permissionMap.put(android.Manifest.permission.BLUETOOTH_SCAN, R.string.permissions_bt_scan);
+        }
+
         // Location needs to be enabled for Bluetooth discovery on Marshmallow.
         if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             listPermissionsNeeded.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
@@ -195,22 +217,16 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                 listPermissionsNeeded.add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+                permissionMap.put(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION, R.string.permissions_background_location_info);
             }
         }
         if (!listPermissionsNeeded.isEmpty()) {
-
-            // Map each permission to its corresponding string resource ID
-            Map<String, Integer> permissionMap = new HashMap<>();
-            permissionMap.put(android.Manifest.permission.ACCESS_FINE_LOCATION, R.string.permission_location_info);
-            permissionMap.put(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION, R.string.permissions_background_location_info);
-            permissionMap.put(android.Manifest.permission.READ_EXTERNAL_STORAGE, R.string.permissions_file_system_read);
-
             // Generate the dialog content based on the permissions needed
             StringBuilder dialogContent = new StringBuilder();
             for (String permission : listPermissionsNeeded) {
                 Integer stringResId = permissionMap.get(permission);
                 if (stringResId != null) {
-                    dialogContent.append(context.getString(stringResId)).append("\n");
+                    dialogContent.append(context.getString(stringResId)).append("\n\n");
                 }
             }
 

@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.util.Log;
 
 import com.eveningoutpost.dexdrip.services.broadcastservice.models.Settings;
 import com.thatguysservice.huami_xdrip.BuildConfig;
@@ -87,41 +88,46 @@ public class BroadcastService {
     }
 
     public static void handleCommand(String function, Intent intentIn) {
-        Intent intent = new Intent(ACTION_WATCH_COMMUNICATION_RECEIVER);
-        int value;
-        switch (function) {
-            case CMD_LOCAL_XDRIP_APP_GOT_RESPONSE:
-                Helper.cancelAlarm(HuamiXdrip.getAppContext(), xdripResponseIntend);
-                break;
-            case CMD_UPDATE_BG_FORCE:
-                if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
+        try {
+            Intent intent = new Intent(ACTION_WATCH_COMMUNICATION_RECEIVER);
+            int value;
+            switch (function) {
+                case CMD_LOCAL_XDRIP_APP_GOT_RESPONSE:
+                    Helper.cancelAlarm(HuamiXdrip.getAppContext(), xdripResponseIntend);
+                    break;
+                case CMD_UPDATE_BG_FORCE:
+                    if (!Helper.ratelimit("miband-bg_force-limit", 5)) {
+                        return;
+                    }
+                    xdripResponseIntend = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONSE);
+                    Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, xdripResponseIntend);
+                    Settings settings = getSettings();
+                    intent.putExtra(INTENT_SETTINGS, settings);
+                    break;
+                case CMD_SNOOZE_ALERT:
+                    intent.putExtra(INTENT_ALERT_TYPE, intentIn.getStringExtra(INTENT_ALERT_TYPE));
+                    break;
+                case CMD_ADD_STEPS:
+                case CMD_ADD_HR:
+                    value = intentIn.getIntExtra("value", 0);
+                    intent.putExtra("timeStamp", Helper.tsl());
+                    intent.putExtra("value", value);
+                    break;
+                case CMD_STAT_INFO:
+                    intent.putExtra(INTENT_STAT_HOURS, intentIn.getIntExtra(INTENT_STAT_HOURS, 24));
+                    break;
+                case CMD_ADD_TREATMENT:
+                    intent.putExtra("timeStamp", Helper.tsl());
+                    intent.putExtras(intentIn);
+                    break;
+                default:
                     return;
-                }
-                xdripResponseIntend = WakeLockTrampoline.getPendingIntent(MiBandService.class, Constants.MIBAND_SERVICE_XDRIP_NO_RESPONCE_ID, CMD_LOCAL_XDRIP_APP_NO_RESPONSE);
-                Helper.wakeUpIntent(HuamiXdrip.getAppContext(), XDRIP_APP_RESPONCE_DELAY, xdripResponseIntend);
-                Settings settings = getSettings();
-                intent.putExtra(INTENT_SETTINGS, settings);
-                break;
-            case CMD_SNOOZE_ALERT:
-                intent.putExtra(INTENT_ALERT_TYPE, intentIn.getStringExtra(INTENT_ALERT_TYPE));
-                break;
-            case CMD_ADD_STEPS:
-            case CMD_ADD_HR:
-                value = intentIn.getIntExtra("value", 0);
-                intent.putExtra("timeStamp", Helper.tsl());
-                intent.putExtra("value", value);
-                break;
-            case CMD_STAT_INFO:
-                intent.putExtra(INTENT_STAT_HOURS, intentIn.getIntExtra(INTENT_STAT_HOURS, 24));
-                break;
-            case CMD_ADD_TREATMENT:
-                intent.putExtra("timeStamp", Helper.tsl());
-                intent.putExtras(intentIn);
-                break;
-            default:
-                return;
+            }
+            sendBroadcast(function, intent);
         }
-        sendBroadcast(function, intent);
+        catch (Exception e){
+            UserError.Log.e(TAG, "handleCommand error: " + e.toString());
+        }
     }
 
     private static Settings getSettings() {

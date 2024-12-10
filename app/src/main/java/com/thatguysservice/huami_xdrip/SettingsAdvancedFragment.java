@@ -88,16 +88,12 @@ public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
         List<String> listPermissionsNeeded = new ArrayList<>();
 
         //check read permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!EasyPermissions.hasPermissions(context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                listPermissionsNeeded.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
+        if (!EasyPermissions.hasPermissions(context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            listPermissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
         //checkWritePermissions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!EasyPermissions.hasPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            }
+        if (!EasyPermissions.hasPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            listPermissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
         if (!listPermissionsNeeded.isEmpty()) {
             String rationaleText = context.getString(R.string.permission_dialog_start) + context.getString(R.string.permissions_file_system);
