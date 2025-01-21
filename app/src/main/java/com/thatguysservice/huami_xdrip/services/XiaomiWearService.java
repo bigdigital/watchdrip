@@ -122,6 +122,22 @@ public class XiaomiWearService extends Service {
                         cancelRetryTimer();
                     }
                 });
+                Helper.threadSleep(1000);
+                xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
+                    UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
+                    if (obj2.isSuccess()) {
+                        UserError.Log.d(TAG, "send -> " + obj.isSuccess());
+                        cancelRetryTimer();
+                    }
+                });
+                Helper.threadSleep(1000);
+                xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
+                    UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
+                    if (obj2.isSuccess()) {
+                        UserError.Log.d(TAG, "send -> " + obj.isSuccess());
+                        cancelRetryTimer();
+                    }
+                });
             }
         });
     }
