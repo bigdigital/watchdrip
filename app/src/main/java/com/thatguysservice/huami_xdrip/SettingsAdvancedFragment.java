@@ -1,6 +1,7 @@
 package com.thatguysservice.huami_xdrip;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -16,6 +17,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.TwoStatePreference;
 
+import com.thatguysservice.huami_xdrip.models.Pref;
+import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.utils.time.TimePreference;
 import com.thatguysservice.huami_xdrip.utils.time.TimePreferenceDialogFragmentCompat;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
@@ -26,14 +29,31 @@ import java.util.List;
 import pub.devrel.easypermissions.EasyPermissions;
 
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_READ_WRITE_PERMISSIONS;
+import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.PREF_ENABLE_WEB_SERVER;
 
 public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
     TwoStatePreference customWatcfacePref;
+    private Preference deviceSettingsPref;
+    private Preference deviceGraphSettingsPref;
+    private Preference deviceAdvancedSettingsPref;
+
+    private void updateCategoriesVisibility(){
+        boolean deviceEnabled = Pref.getBooleanDefaultFalse(MiBandEntry.PREF_MIBAND_ENABLE_DEVICE);
+        deviceSettingsPref.setEnabled(deviceEnabled);
+        deviceAdvancedSettingsPref.setEnabled(deviceEnabled);
+        deviceGraphSettingsPref.setEnabled(deviceEnabled);
+    }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.advanced_preferences, rootKey);
         customWatcfacePref = findPreference(MiBandEntry.PREF_MIBAND_USE_CUSTOM_WATHCFACE);
+
+        deviceSettingsPref = findPreference("miband_category_device_settings");
+        deviceGraphSettingsPref = findPreference("miband_category_device_graph_settings");
+        deviceAdvancedSettingsPref = findPreference("miband_category_device_advanced_settings");
+
+
         if (customWatcfacePref != null) {
             customWatcfacePref.setOnPreferenceChangeListener((preference, newValue) -> {
                 if ((Boolean) newValue) {
@@ -117,11 +137,13 @@ public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
     @Override
     public void onResume() {
         super.onResume();
-
+        updateCategoriesVisibility();
         if (MiBandEntry.isNeedToUseCustomWatchface() && !checkAndRequestFilePermissions()) {
             setWatchfacePref(false);
         }
+
     }
+
 
 
     @Override

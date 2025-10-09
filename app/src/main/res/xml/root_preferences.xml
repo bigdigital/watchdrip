@@ -61,7 +61,6 @@
             android:title="@string/title_miband_send_alarms_other" />
     </PreferenceCategory>
     <Preference
-        android:dependency="miband_enable_device"
         android:title="@string/Advanced"
         android:key="advanced_pref"
         android:fragment="com.thatguysservice.huami_xdrip.SettingsAdvancedFragment" />

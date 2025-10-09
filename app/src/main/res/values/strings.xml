@@ -31,7 +31,7 @@
     <string name="summary_miband_goal_notification">Your watch will vibrate when you reach a goal</string>
     <string name="summary_miband_locale_24_hour">Show 24 Hour clock</string>
 
-    <string name="title_miband_nightmode_category">Night mode settings</string>
+    <string name="title_miband_category_update_interval_settings">Update Interval Settings</string>
     <string name="title_miband_nightmode_enabled">Enable night mode settings</string>
     <string name="summary_miband_nightmode_enabled">Reduce band screen brightness during custom time</string>
     <string name="title_miband_nightmode_start">Night mode start</string>
@@ -53,7 +53,7 @@
     <string name="summary_miband_mac">Leave empty for auto search</string>
     <string name="title_vibrate_on_readings">Vibrate on readings</string>
 
-    <string name="title_miband_graph_category">Graph options</string>
+    <string name="title_miband_category_device_graph_settings">Device Graph options</string>
     <string name="title_miband_graph_treatment_enable">Show bolus</string>
 
     <string name="title_miband_graph_hours">Watchface graph hours</string>
@@ -181,4 +181,6 @@ Additional thanks to all patrons for supporting this project and making it possi
 
     <string name="title_all_day_update_interval">All day update interval</string>
     <string name="summary_all_day_update_interval">Defines how often the BG data would be synchronized. Leave empty to receive live data</string>
+    <string name="title_miband_category_device_advanced_settings">Device Advanced Settings</string>
+    <string name="title_miband_category_device_settings">Device Settings</string>
 </resources>

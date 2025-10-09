@@ -21,12 +21,14 @@ import androidx.lifecycle.Observer;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.TwoStatePreference;
 
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.PersistantDeviceInfo;
 import com.thatguysservice.huami_xdrip.models.PersistantDevices;
+import com.thatguysservice.huami_xdrip.models.Pref;
 import com.thatguysservice.huami_xdrip.models.PropertiesUpdate;
 import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
@@ -42,8 +44,20 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_BLUETOOTH_PERMISSIONS;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
+import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.PREF_ENABLE_WEB_SERVER;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
+
+    private void updateAdvancedMenuVisibility(){
+        boolean xiaomiService = Pref.getBooleanDefaultFalse(MiBandEntry.PREF_ENABLE_XIAOMI_SERVICE);
+        boolean serviceEnabled = Pref.getBooleanDefaultFalse(MiBandEntry.PREF_MIBAND_ENABLED);
+        boolean deviceEnabled = Pref.getBooleanDefaultFalse(MiBandEntry.PREF_MIBAND_ENABLE_DEVICE);
+        boolean enabled = serviceEnabled && (deviceEnabled || xiaomiService);
+        if (advancedPreferenseMenu != null) {
+            advancedPreferenseMenu.setEnabled(enabled);
+        }
+    }
+
     public SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
             if (key.startsWith("miband")) {
@@ -52,6 +66,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                     MiBandEntry.refresh();
                 }
             }
+            if (key.startsWith("miband_enable")) {
+                updateAdvancedMenuVisibility();
+            }
+
         }
     };
     BgDataRepository bgDataRepository;
@@ -60,6 +78,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private TwoStatePreference webServerEnabledPref;
     private TwoStatePreference xiaomiServerEnabledPref;
     private ListPreference activeDevicePref;
+
+    private Preference advancedPreferenseMenu;
 
     protected void setListPreferenceData() {
         PersistantDevices devices = MiBand.getDevices();
@@ -118,12 +138,15 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
         servicePref = findPreference(MiBandEntry.PREF_MIBAND_ENABLED);
         deviceEnabledPref = findPreference(MiBandEntry.PREF_MIBAND_ENABLE_DEVICE);
-        webServerEnabledPref = findPreference(MiBandEntry.PREF_ENABLE_WEB_SERVER);
+        webServerEnabledPref = findPreference(PREF_ENABLE_WEB_SERVER);
         xiaomiServerEnabledPref = findPreference(MiBandEntry.PREF_ENABLE_XIAOMI_SERVICE);
+        advancedPreferenseMenu = findPreference("advanced_pref");
         servicePref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
         deviceEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
         webServerEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
         xiaomiServerEnabledPref.setOnPreferenceChangeListener((preference, newValue) -> prefEnableCallback(preference, (Boolean) newValue));
+
+
 
         activeDevicePref = findPreference(MiBandEntry.PREF_MIBAND_ACTIVE_DEVICE);
         activeDevicePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -147,11 +170,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
         });
         setListPreferenceData();
+
+        updateAdvancedMenuVisibility();
         updateListPreferenceVisibility();
     }
-
     private boolean prefEnableCallback(Preference preference, Boolean newValue) {
-       if (preference == deviceEnabledPref && (Boolean) newValue) {
+        if (preference == deviceEnabledPref && (Boolean) newValue) {
             boolean result = checkAndRequestBTPermissions();
             if (!result) {
                 return false;
@@ -179,8 +203,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         FragmentActivity context = this.getActivity();
         List<String> listPermissionsNeeded = new ArrayList<>();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!EasyPermissions.hasPermissions(context, Manifest.permission.BLUETOOTH_CONNECT)) {
                 listPermissionsNeeded.add(android.Manifest.permission.BLUETOOTH_CONNECT);
             }
@@ -195,9 +218,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         // Location needs to be enabled for Bluetooth discovery on Marshmallow.
         if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             listPermissionsNeeded.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
-            if  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-               if(!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_COARSE_LOCATION)){
-                   listPermissionsNeeded.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (!EasyPermissions.hasPermissions(context, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    listPermissionsNeeded.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
                 }
             }
         }

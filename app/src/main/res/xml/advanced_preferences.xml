@@ -1,26 +1,22 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="miband_send_readings"
-        android:title="@string/title_send_readings" />
-    <SwitchPreference
-        android:defaultValue="false"
-        android:dependency="miband_send_readings"
-        android:key="miband_vibrate_on_readings"
-        android:title="@string/title_vibrate_on_readings" />
-
-    <EditTextPreference
-        android:defaultValue=""
-        android:digits="0123456789"
-        android:inputType="number"
-        android:key="miband_all_day_update_interval"
-        android:summary="@string/summary_all_day_update_interval"
-        android:title="@string/title_all_day_update_interval" />
-
     <PreferenceCategory
-        android:title="@string/title_miband_graph_category"
-        android:key="miband_graph_category">
+        android:key="miband_category_device_settings"
+        android:title="@string/title_miband_category_device_settings">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="miband_send_readings"
+            android:title="@string/title_send_readings" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:dependency="miband_send_readings"
+            android:key="miband_vibrate_on_readings"
+            android:title="@string/title_vibrate_on_readings" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="miband_category_device_graph_settings"
+        android:title="@string/title_miband_category_device_graph_settings">
         <EditTextPreference
             android:defaultValue="4"
             android:digits="0123456789"
@@ -34,8 +30,16 @@
             android:title="@string/title_miband_graph_treatment_enable" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:key="miband_nightmode_category"
-        android:title="@string/title_miband_nightmode_category">
+        android:key="miband_category_update_interval_settings"
+        android:title="@string/title_miband_category_update_interval_settings">
+
+        <EditTextPreference
+            android:defaultValue=""
+            android:digits="0123456789"
+            android:inputType="number"
+            android:key="miband_all_day_update_interval"
+            android:summary="@string/summary_all_day_update_interval"
+            android:title="@string/title_all_day_update_interval" />
 
         <SwitchPreference
             android:defaultValue="false"
@@ -67,33 +71,37 @@
             android:summary="@string/summary_miband_interval_in_nightmode"
             android:title="@string/title_miband_interval_in_nightmode" />
     </PreferenceCategory>
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="debug_miband_use_custom_watchface"
-        android:summary="@string/use_custom_watcface_summary"
-        android:switchTextOff="@string/short_off_text_for_switches"
-        android:switchTextOn="@string/short_on_text_for_switches"
-        android:title="@string/use_custom_watchface_title"
-        app:allowDividerAbove="true"/>
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="debug_miband_disable_high_mtu"
-        android:summary="@string/summary_disable_hight_mtu"
-        android:switchTextOff="@string/short_off_text_for_switches"
-        android:switchTextOn="@string/short_on_text_for_switches"
-        android:title="@string/title_disable_hight_mtu" />
-    <EditTextPreference
-        android:defaultValue="90"
-        android:digits="0123456789"
-        android:inputType="number"
-        android:key="advanced_rssi_threshold"
-        android:summary="@string/advanced_rssi_threshold_summary"
-        android:title="@string/advanced_rssi_threshold_title" />
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="debug_miband_force_new_protocol"
-        android:summary="@string/summary_force_new_protocol"
-        android:switchTextOff="@string/short_off_text_for_switches"
-        android:switchTextOn="@string/short_on_text_for_switches"
-        android:title="@string/title_force_new_protocol" />
+    <PreferenceCategory
+        android:key="miband_category_device_advanced_settings"
+        android:title="@string/title_miband_category_device_advanced_settings">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="debug_miband_use_custom_watchface"
+            android:summary="@string/use_custom_watcface_summary"
+            android:switchTextOff="@string/short_off_text_for_switches"
+            android:switchTextOn="@string/short_on_text_for_switches"
+            android:title="@string/use_custom_watchface_title"
+            app:allowDividerAbove="true" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="debug_miband_disable_high_mtu"
+            android:summary="@string/summary_disable_hight_mtu"
+            android:switchTextOff="@string/short_off_text_for_switches"
+            android:switchTextOn="@string/short_on_text_for_switches"
+            android:title="@string/title_disable_hight_mtu" />
+        <EditTextPreference
+            android:defaultValue="90"
+            android:digits="0123456789"
+            android:inputType="number"
+            android:key="advanced_rssi_threshold"
+            android:summary="@string/advanced_rssi_threshold_summary"
+            android:title="@string/advanced_rssi_threshold_title" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="debug_miband_force_new_protocol"
+            android:summary="@string/summary_force_new_protocol"
+            android:switchTextOff="@string/short_off_text_for_switches"
+            android:switchTextOn="@string/short_on_text_for_switches"
+            android:title="@string/title_force_new_protocol" />
+    </PreferenceCategory>
 </PreferenceScreen>

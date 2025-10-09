@@ -428,14 +428,14 @@ public class MiBandService extends BaseBluetoothSequencer {
                 startBgTimer();
                 return false;
             case CMD_UPDATE_BG:
-                updateLatestBgData(bundle);
+                updateLatestBgData(bundle, false);
                 if (isNightMode) {
                     break;
                 }
                 startBgTimer();
                 break;
             case CMD_UPDATE_BG_FORCE:
-                updateLatestBgData(bundle);
+                updateLatestBgData(bundle, true);
                 startBgTimer();
                 break;
             case CMD_LOCAL_BG_FORCE_REMOTE:
@@ -617,7 +617,7 @@ public class MiBandService extends BaseBluetoothSequencer {
 
         expireDate.setTimeInMillis(System.currentTimeMillis() + interval);
 
-        if (MiBandEntry.isDeviceEnabled() && MiBandEntry.isNightModeEnabled()) {
+        if (MiBandEntry.isNightModeEnabled()) {
             int nightModeInterval = MiBandEntry.getNightModeInterval();
             if (nightModeInterval != MiBandEntry.NIGHT_MODE_INTERVAL_STEP) {
                 Calendar currCal = Calendar.getInstance();
@@ -1752,12 +1752,14 @@ public class MiBandService extends BaseBluetoothSequencer {
         }
     }
 
-    private void updateLatestBgData(Bundle bundle) {
+    private void updateLatestBgData(Bundle bundle, boolean forceXiaomiService) {
         latestBgDataBundle = bundle;
         bgDataLatest = new BgData(bundle);
         bgDataRepository.setNewBgData(bgDataLatest);
         bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_received_data));
-
+        if (!forceXiaomiService && isNightMode) {
+            return;
+        }
         XiaomiWearService.bgForce(new WebServiceData(bgDataLatest, latestBgDataBundle, true).getGson());
     }
 

@@ -67,7 +67,7 @@ public class MiBandEntry {
 
                     int nightModeInterval = MiBandEntry.getNightModeInterval();
                     preference.setTitle(String.format("%s (%d %s)", title_text, nightModeInterval, minutes));
-
+                    refresh();
                 } else if (key.equals(MiBandEntry.PREF_MIBAND_ALL_DAY_INTERVAL)) {
                     int dayModeInterval = Helper.tolerantParseInt((String) value, 0);
                     final String minutes = HuamiXdrip.gs(R.string.unit_minutes);
@@ -76,6 +76,7 @@ public class MiBandEntry {
                         preference.setTitle(String.format("%s (%s)", title_text, "live"));
                     else
                         preference.setTitle(String.format("%s (%d %s)", title_text, dayModeInterval, minutes));
+                    refresh();
                 } else if (key.equals(MiBandEntry.PREF_MIBAND_GRAPH_LIMIT)) {
                     final int ivalue = (int) value;
                     setGraphLimit(ivalue);

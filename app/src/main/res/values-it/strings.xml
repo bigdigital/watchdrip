@@ -19,7 +19,7 @@
     <string name="summary_miband_goal_notification">Il tuo orologio vibrerà quando raggiungi un obiettivo</string>
     <string name="summary_miband_locale_24_hour">Mostra orologio 24 ore</string>
 
-    <string name="title_miband_nightmode_category">Impostazioni modalità notturna</string>
+    <string name="title_miband_category_update_interval_settings">Aggiorna le impostazioni dell\'intervallo</string>
     <string name="title_miband_nightmode_enabled">Abilita le impostazioni della modalità notturna</string>
     <string name="summary_miband_nightmode_enabled">Riduci la luminosità dello schermo della band in un intervallo personalizzato</string>
     <string name="title_miband_nightmode_start">Inizio modalità notturna</string>
@@ -41,7 +41,7 @@
     <string name="summary_miband_mac">Lasciare vuoto per la ricerca automatica</string>
     <string name="title_vibrate_on_readings">Vibra alle letture</string>
 
-    <string name="title_miband_graph_category">Opzioni del grafico</string>
+    <string name="title_miband_category_device_graph_settings">Opzioni del grafico</string>
     <string name="title_miband_graph_treatment_enable">Mostra il bolo</string>
 
     <string name="title_miband_miband_graph_limit">Limiti del grafico</string>
