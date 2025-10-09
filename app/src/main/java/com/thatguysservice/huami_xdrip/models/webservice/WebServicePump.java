@@ -13,9 +13,11 @@ public class WebServicePump {
     public WebServicePump( Bundle bundle) {
         String pumpJSON = bundle.getString("pumpJSON");
         JSONObject json = null;
-        try {
-            json = new JSONObject(pumpJSON);
-        } catch (JSONException e) {
+        if (pumpJSON != null) {
+            try {
+                json = new JSONObject(pumpJSON);
+            } catch (JSONException e) {
+            }
         }
         try {
             reservoir = json.getDouble("reservoir");
