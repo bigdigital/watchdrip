@@ -38,6 +38,9 @@ import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -47,6 +50,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 import static com.thatguysservice.huami_xdrip.HuamiXdrip.gs;
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_BLUETOOTH_PERMISSIONS;
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_READ_WRITE_PERMISSIONS;
+import static com.thatguysservice.huami_xdrip.utils.FileUtils.getExternalDir;
 import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.isLoggingEnabled;
 
 public class MainActivity extends AppCompatActivity implements
@@ -280,6 +284,8 @@ public class MainActivity extends AppCompatActivity implements
         };
 
         bgDataRepository.getServiceStatus().observe(this, serviceStateObserver);
+
+        getExternalDir();
     }
 
     private void handleFragmentBackButton(Toolbar toolbar) {

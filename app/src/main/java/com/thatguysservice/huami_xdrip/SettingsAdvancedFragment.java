@@ -1,10 +1,13 @@
 package com.thatguysservice.huami_xdrip;
 
 import android.Manifest;
-import android.content.SharedPreferences;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.text.InputType;
 import android.widget.EditText;
 
@@ -18,7 +21,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.TwoStatePreference;
 
 import com.thatguysservice.huami_xdrip.models.Pref;
-import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.utils.time.TimePreference;
 import com.thatguysservice.huami_xdrip.utils.time.TimePreferenceDialogFragmentCompat;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
@@ -29,7 +31,6 @@ import java.util.List;
 import pub.devrel.easypermissions.EasyPermissions;
 
 import static com.thatguysservice.huami_xdrip.models.Constants.REQUEST_ID_READ_WRITE_PERMISSIONS;
-import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.PREF_ENABLE_WEB_SERVER;
 
 public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
     TwoStatePreference customWatcfacePref;
@@ -120,6 +121,20 @@ public class SettingsAdvancedFragment extends PreferenceFragmentCompat {
             EasyPermissions.requestPermissions(context, rationaleText, REQUEST_ID_READ_WRITE_PERMISSIONS, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]));
 
             return false;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                    startActivity(intent);
+                } catch (Exception ex){
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+                return false;
+            }
         }
         return true;
     }
