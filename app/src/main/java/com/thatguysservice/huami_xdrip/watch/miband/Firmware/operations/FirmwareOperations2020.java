@@ -69,11 +69,7 @@ public class FirmwareOperations2020 extends FirmwareOperationsNew {
             return;
         }
 
-        //  devices return 0x57 as their D2 acknowledgement instead of standard 0x01
-        boolean isD2DeviceAck = value[0] == OperationCodes.RESPONSE
-                && value[1] == COMMAND_SEND_FIRMWARE_INFO
-                && (value[2] & 0xff) == 0x57;
-        boolean success = (value[2] == OperationCodes.SUCCESS) || ((value[1] == REPLY_UPDATE_PROGRESS) && value.length == 6) || isD2DeviceAck;
+        boolean success = (value[2] == OperationCodes.SUCCESS) || ((value[1] == REPLY_UPDATE_PROGRESS) && value.length == 6);
         String seq = getSequence();
         if (value[0] == OperationCodes.RESPONSE && success) {
             try {
@@ -85,7 +81,6 @@ public class FirmwareOperations2020 extends FirmwareOperationsNew {
                             nextSequence();
                             processFirmwareSequence();
                         }
-                        break;
                     }
                     case COMMAND_SEND_FIRMWARE_INFO: {
                         if (seq.equals(SequenceStateVergeNew.WAITING_TRANSFER_SEND_WF_INFO_RESPONSE)) {
