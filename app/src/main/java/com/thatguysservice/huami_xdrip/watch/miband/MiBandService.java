@@ -47,14 +47,18 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.polidea.rxandroidble2.ConnectionParameters;
 import com.polidea.rxandroidble2.RxBleConnection;
 import com.polidea.rxandroidble2.RxBleDeviceServices;
@@ -74,6 +78,7 @@ import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.services.XiaomiWearService;
+import com.thatguysservice.huami_xdrip.services.GarminService;
 import com.thatguysservice.huami_xdrip.utils.Version;
 import com.thatguysservice.huami_xdrip.utils.bt.Subscription;
 import com.thatguysservice.huami_xdrip.utils.framework.PoorMansConcurrentLinkedDeque;
@@ -103,6 +108,8 @@ import com.thatguysservice.huami_xdrip.webservice.WebServer;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -138,7 +145,6 @@ public class MiBandService extends BaseBluetoothSequencer {
     private static final int CGI_WAIT_TIMEOUT = (int) (Constants.SECOND_IN_MS * 5);
     private static final int CGI_WAIT_DELAY = 100;
     static BatteryInfo batteryInfo = new BatteryInfo();
-    static private long bgWakeupTime;
 
     static {
         huntCharacterstics.add(Const.UUID_CHAR_HEART_RATE_MEASUREMENT);
@@ -175,6 +181,14 @@ public class MiBandService extends BaseBluetoothSequencer {
     private Bundle latestBgDataBundle;
     private WebServer webServer;
     private boolean isConnectionStopped = true;
+
+    long lastTimeTir=0;
+    private String isNormal="1";
+    ArrayList<String> valoresDia=new ArrayList<String>();
+    boolean started=false;
+
+    private String inRange="0",lowRange="0",highRange="0";
+
     private WebServer.CommonGatewayInterface CGI_getInfoResponse = new WebServer.CommonGatewayInterface() {
         @Override
         public String run(Map<String, List<String>> params) {
@@ -185,11 +199,11 @@ public class MiBandService extends BaseBluetoothSequencer {
             boolean includeGraph = false;
             if (params.containsKey("graph")) {
                 List<String> graph = params.get("graph");
-                if (graph.get(0).equals("1")) {
+                if (graph != null && !graph.isEmpty() && "1".equals(graph.get(0))) {
                     includeGraph = true;
                 }
             }
-            return new WebServiceData(bgDataLatest, latestBgDataBundle, includeGraph).getGson();
+            return new WebServiceData(bgDataLatest, latestBgDataBundle, includeGraph,lowRange,inRange,highRange).getGson();
         }
     };
 
@@ -200,13 +214,21 @@ public class MiBandService extends BaseBluetoothSequencer {
             Double carbs = 0.0;
             Double insulin = 0.0;
             try {
-                carbs = Double.valueOf(params.get("carbs").get(0));
+                List<String> carbParams = params.get("carbs");
+                if (carbParams != null && !carbParams.isEmpty()) {
+                    carbs = Double.valueOf(carbParams.get(0));
+                }
             } catch (Exception e) {
+                UserError.Log.e(TAG, "Error parsing carbs: " + e.getMessage());
             }
 
             try {
-                insulin = Double.valueOf(params.get("insulin").get(0));
+                List<String> insulinParams = params.get("insulin");
+                if (insulinParams != null && !insulinParams.isEmpty()) {
+                    insulin = Double.valueOf(insulinParams.get(0));
+                }
             } catch (Exception e) {
+                UserError.Log.e(TAG, "Error parsing insulin: " + e.getMessage());
             }
             if (addTreatment(carbs, insulin)) {
                 isWaitingAddTreatmentResponse = true;
@@ -293,6 +315,7 @@ public class MiBandService extends BaseBluetoothSequencer {
 
     @Override
     public void onDestroy() {
+        started=false;
         UserError.Log.e(TAG, "Killing service ");
         stopWebServer();
         super.onDestroy();
@@ -345,6 +368,37 @@ public class MiBandService extends BaseBluetoothSequencer {
         final PowerManager.WakeLock wl = Helper.getWakeLock("Miband service", 60000);
         try {
             if (shouldServiceRun()) {
+
+                if(!started) {
+                    started = true;
+                    try {
+                        SharedPreferences prefs = this.getSharedPreferences("APP_DATA", Context.MODE_PRIVATE);
+                        Gson gson = new Gson();
+
+                        String json = prefs.getString("tirData", null);
+                        Log.e("TIRDATA", "VALOR JSON " + json);
+                        Type type = new TypeToken<ArrayList<String>>() {
+                        }.getType();
+                        valoresDia = gson.fromJson(json, type);
+                        if (valoresDia == null)
+                            valoresDia = new ArrayList<String>();
+                    } catch (Exception e) {
+                        valoresDia = new ArrayList<String>();
+                    }
+                    if (valoresDia.size() > 1)
+                        isNormal = valoresDia.get(valoresDia.size() - 1);
+                    else
+                        isNormal = "1";
+
+                    SimpleDateFormat formatofecha = new SimpleDateFormat("ddMMyyyy");
+                    Date fechaAhora = new Date();
+                    String hoyString = formatofecha.format(fechaAhora);
+                    if (valoresDia.isEmpty() || (valoresDia.size()>0 && !valoresDia.get(0).equals(hoyString))) {
+                        valoresDia.clear();
+                        valoresDia.add(hoyString);
+                    }
+                }
+
                 String function = null;
                 if (intent != null) {
                     function = intent.getStringExtra(INTENT_FUNCTION_KEY);
@@ -389,6 +443,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 } else {
                     stopConnection();
                 }
+
                 return START_STICKY;
             } else {
                 deactivateService();
@@ -649,7 +704,6 @@ public class MiBandService extends BaseBluetoothSequencer {
 
     private void stopBgUpdateTimer() {
         Helper.cancelAlarm(HuamiXdrip.getAppContext(), bgServiceIntent);
-        bgWakeupTime = 0;
         isNightMode = false;
     }
 
@@ -660,7 +714,6 @@ public class MiBandService extends BaseBluetoothSequencer {
             UserError.Log.d(TAG, "Scheduling next BgTimer in: " + Helper.niceTimeScalar(retry_in) + " @ " + Helper.dateTimeText(retry_in + Helper.tsl()));
             bgServiceIntent = WakeLockTrampoline.getPendingIntent(this.getClass(), Constants.MIBAND_SERVICE_BG_RETRY_ID, CMD_LOCAL_BG_FORCE_REMOTE);
             Helper.wakeUpIntent(HuamiXdrip.getAppContext(), retry_in, bgServiceIntent);
-            bgWakeupTime = Helper.tsl() + retry_in;
         } else {
             UserError.Log.d(TAG, "Retry timer was not scheduled");
         }
@@ -1603,7 +1656,7 @@ public class MiBandService extends BaseBluetoothSequencer {
     public void writeToConfiguration(byte[] data) {
         if (useV2ChunkedProtocol) {
             data = ArrayUtils.insert(0, data, (byte) 1);
-            writeToChunkedV2(OperationCodes.CHUNKED_V2_ENDPOINT_COMPAT, getNextHandle(), data, sharedSessionKey != null);
+            writeToChunkedV2(OperationCodes.CHUNKED_V2_ENDPOINT_COMPAT, getNextHandle(), data, true);
         } else {
             I.connection.writeCharacteristic(Const.UUID_CHARACTERISTIC_3_CONFIGURATION, data)
                     .subscribe(val -> {
@@ -1637,10 +1690,6 @@ public class MiBandService extends BaseBluetoothSequencer {
         int header_size = 11;
 
         if (encrypt) {
-            if (sharedSessionKey == null) {
-                UserError.Log.e(TAG, "writeToChunkedV2: sharedSessionKey is null, cannot encrypt");
-                return;
-            }
             byte[] messagekey = new byte[16];
             for (int i = 0; i < 16; i++) {
                 messagekey[i] = (byte) (sharedSessionKey[i] ^ handle);
@@ -1761,10 +1810,125 @@ public class MiBandService extends BaseBluetoothSequencer {
         bgDataLatest = new BgData(bundle);
         bgDataRepository.setNewBgData(bgDataLatest);
         bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_received_data));
-        if (!forceXiaomiService && isNightMode) {
-            return;
+        try {
+
+            if(valoresDia.size()>0) {
+                SimpleDateFormat formatofecha = new SimpleDateFormat("ddMMyyyy");
+                Date fechaAhora = new Date();
+                String hoyString = formatofecha.format(fechaAhora);
+                if (!valoresDia.get(0).equals(hoyString)) {
+                    valoresDia.clear();
+                    valoresDia.add(hoyString);
+                }
+
+                long time = bgDataLatest.getTimeStamp();
+
+                if (lastTimeTir != time) {
+                    Date fechaMediaNoche = formatofecha.parse(hoyString);
+                    long minutos = (fechaAhora.getTime() - fechaMediaNoche.getTime()) / 1000 / 60;
+                    while (valoresDia.size() < minutos) {
+                        valoresDia.add(isNormal);
+                    }
+                    boolean isHigh = bgDataLatest.isBgHigh();
+                    boolean isLow = bgDataLatest.isBgLow();
+
+                    if (isHigh)
+                        isNormal = "2";
+                    else if(isLow)
+                        isNormal = "0";
+                    else
+                        isNormal = "1";
+
+                    lastTimeTir = time;
+                    valoresDia.add(isNormal);
+
+                    SharedPreferences prefs = this.getSharedPreferences("APP_DATA", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+
+                    Gson gson = new Gson();
+                    String json = gson.toJson(valoresDia);
+
+                    editor.putString("tirData", json);
+                    editor.apply();
+                    int inRangeInt = 0;
+                    int lowRangeInt = 0;
+                    int highRangeInt = 0;
+                    int i = 1;
+                    while (i < valoresDia.size()) {
+                        String valor = valoresDia.get(i++);
+                        if (valor.equals("1"))
+                            inRangeInt++;
+                        else if(valor.equals("0"))
+                            lowRangeInt++;
+                        else if(valor.equals("2"))
+                            highRangeInt++;
+                    }
+
+                    //Log.e("TIRDATA", "IN Range " + inRangeInt);
+                    //Log.e("TIRDATA", "Size " + (valoresDia.size() - 1));
+                    if(inRangeInt>0) {
+                        inRangeInt = (int) Math.ceil(((double) 100 / ((double) valoresDia.size() - 1)) * (double) inRangeInt);
+                        if (inRangeInt > 100)
+                            inRangeInt = 100;
+                    }
+                    if(inRangeInt<100) {
+                        if(lowRangeInt>0 && highRangeInt==0) {
+                            lowRangeInt = 100 - inRangeInt;
+                        }
+                        else if(highRangeInt>0 && lowRangeInt==0) {
+                            highRangeInt = 100 - inRangeInt;
+                        }
+                        else if(lowRangeInt>0 && highRangeInt>0)
+                        {
+                            if(highRangeInt>=lowRangeInt) {
+                                int highRangeIntpercent = (int) Math.round(((double) 100 / ((double) valoresDia.size() - 1)) * (double) highRangeInt);
+                                if (highRangeIntpercent + inRangeInt >= 100) {
+                                    highRangeIntpercent = (int) Math.floor(((double) 100 / ((double) valoresDia.size() - 1)) * (double) highRangeInt);
+                                    if (highRangeIntpercent + inRangeInt >= 100) {
+                                        highRangeIntpercent = 100 - inRangeInt;
+                                    }
+                                }
+                                highRangeInt=highRangeIntpercent;
+                                lowRangeInt=100-inRangeInt-highRangeInt;
+                            }
+                            else
+                            {
+                                int lowRangeIntpercent = (int) Math.round(((double) 100 / ((double) valoresDia.size() - 1)) * (double) lowRangeInt);
+                                if (lowRangeIntpercent + inRangeInt >= 100) {
+                                    lowRangeIntpercent = (int) Math.floor(((double) 100 / ((double) valoresDia.size() - 1)) * (double) lowRangeInt);
+                                    if (lowRangeIntpercent + inRangeInt >= 100) {
+                                        lowRangeIntpercent = 100 - inRangeInt;
+                                    }
+                                }
+                                lowRangeInt=lowRangeIntpercent;
+                                highRangeInt=100-inRangeInt-lowRangeInt;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        highRangeInt=0;
+                        lowRangeInt=0;
+                    }
+                    Log.e("TIRDATA", "IN Range " + inRangeInt);
+                    Log.e("TIRDATA", "LOW Range " + lowRangeInt);
+                    Log.e("TIRDATA", "HIGH Range " + highRangeInt);
+
+                    //inRangeInt = (int) Math.round(((double) 100 / ((double) 1440)) * (double) inRangeInt);
+                    inRange = "" + inRangeInt;
+                    lowRange = "" + lowRangeInt;
+                    highRange = "" + highRangeInt;
+                    if (!forceXiaomiService && isNightMode) {
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+
         }
-        XiaomiWearService.bgForce(new WebServiceData(bgDataLatest, latestBgDataBundle, true).getGson());
+        String jsonString=new WebServiceData(bgDataLatest, latestBgDataBundle, true,lowRange,inRange,highRange).getGson();
+        GarminService.bgForce(jsonString);
+        XiaomiWearService.bgForce(jsonString);
     }
 
     private void updateBgData() {

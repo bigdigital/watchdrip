@@ -31,10 +31,10 @@ android {
     defaultConfig {
         applicationId "com.thatguysservice.huami_xdrip"
         minSdk 24
-        targetSdk 31
+        targetSdk 33
 
         // Note: always bump BOTH versionCode and versionName!
-        versionName "0.4.4"
+        versionName "0.4.5"
         versionCode 28
         buildConfigField "long", "buildTimestamp", generateTimestamp()
         buildConfigField "int", "targetSDK", targetSdkVersion.mApiLevel.toString()
@@ -44,6 +44,12 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }
 
     dataBinding {
@@ -139,4 +145,5 @@ dependencies {
     implementation 'com.github.tonyofrancis.Fetch:fetch2:3.3.0'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
     implementation 'com.faendir.rhino:rhino-android:1.6.0'
+    implementation "com.garmin.connectiq:ciq-companion-app-sdk:2.4.0@aar"
 }

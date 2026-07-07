@@ -24,6 +24,12 @@
         android:title="@string/title_enable_xiaomi_service" />
     <SwitchPreference
         android:defaultValue="false"
+        android:dependency="miband_enabled"
+        android:key="miband_enable_garmin_service"
+        android:summary="@string/summary_enable_garmin_service"
+        android:title="@string/title_enable_garmin_service" />
+    <SwitchPreference
+        android:defaultValue="false"
         android:key="debug_miband_enable_logs"
         android:summary="@string/summary_enable_loggin"
         android:switchTextOff="@string/short_off_text_for_switches"

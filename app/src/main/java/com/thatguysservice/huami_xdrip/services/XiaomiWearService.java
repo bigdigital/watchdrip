@@ -110,36 +110,42 @@ public class XiaomiWearService extends Service {
             return;
         }
         UserError.Log.d(TAG, "updateWearBg");
-        xiaomiWatchHelper.launchApp("com.application.watch.watchdrip", obj -> {
-            UserError.Log.d(TAG, "launchApp code: " + obj.getCode());
-            if (obj.isSuccess()) {
-                UserError.Log.d(TAG, "Init message send");
-                Helper.threadSleep(1000);
-                xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
-                    UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
-                    if (obj2.isSuccess()) {
-                        UserError.Log.d(TAG, "send -> " + obj.isSuccess());
-                        cancelRetryTimer();
-                    }
-                });
-                Helper.threadSleep(1000);
-                xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
-                    UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
-                    if (obj2.isSuccess()) {
-                        UserError.Log.d(TAG, "send -> " + obj.isSuccess());
-                        cancelRetryTimer();
-                    }
-                });
-                Helper.threadSleep(1000);
-                xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
-                    UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
-                    if (obj2.isSuccess()) {
-                        UserError.Log.d(TAG, "send -> " + obj.isSuccess());
-                        cancelRetryTimer();
-                    }
-                });
-            }
-        });
+        try {
+            xiaomiWatchHelper.launchApp("com.application.watch.watchdrip", obj -> {
+                UserError.Log.d(TAG, "launchApp code: " + obj.getCode());
+                if (obj.isSuccess()) {
+                    UserError.Log.d(TAG, "Init message send");
+                    Helper.threadSleep(1000);
+                    xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
+                        UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
+                        if (obj2.isSuccess()) {
+                            UserError.Log.d(TAG, "send -> " + obj.isSuccess());
+                            cancelRetryTimer();
+                        }
+                    });
+                    Helper.threadSleep(1000);
+                    xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
+                        UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
+                        if (obj2.isSuccess()) {
+                            UserError.Log.d(TAG, "send -> " + obj.isSuccess());
+                            cancelRetryTimer();
+                        }
+                    });
+                    Helper.threadSleep(1000);
+                    xiaomiWatchHelper.sendMessageToWear(jsonString, obj2 -> {
+                        UserError.Log.d(TAG, "sendMessageToWear code: " + obj2.getCode());
+                        if (obj2.isSuccess()) {
+                            UserError.Log.d(TAG, "send -> " + obj.isSuccess());
+                            cancelRetryTimer();
+                        }
+                    });
+                }
+            });
+        } catch(Exception e)
+        {
+            UserError.Log.e(TAG, "Exception XiaomiWearService: "+e.getMessage());
+        }
+
     }
 
     @Override

@@ -164,6 +164,8 @@ Additional thanks to all patrons for supporting this project and making it possi
 
     <string name="summary_enable_xiaomi_service">Allows to communicate with Xiaomi HyperOS based devices</string>
     <string name="title_enable_xiaomi_service">Enable Xiaomi Service</string>
+    <string name="summary_enable_garmin_service">Allows to communicate with Garmin ConnectIQ based devices</string>
+    <string name="title_enable_garmin_service">Enable Garmin Service</string>
     <string name="action_add_device">Add device</string>
     <string name="action_remove_device">Remove device</string>
     <string name="title_enable_device">Enable device</string>
