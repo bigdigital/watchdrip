@@ -29,6 +29,9 @@ public class BroadcastService {
     public static final String INTENT_SETTINGS = "SETTINGS";
     public static final String INTENT_ALERT_TYPE = "ALERT_TYPE";
     public static final String INTENT_STAT_HOURS = "STAT_HOURS";
+    // Set on the bg bundle by AapsStatusReceiver so MiBandService can tell an
+    // AAPS-pushed reading apart from one that came from xDrip+'s own broadcast.
+    public static final String INTENT_BG_SOURCE_AAPS = "bg.sourceAaps";
 
     public static final String CMD_SET_SETTINGS = "set_settings";
     public static final String CMD_UPDATE_BG_FORCE = "update_bg_force";
@@ -57,6 +60,7 @@ public class BroadcastService {
     public static final String CMD_LOCAL_XDRIP_APP_NO_RESPONSE = CMD_LOCAL_PREFIX + "xdrip_app_no_responce";
     public static final String CMD_LOCAL_XDRIP_APP_GOT_RESPONSE = CMD_LOCAL_PREFIX + "xdrip_app_got_responce";
     public static final String CMD_LOCAL_WATCHDOG = CMD_LOCAL_PREFIX + "watchdog";
+    public static final String CMD_LOCAL_RESEND_BG = CMD_LOCAL_PREFIX + "resend_bg";
 
     private static final int XDRIP_APP_RESPONCE_DELAY = (int) (Constants.SECOND_IN_MS * 10);
 
@@ -78,9 +82,15 @@ public class BroadcastService {
     }
 
     public static void bgForce() {
-        if (shouldServiceRun()) {
-            handleCommand(CMD_UPDATE_BG_FORCE);
+        if (!shouldServiceRun()) {
+            return;
         }
+        //For AAPS only refresh
+        if (MiBandService.isRecentAapsBgAvailable()) {
+            Helper.startService(MiBandService.class, INTENT_FUNCTION_KEY, CMD_LOCAL_RESEND_BG);
+            return;
+        }
+        handleCommand(CMD_UPDATE_BG_FORCE);
     }
 
     public static void handleCommand(String function) {

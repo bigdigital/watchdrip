@@ -18,6 +18,7 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_CANC
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_AFTER_MISSING_ALARM;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_BG_FORCE_REMOTE;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_REFRESH;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_RESEND_BG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_UPDATE_BG_AS_NOTIFICATION;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_WATCHDOG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_LOCAL_XDRIP_APP_NO_RESPONSE;
@@ -27,6 +28,7 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_SNOO
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_STAT_INFO;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_BG_SOURCE_AAPS;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_FUNCTION_KEY;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_REPLY_CODE_OK;
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.bgForce;
@@ -174,6 +176,18 @@ public class MiBandService extends BaseBluetoothSequencer {
     private Bundle latestBgDataBundle;
     private WebServer webServer;
     private boolean isConnectionStopped = true;
+
+    // Whether the latest bg data came from AAPS's status broadcast rather
+    // than xDrip+, and whether it's still fresh - AAPS has no on-demand
+    // fetch API, so BroadcastService.bgForce() checks these (static, since
+    // it has no MiBandService instance to ask) to skip straight to
+    // resending cached data instead of waiting out the xDrip watchdog.
+    private static boolean lastBgFromAaps = false;
+    private static boolean lastBgIsStale = true;
+
+    public static boolean isRecentAapsBgAvailable() {
+        return lastBgFromAaps && !lastBgIsStale;
+    }
 
     private final TimeInRangeTracker tirTracker = new TimeInRangeTracker();
 
@@ -439,8 +453,22 @@ public class MiBandService extends BaseBluetoothSequencer {
                 Helper.static_toast_long(statisticInfo.toString());
                 break;
             case CMD_LOCAL_XDRIP_APP_NO_RESPONSE:
-                bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_no_response));
+                // xDrip+ didn't answer our fetch request within the watchdog
+                // delay - either it's not actually there to ask (AAPS-only,
+                // Garmin/HyperOS/older-protocol setups) or something's wrong
+                // with it. Either way, re-push whatever we already have so
+                // Refresh still does something useful; only show the error
+                // banner when we don't have a recent AAPS reading to fall
+                // back on, since AAPS has no on-demand fetch API and a
+                // timeout there is expected, not a real problem.
+                if (!isRecentAapsBgAvailable()) {
+                    bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_no_response));
+                }
+                resendCachedBgToWatches();
                 startBgTimer();
+                return false;
+            case CMD_LOCAL_RESEND_BG:
+                resendCachedBgToWatches();
                 return false;
             case CMD_UPDATE_BG:
                 updateLatestBgData(bundle, false);
@@ -1772,8 +1800,10 @@ public class MiBandService extends BaseBluetoothSequencer {
     private void updateLatestBgData(Bundle bundle, boolean forceXiaomiService) {
         latestBgDataBundle = bundle;
         bgDataLatest = new BgData(bundle);
+        lastBgFromAaps = bundle.getBoolean(INTENT_BG_SOURCE_AAPS, false);
+        lastBgIsStale = bgDataLatest.isStale();
         bgDataRepository.setNewBgData(bgDataLatest);
-        bgDataRepository.setNewConnectionState(HuamiXdrip.gs(R.string.xdrip_app_received_data));
+        bgDataRepository.setNewConnectionState(HuamiXdrip.getAppContext().getString(R.string.app_received_data, lastBgFromAaps ? "AAPS" : "xDrip"));
 
         tirTracker.update(bgDataLatest);
 
@@ -1781,6 +1811,18 @@ public class MiBandService extends BaseBluetoothSequencer {
             return;
         }
 
+        pushBgToWatches();
+    }
+
+    // Re-pushes whatever bg data we already have
+    private void resendCachedBgToWatches() {
+        if (bgDataLatest == null) {
+            return;
+        }
+        pushBgToWatches();
+    }
+
+    private void pushBgToWatches() {
         String jsonString = new WebServiceData(bgDataLatest, latestBgDataBundle, true, tirTracker.getLowRange(), tirTracker.getInRange(), tirTracker.getHighRange()).getGson();
         GarminService.bgForce(jsonString);
         XiaomiWearService.bgForce(jsonString);

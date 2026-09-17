@@ -16,6 +16,7 @@ import com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry;
 import org.json.JSONObject;
 
 import static com.thatguysservice.huami_xdrip.services.BroadcastService.CMD_UPDATE_BG_FORCE;
+import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_BG_SOURCE_AAPS;
 
 /**
  * Consumes AndroidAPS's "info.nightscout.androidaps.status" broadcast (sent by
@@ -65,6 +66,7 @@ public class AapsStatusReceiver extends BroadcastReceiver {
             bgBundle.putString("bg.deltaName", slopeArrow);
             bgBundle.putBoolean("bg.isHigh", valueMgdl >= high);
             bgBundle.putBoolean("bg.isLow", valueMgdl <= low);
+            bgBundle.putBoolean(INTENT_BG_SOURCE_AAPS, true);
 
             if (extras.containsKey("pumpReservoir") || extras.containsKey("iob") || extras.containsKey("pumpBattery")) {
                 JSONObject pumpJson = new JSONObject();
