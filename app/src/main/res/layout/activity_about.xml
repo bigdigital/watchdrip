@@ -44,9 +44,10 @@
                     android:id="@+id/about_desc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/about_description"
                     android:autoLink="web"
-                    android:linksClickable="true"/>
+                    android:linksClickable="true"
+                    android:text="@string/about_description"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -57,12 +58,14 @@
                     <TextView
                         android:id="@+id/about_version"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                     <TextView
                         android:id="@+id/about_build_timestamp"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
                 </LinearLayout>
 
                 <TextView
@@ -70,16 +73,91 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="25dp"
-                    android:text="@string/supported_devices_desc" />
+                    android:text="@string/supported_devices_desc"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                 <TextView
-                    android:id="@+id/about_supported_devices"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/supported_devices"
-                    android:textSize="20sp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/supported_devices_direct_title"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/supported_devices_direct"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/supported_devices_xiaomi_title"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/supported_devices_xiaomi"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:autoLink="web"
-                    android:linksClickable="true"/>
+                    android:linksClickable="true" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/supported_devices_zepp_title"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/supported_devices_zepp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:autoLink="web"
+                    android:linksClickable="true" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/supported_devices_garmin_title"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/supported_devices_garmin"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:autoLink="web"
+                    android:linksClickable="true" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="25dp"
+                    android:text="@string/support_project_title"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/support_project"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:autoLink="web"
+                    android:linksClickable="true" />
 
             </LinearLayout>
 

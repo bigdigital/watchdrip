@@ -134,8 +134,20 @@
     <string name="about_description">This application is an extension of xDrip, allowing it to communicate with various watches and display glucose levels and alarms directly on the watch. \n
         Special thanks to Nimrod100 for help with testing and implementing support for Xiaomi 8 and 9.\n
 Additional thanks to all patrons for supporting this project and making it possible</string>
-    <string name="supported_devices" translatable="false">\u0020MiBand 2\n MiBand 3\n MiBand 4\n MiBand 5\n MiBand 6\n Amazfit GTR 47mm\n Amazfit GTR 42mm\n  Amazfit GTR2\n Amazfit GTR2e\n Amazfit GTS2\n Amazfit GTS2e\n Amazfit GTS2 Mini\n Amazfit Band5\n Amazfit Bip\n Amazfit Bip Lite\n Amazfit Bip S\n  Amazfit Bip S Lite\n Amazfit T-Rex Pro\n ZEPP OS based devices (using web server)\n Xiaomi 8,9 (by using Xiaomi service) </string>
+    <string name="support_project_title">Support the project</string>
+    <string name="support_project" translatable="false">https://www.patreon.com/xdrip_miband</string>
     <string name="supported_devices_desc">Supported devices:</string>
+    <string name="supported_devices_direct_title">Direct Bluetooth (MiBand / Amazfit)</string>
+    <string name="supported_devices_direct" translatable="false">MiBand 2, MiBand 3, MiBand 4, MiBand 5, MiBand 6\nAmazfit GTR 47mm, Amazfit GTR 42mm, Amazfit GTR2, Amazfit GTR2e\nAmazfit GTS2, Amazfit GTS2e, Amazfit GTS2 Mini\nAmazfit Band5, Amazfit Bip, Amazfit Bip Lite, Amazfit Bip S, Amazfit Bip S Lite\nAmazfit T-Rex Pro</string>
+
+    <string name="supported_devices_xiaomi_title">Xiaomi / HyperOS watches</string>
+    <string name="supported_devices_xiaomi" translatable="false">Xiaomi 8 Pro, Xiaomi 9, Xiaomi 10, Redmi Watch 4, Redmi Watch 6 \u2014 via the Xiaomi service.\nSetup guide: https://bigdigital.home.blog/2024/11/28/xiaomi-89-support/</string>
+
+    <string name="supported_devices_zepp_title">Zepp OS devices</string>
+    <string name="supported_devices_zepp" translatable="false">Many Zepp OS 2+ watches, via the built-in web server and a companion Zepp OS app.\nFull device list and setup: https://watchdrip.org/</string>
+
+    <string name="supported_devices_garmin_title">Garmin (ConnectIQ)</string>
+    <string name="supported_devices_garmin" translatable="false">Garmin watches with ConnectIQ support, via the WatchDrip Garmin app.\nFull device list and setup: https://watchdrip.org/garmin/</string>
     <string name="about_version">Version: %s, Build date:\u0020</string>
     <string name="action_view_about">About</string>
     <string name="Advanced">Advanced</string>
