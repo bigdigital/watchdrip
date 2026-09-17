@@ -57,44 +57,21 @@ public class BgGraphBuilder {
         return mgdl * Constants.MGDL_TO_MMOLL;
     }
 
-    public static String unitized_string(double value, boolean doMgdl) {
+    private static String formatMgdlOrMmol(double value, boolean doMgdl) {
         final DecimalFormat df = new DecimalFormat("#");
-        if (value >= 400) {
-            return "HIGH";
-        } else if (value >= 40) {
-            if (doMgdl) {
-                df.setMaximumFractionDigits(0);
-                return df.format(value);
-            } else {
-                df.setMaximumFractionDigits(1);
-                //next line ensures mmol/l value is XX.x always.  Required by PebbleWatchSync, and probably not a bad idea.
-                df.setMinimumFractionDigits(1);
-                return df.format(mmolConvert(value));
-            }
-        } else if (value > 12) {
-            return "LOW";
+        if (doMgdl) {
+            df.setMaximumFractionDigits(0);
+            return df.format(value);
         } else {
-            switch ((int) value) {
-                case 0:
-                    return "??0";
-                case 1:
-                    return "?SN";
-                case 2:
-                    return "??2";
-                case 3:
-                    return "?NA";
-                case 5:
-                    return "?NC";
-                case 6:
-                    return "?CD";
-                case 9:
-                    return "?AD";
-                case 12:
-                    return "?RF";
-                default:
-                    return "???";
-            }
+            df.setMaximumFractionDigits(1);
+            //next line ensures mmol/l value is XX.x always.  Required by PebbleWatchSync, and probably not a bad idea.
+            df.setMinimumFractionDigits(1);
+            return df.format(mmolConvert(value));
         }
+    }
+
+    public static String unitized_string(double value, boolean doMgdl) {
+        return formatMgdlOrMmol(value > 12 ? value : 0, doMgdl);
     }
 
     public static String unitizedDeltaStringRaw(boolean showUnit, boolean highGranularity, double value, boolean doMgdl) {
