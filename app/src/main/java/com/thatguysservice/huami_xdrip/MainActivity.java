@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements
     private MenuItem renameDeviceItem;
     private BgDataRepository bgDataRepository;
     private MenuItem viewLog;
+    private MenuItem wfStoreItem;
 
     @Override
     protected void onStop() {
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements
         addDeviceItem = menu.findItem(R.id.action_add_device);
         renameDeviceItem = menu.findItem(R.id.action_rename_device);
         viewLog = menu.findItem(R.id.action_view_log);
+        wfStoreItem = menu.findItem(R.id.action_wf_store);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -176,6 +178,10 @@ public class MainActivity extends AppCompatActivity implements
 
         if (viewLog != null) {
             viewLog.setVisible(isLoggingEnabled());
+        }
+
+        if (wfStoreItem != null) {
+            wfStoreItem.setVisible(MiBandEntry.isDeviceEnabled());
         }
 
         if (removeDeviceItem == null || addDeviceItem == null) return;
