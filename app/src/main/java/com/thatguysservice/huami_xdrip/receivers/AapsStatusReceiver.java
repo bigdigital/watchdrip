@@ -25,6 +25,7 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_B
 public class AapsStatusReceiver extends BroadcastReceiver {
     private static final String TAG = AapsStatusReceiver.class.getSimpleName();
     private static final long STALE_THRESHOLD_MS = 15 * 60 * 1000L;
+    private static String lastSignature;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -109,6 +110,19 @@ public class AapsStatusReceiver extends BroadcastReceiver {
                 bgBundle.putDouble("treatment.carbs", AapsTreatmentCache.getCarbs());
                 bgBundle.putLong("treatment.timeStamp", AapsTreatmentCache.getTimestamp());
                 bgBundle.putParcelable("graph.treatment", AapsTreatmentCache.buildTreatmentLine(low, high, doMgdl));
+            }
+
+            // AAPS sends the same status several times per reading; each one would
+            // trigger a full watchface upload, so ignore repeats of identical data.
+            String signature = timeStamp + "|" + valueMgdl + "|" + deltaMgdl + "|" + slopeArrow + "|" + high + "|" + low + "|" + doMgdl
+                    + "|" + bgBundle.getString("pumpJSON") + "|" + statusLine + "|" + bgBundle.getLong("treatment.timeStamp")
+                    + "|" + bgBundle.getDouble("treatment.insulin") + "|" + bgBundle.getDouble("treatment.carbs");
+            synchronized (AapsStatusReceiver.class) {
+                if (signature.equals(lastSignature)) {
+                    UserError.Log.d(TAG, "Ignoring duplicate AAPS status broadcast, BG: " + valueMgdl);
+                    return;
+                }
+                lastSignature = signature;
             }
 
             UserError.Log.d(TAG, "Received AAPS status broadcast, BG: " + valueMgdl);
