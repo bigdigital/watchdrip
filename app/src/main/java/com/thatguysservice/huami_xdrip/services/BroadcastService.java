@@ -124,7 +124,7 @@ public class BroadcastService {
                     intent.putExtra("value", value);
                     break;
                 case CMD_STAT_INFO:
-                    intent.putExtra(INTENT_STAT_HOURS, intentIn.getIntExtra(INTENT_STAT_HOURS, 24));
+                    intent.putExtra(INTENT_STAT_HOURS, intentIn != null ? intentIn.getIntExtra(INTENT_STAT_HOURS, 24) : 24);
                     break;
                 case CMD_ADD_TREATMENT:
                     intent.putExtra("timeStamp", Helper.tsl());
