@@ -7,12 +7,16 @@ import static com.thatguysservice.huami_xdrip.services.BroadcastService.INTENT_F
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 
 import com.eveningoutpost.dexdrip.services.broadcastservice.models.Settings;
 import com.google.gson.Gson;
 import com.thatguysservice.huami_xdrip.HuamiXdrip;
+import com.thatguysservice.huami_xdrip.R;
+import com.thatguysservice.huami_xdrip.repository.BgDataRepository;
 import com.thatguysservice.huami_xdrip.UtilityModels.ForegroundServiceStarter;
 import com.thatguysservice.huami_xdrip.UtilityModels.Inevitable;
 import com.thatguysservice.huami_xdrip.models.Constants;
@@ -25,6 +29,7 @@ import com.thatguysservice.huami_xdrip.watch.miband.MiBandService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import test.invoke.sdk.XiaomiWatchHelper;
 
@@ -37,6 +42,8 @@ public class XiaomiWearService extends Service {
     private PendingIntent serviceIntent;
 
     private static final int SEND_DELAY = (int) (Constants.SECOND_IN_MS * 10);
+    private static final long LAUNCH_TIMEOUT_MS = Constants.SECOND_IN_MS * 15;
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private String json;
 
     public static boolean shouldServiceRun() {
@@ -109,8 +116,20 @@ public class XiaomiWearService extends Service {
         if (!Helper.ratelimit("xiaomi-bg_force-limit", 2)) {
             return;
         }
+        if (jsonString == null || jsonString.isEmpty()) {
+            UserError.Log.d(TAG, "updateWearBg: no data to send");
+            return;
+        }
         UserError.Log.d(TAG, "updateWearBg");
+        final AtomicBoolean launchAnswered = new AtomicBoolean(false);
+        handler.postDelayed(() -> {
+            if (!launchAnswered.get()) {
+                UserError.Log.e(TAG, "No response from Xiaomi Wear for launchApp after " + LAUNCH_TIMEOUT_MS / 1000 + "s");
+                BgDataRepository.getInstance().setNewConnectionState(HuamiXdrip.gs(R.string.xiaomi_wear_no_response));
+            }
+        }, LAUNCH_TIMEOUT_MS);
         xiaomiWatchHelper.launchApp("com.application.watch.watchdrip", obj -> {
+            launchAnswered.set(true);
             UserError.Log.d(TAG, "launchApp code: " + obj.getCode());
             if (obj.isSuccess()) {
                 UserError.Log.d(TAG, "Init message send");
@@ -184,6 +203,7 @@ public class XiaomiWearService extends Service {
         UserError.Log.d(TAG, "killing service");
         foregroundServiceStarter.stop();
         cancelRetryTimer();
+        handler.removeCallbacksAndMessages(null);
         xiaomiWatchHelper.unRegisterWatchHelper();
         super.onDestroy();
     }
