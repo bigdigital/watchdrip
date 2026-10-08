@@ -11,6 +11,7 @@ import fi.iki.elonen.NanoHTTPD;
 
 public class WebServer extends NanoHTTPD {
     public static final int PORT = 29863;
+    private static final int MAX_LOGGED_RESPONSE = 200;
     private final String TAG = this.getClass().getSimpleName();
     private HashMap<String, CommonGatewayInterface> cgiEntries = new HashMap<String, CommonGatewayInterface>();
 
@@ -39,7 +40,8 @@ public class WebServer extends NanoHTTPD {
             UserError.Log.d(TAG, "CGIResp Exception: " + e.getMessage());
             return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, e.getMessage());
         }
-        UserError.Log.d(TAG, "CGIResp: " + msg);
+        // The body can be several KB (graph data), which floods the log, so only keep the start
+        UserError.Log.d(TAG, "CGIResp: " + (msg == null ? null : msg.length() > MAX_LOGGED_RESPONSE ? msg.substring(0, MAX_LOGGED_RESPONSE) + "... (" + msg.length() + " chars)" : msg));
         if (msg == null)
             return newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, msg);
 

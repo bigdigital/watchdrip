@@ -55,6 +55,8 @@ public class ForegroundServiceStarter {
                 mService.startForeground(ongoingNotificationId, Notifications.createNotification(HuamiXdrip.getAppContext().getString(R.string.huami_xdrip_running), mContext));
             } catch (IllegalArgumentException e) {
                 UserError.Log.e(TAG, "Got exception trying to use Android 10+ service starting for " + mService.getClass().getSimpleName() + " " + e);
+            } catch (RuntimeException e) {
+                UserError.Log.e(TAG, "Cannot start foreground for " + mService.getClass().getSimpleName() + " " + e);
             }
 
             //     }

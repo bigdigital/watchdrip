@@ -471,6 +471,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 resendCachedBgToWatches();
                 return false;
             case CMD_UPDATE_BG:
+                updateWebServer();
                 updateLatestBgData(bundle, false);
                 if (isNightMode) {
                     break;
@@ -478,6 +479,7 @@ public class MiBandService extends BaseBluetoothSequencer {
                 startBgTimer();
                 break;
             case CMD_UPDATE_BG_FORCE:
+                updateWebServer();
                 updateLatestBgData(bundle, true);
                 startBgTimer();
                 break;
@@ -507,6 +509,10 @@ public class MiBandService extends BaseBluetoothSequencer {
 
     private void updateWebServer() {
         if (MiBandEntry.isWebServerEnabled()) {
+            if (webServer != null && !webServer.isAlive()) {
+                UserError.Log.e(TAG, "WebServer is not alive, restarting");
+                stopWebServer();
+            }
             if (webServer == null) {
                 try {
                     webServer = new WebServer();

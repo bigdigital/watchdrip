@@ -52,9 +52,19 @@
         android:id="@+id/sendLogsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/button"
+        android:layout_above="@id/saveLogButton"
         android:checked="true"
         android:text="App log" />
+
+    <Button
+        android:id="@+id/saveLogButton"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/button"
+        android:layout_centerHorizontal="true"
+        android:onClick="saveLogToFile"
+        android:text="@string/save_log_to_file" />
 
     <Button
         android:id="@+id/button"

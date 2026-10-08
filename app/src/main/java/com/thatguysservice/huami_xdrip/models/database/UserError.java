@@ -2,7 +2,6 @@ package com.thatguysservice.huami_xdrip.models.database;
 
 import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.isLoggingEnabled;
 
-import android.os.AsyncTask;
 import android.provider.BaseColumns;
 
 import com.reactiveandroid.ReActiveAndroid;
@@ -120,47 +119,23 @@ public class UserError extends Model {
 
 
     public static void cleanup() {
-        new Cleanup().execute(deletable());
-    }
-
-    public static void cleanupByTimeAndClause(final long timestamp, final String clause) {
-        Delete.from(UserError.class)
-                .where("timestamp < ? AND ?%", timestamp, clause)
-                .execute();
+        cleanupRaw();
     }
 
     public synchronized static void cleanupRaw() {
         final long timestamp = Helper.tsl();
-        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS, "severity < 3");
-        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 2, "severity = 3");
-        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 2, "severity > 3");
+        Delete.from(UserError.class)
+                .where("severity < ? AND timestamp < ?", 3, timestamp - Constants.DAY_IN_MS)
+                .execute();
+        Delete.from(UserError.class)
+                .where("severity >= ? AND timestamp < ?", 3, timestamp - Constants.DAY_IN_MS * 2)
+                .execute();
         ReActiveAndroid.getModelAdapter(UserError.class).getModelCache().clear();
     }
 
 
     public static List<UserError> all() {
         return Select.from(UserError.class).orderBy("timestamp desc").fetch();
-    }
-
-    public static List<UserError> deletable() {
-        List<UserError> userErrors = Select
-                .from(UserError.class)
-                .where("severity < ? AND timestamp < ? ", 3, (new Date().getTime() - 1000 * 60 * 60 * 24))
-                .orderBy("timestamp desc")
-                .fetch();
-        List<UserError> highErrors = Select
-                .from(UserError.class)
-                .where("severity = ? AND timestamp < ?", 3, (new Date().getTime() - 1000 * 60 * 60 * 24 * 2))
-                .orderBy("timestamp desc")
-                .fetch();
-        List<UserError> events = Select
-                .from(UserError.class)
-                .where("severity > ? AND timestamp < ?", 3, (new Date().getTime() - 1000 * 60 * 60 * 24 * 2))
-                .orderBy("timestamp desc")
-                .fetch();
-        userErrors.addAll(highErrors);
-        userErrors.addAll(events);
-        return userErrors;
     }
 
     public static List<UserError> bySeverity(Integer[] levels) {
@@ -172,7 +147,9 @@ public class UserError extends Model {
         return Select
                 .from(UserError.class)
                 .where("severity in (" + levelsString.substring(0, levelsString.length() - 1) + ")")
-                .orderBy("timestamp desc")
+                // order by the primary key: timestamp has no index, so sorting by it
+                // scans the whole table, which is very slow when the log is huge
+                .orderBy("id desc")
                 .limit(10000)//too many data can kill akp
                 .fetch();
     }
@@ -233,21 +210,6 @@ public class UserError extends Model {
         } catch (Exception e) {
             Log.e(TAG, "getForTimestamp() Got exception on Select : " + e.toString());
             return null;
-        }
-    }
-
-    private static class Cleanup extends AsyncTask<List<UserError>, Integer, Boolean> {
-        @Override
-        protected Boolean doInBackground(List<UserError>... errors) {
-            try {
-                for (UserError userError : errors[0]) {
-                    userError.delete();
-                    userError.save();
-                }
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
         }
     }
 

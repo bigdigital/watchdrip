@@ -8,6 +8,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.squareup.okhttp.FormEncodingBuilder;
@@ -20,8 +22,8 @@ import com.thatguysservice.huami_xdrip.models.PersistentStore;
 import com.thatguysservice.huami_xdrip.models.database.UserError;
 import com.thatguysservice.huami_xdrip.watch.miband.MiBand;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class SendFeedBackActiviy extends AppCompatActivity {
@@ -71,34 +73,8 @@ public class SendFeedBackActiviy extends AppCompatActivity {
         final EditText contact = findViewById(R.id.contactTextField);
         final EditText yourtext = findViewById(R.id.issueTextField);
 
-        List<Integer> severitiesList = new ArrayList<>();
-        // if (highCheckboxView.isChecked())
-        severitiesList.add(3);
-        // if (mediumCheckboxView.isChecked())
-        severitiesList.add(2);
-        // if (lowCheckboxView.isChecked())
-        severitiesList.add(1);
-        //if (userEventLowCheckboxView.isChecked())
-        severitiesList.add(5);
-        // if (userEventHighCheckboxView.isChecked())
-        severitiesList.add(6);
-        List<UserError> errors = UserError.bySeverity(severitiesList.toArray(new Integer[severitiesList.size()]));
-
-        if (log_data == null || log_data.isEmpty()) {
-            CheckBox logCheckbox = findViewById(R.id.sendLogsCheckBox);
-            if (logCheckbox.isChecked()) {
-                StringBuilder tmp = new StringBuilder(20000);
-                for (UserError item : errors) {
-                    tmp.append(item.toString());
-                    tmp.append("\n");
-                    if (tmp.length() > 200000) {
-                        Helper.static_toast(this, "Could not package up all logs, using most recent", Toast.LENGTH_LONG);
-                        break;
-                    }
-                }
-                log_data = tmp.toString();
-            }
-        }
+        final boolean collectLogs = (log_data == null || log_data.isEmpty())
+                && ((CheckBox) findViewById(R.id.sendLogsCheckBox)).isChecked();
 
         final OkHttpClient client = new OkHttpClient();
 
@@ -110,17 +86,23 @@ public class SendFeedBackActiviy extends AppCompatActivity {
         Helper.static_toast_short("Sending...");
 
         try {
-            String data = Helper.getDeviceDetails() + "\n Version " + Helper.getVersionDetails() + "\n";
-            data = data + "Device: " + MiBand.getMibandType() + "\n Device version: " + MiBand.getVersion() + "\n";
-            data = data + "===\n\n";
-            data = data + yourtext.getText().toString() + " \n\n===\nType: " + type_of_message + "\nLog data:\n\n" + log_data + "\n\n\nSent: " + Helper.dateTimeText(Helper.tsl());
-            final RequestBody formBody = new FormEncodingBuilder()
-                    .add("contact", contact.getText().toString())
-                    .add("body", data)
-                    .add("type", type_of_message)
-                    .build();
+            final String contactText = contact.getText().toString();
+            final String issueText = yourtext.getText().toString();
+            final String deviceHeader = Helper.getDeviceDetails() + "\n Version " + Helper.getVersionDetails() + "\n"
+                    + "Device: " + MiBand.getMibandType() + "\n Device version: " + MiBand.getVersion() + "\n"
+                    + "===\n\n";
             new Thread(() -> {
                 try {
+                    // Reading thousands of log rows is slow, so keep it off the UI thread
+                    if (collectLogs) {
+                        log_data = collectLogData();
+                    }
+                    final String data = deviceHeader + issueText + " \n\n===\nType: " + type_of_message + "\nLog data:\n\n" + log_data + "\n\n\nSent: " + Helper.dateTimeText(Helper.tsl());
+                    final RequestBody formBody = new FormEncodingBuilder()
+                            .add("contact", contactText)
+                            .add("body", data)
+                            .add("type", type_of_message)
+                            .build();
                     final Request request = new Request.Builder()
                             .url(send_url)
                             .post(formBody)
@@ -135,14 +117,51 @@ public class SendFeedBackActiviy extends AppCompatActivity {
                     } else {
                         Helper.static_toast_short("Error sending feedback: " + response.message().toString());
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     Log.e(TAG, "Got exception in execute: " + e.toString());
-                    Helper.static_toast_short("Network connection error");
+                    Helper.static_toast_short("Error sending feedback: " + e.getMessage());
                 }
             }).start();
         } catch (Exception e) {
             Helper.static_toast_short(e.getMessage());
             Log.e(TAG, "General exception: " + e.toString());
         }
+    }
+
+    private final ActivityResultLauncher<String> saveLogLauncher =
+            registerForActivityResult(new ActivityResultContracts.CreateDocument("text/plain"), uri -> {
+                if (uri == null) {
+                    return; // cancelled by the user
+                }
+                new Thread(() -> {
+                    try (OutputStream out = getContentResolver().openOutputStream(uri)) {
+                        final String text = Helper.getDeviceDetails() + "\n Version " + Helper.getVersionDetails() + "\n"
+                                + "Device: " + MiBand.getMibandType() + "\n Device version: " + MiBand.getVersion() + "\n"
+                                + "===\n\n" + collectLogData();
+                        out.write(text.getBytes(StandardCharsets.UTF_8));
+                        Helper.static_toast_long(getString(R.string.log_saved));
+                    } catch (Throwable e) {
+                        Log.e(TAG, "Cannot save log: " + e);
+                        Helper.static_toast_long(getString(R.string.log_save_error) + ": " + e.getMessage());
+                    }
+                }).start();
+            });
+
+    public void saveLogToFile(View view) {
+        saveLogLauncher.launch("watchdrip_log_" + Helper.tsl() + ".txt");
+    }
+
+    private String collectLogData() {
+        final Integer[] severities = {3, 2, 1, 5, 6};
+        final StringBuilder tmp = new StringBuilder(20000);
+        for (UserError item : UserError.bySeverity(severities)) {
+            tmp.append(item.toString());
+            tmp.append("\n");
+            if (tmp.length() > 200000) {
+                Helper.static_toast(this, "Could not package up all logs, using most recent", Toast.LENGTH_LONG);
+                break;
+            }
+        }
+        return tmp.toString();
     }
 }
