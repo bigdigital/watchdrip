@@ -18,7 +18,9 @@ import com.thatguysservice.huami_xdrip.models.Pref;
 import com.thatguysservice.huami_xdrip.models.database.UserError;
 
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +43,8 @@ public class TelinkGattWriter {
     private static final String PREF_SERVICES_PREFIX = "telink_services_";
     // 1: firmware fork with CMD_ID_EXTDATA_AGE, 0: stock, unset: unknown
     private static final String PREF_EXT_AGE_PREFIX = "telink_ext_age_";
+    // Stock firmware is trusted until the app restarts, the thermometer may get reflashed
+    private static final Set<String> stockThisRun = ConcurrentHashMap.newKeySet();
 
     private static final long CONNECT_TIMEOUT_SEC = 20;
     private static final long DISCOVER_TIMEOUT_SEC = 10;
@@ -196,7 +200,7 @@ public class TelinkGattWriter {
     private boolean sendWithAge(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, String mac, PvvxDisplayFrame frame) throws InterruptedException {
         final String key = macKey(PREF_EXT_AGE_PREFIX, mac);
         final int known = Pref.getInt(key, -1);
-        if (known == 0) {
+        if (known == 0 && stockThisRun.contains(mac)) {
             return false;
         }
         byte[] answer = request(gatt, characteristic, frame.buildWithAge(ageSec(frame)), 2);
@@ -217,6 +221,7 @@ public class TelinkGattWriter {
             UserError.Log.d(TAG, mac + (supported ? " shows the data age itself (firmware fork)" : " runs stock firmware, using the standard frame"));
             Pref.setInt(key, supported ? 1 : 0);
         }
+        if (!supported) stockThisRun.add(mac);
         return supported;
     }
 
