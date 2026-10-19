@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="debug_miband_enable_logs"
+        android:summary="@string/summary_enable_loggin"
+        android:title="@string/title_enable_logging"
+        app:iconSpaceReserved="false" />
+    <Preference
+        android:dependency="debug_miband_enable_logs"
+        android:key="troubleshooting_feedback"
+        android:summary="@string/summary_feedback_screen"
+        android:title="@string/action_view_log"
+        app:iconSpaceReserved="false" />
+</PreferenceScreen>

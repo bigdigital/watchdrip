@@ -53,7 +53,7 @@
     <string name="summary_miband_mac">Leave empty for auto search</string>
     <string name="title_vibrate_on_readings">Vibrate on readings</string>
 
-    <string name="title_miband_category_device_graph_settings">Device Graph options</string>
+    <string name="title_miband_category_device_graph_settings">Graph</string>
     <string name="title_miband_graph_treatment_enable">Show bolus</string>
 
     <string name="title_miband_graph_hours">Watchface graph hours</string>
@@ -153,7 +153,6 @@ Additional thanks to all patrons for supporting this project and making it possi
     <string name="supported_devices_garmin" translatable="false">Garmin watches with ConnectIQ support, via the WatchDrip Garmin app.\nFull device list and setup: https://watchdrip.org/garmin/</string>
     <string name="about_version">Version: %s, Build date:\u0020</string>
     <string name="action_view_about">About</string>
-    <string name="Advanced">Advanced</string>
     <string name="action_get_statistic">Get statistic</string>
     <string name="xdrip_app_no_response">No response from xDrip App. Please check xDrip settings</string>
     <string name="app_received_data">Received data from %1$s</string>
@@ -175,13 +174,64 @@ Additional thanks to all patrons for supporting this project and making it possi
     <string name="downloadError">An error occurred during request.</string>
     <string name="unZipError">Could not extract zip.</string>
     <string name="custom_wf_option_enabled">Custom watchface option were enabled</string>
-    <string name="summary_enable_web_server">Allows to communicate with ZEPP OS based devices</string>
+    <string name="summary_enable_web_server">Allows to communicate with ZEPP OS based devices using local WEB server</string>
     <string name="title_enable_web_server">Enable web server</string>
 
     <string name="summary_enable_xiaomi_service">Allows to communicate with Xiaomi HyperOS based devices</string>
     <string name="title_enable_xiaomi_service">Enable Xiaomi Service</string>
     <string name="summary_enable_garmin_service">Allows to communicate with Garmin ConnectIQ based devices</string>
     <string name="title_enable_garmin_service">Enable Garmin Service</string>
+
+    <!-- Settings structure -->
+    <string name="title_category_integrations">Watches &amp; displays</string>
+    <string name="title_category_general">General</string>
+    <string name="screen_miband">Direct BT connection</string>
+    <string name="screen_zepp">Zepp OS (web server)</string>
+    <string name="screen_xiaomi">Xiaomi / HyperOS</string>
+    <string name="screen_garmin">Garmin (ConnectIQ)</string>
+    <string name="screen_telink">Thermometers (Telink)</string>
+    <string name="screen_data">Data &amp; updates</string>
+    <string name="summary_screen_data">Graph, update interval, night mode</string>
+    <string name="screen_troubleshooting">Troubleshooting</string>
+    <string name="summary_screen_troubleshooting">Error logs and feedback</string>
+    <string name="status_on">On</string>
+    <string name="status_off">Off</string>
+    <string name="status_on_detail">On · %1$s</string>
+    <string name="status_telink_no_mac">no thermometer set</string>
+    <plurals name="status_telink_count">
+        <item quantity="one">%d thermometer</item>
+        <item quantity="other">%d thermometers</item>
+    </plurals>
+    <string name="summary_enable_device">Connect directly to a Mi Band or Amazfit watch over Bluetooth</string>
+    <string name="title_miband_category_notifications">Notifications</string>
+    <string name="title_setup_guide">Setup guide and supported devices</string>
+    <string name="url_zepp_setup" translatable="false">https://bigdigital.home.blog/2022/12/21/zepp-os-devices-support/</string>
+    <string name="url_garmin_setup" translatable="false">https://watchdrip.org/garmin/</string>
+    <string name="url_xiaomi_setup" translatable="false">https://bigdigital.home.blog/2024/11/28/xiaomi-89-support/</string>
+    <string name="summary_feedback_screen">View the error log and send it with a description of the problem</string>
+    <string name="bg_no_data">No data</string>
+    <string name="summary_enable_telink_service">Shows glucose on Telink BLE thermometers flashed with custom firmware</string>
+    <string name="title_enable_telink_service">Enable Telink thermometer service</string>
+    <string name="title_telink_category_thermometer">Thermometer</string>
+    <string name="title_telink_selected">Thermometer</string>
+    <string name="summary_telink_selected">Select the thermometer to edit, all of them show the data</string>
+    <string name="title_telink_mac">MAC address</string>
+    <string name="summary_telink_no_thermometer">No thermometer yet, add one from the menu</string>
+    <string name="summary_telink_mac_not_set">Not set</string>
+    <string name="telink_invalid_mac">Not a valid MAC address</string>
+    <string name="telink_default_name">Thermometer %1$d</string>
+    <string name="action_add_thermometer">Add thermometer</string>
+    <string name="action_rename_thermometer">Rename thermometer</string>
+    <string name="action_remove_thermometer">Remove thermometer</string>
+    <string name="confirm_remove_thermometer">Remove %1$s?</string>
+    <string name="title_telink_alarm_beep">Alarm beep</string>
+    <string name="summary_telink_alarm_beep">Send high and low alarms to the thermometer, which beeps on a piezo soldered</string>
+    <string name="title_telink_snooze_minutes">Snooze duration</string>
+    <string name="title_telink_snooze">Snooze alarm</string>
+    <string name="summary_telink_snooze_off">Silence the thermometer alarm for the snooze duration. Also can be snoozed by press thermometer button during an alarm</string>
+    <string name="summary_telink_snooze_on">Snoozed until %1$s, tap to cancel</string>
+    <string name="telink_snooze_key_pressed">Thermometer alarm snoozed with its button</string>
+    <string name="dialog_telink_mac">MAC address of the thermometer, e.g. A4:C1:38:12:34:56 or A4C138123456. More thermometers can be added from the menu.</string>
     <string name="action_add_device">Add device</string>
     <string name="action_remove_device">Remove device</string>
     <string name="title_enable_device">Enable device</string>
@@ -199,6 +249,6 @@ Additional thanks to all patrons for supporting this project and making it possi
 
     <string name="title_all_day_update_interval">All day update interval</string>
     <string name="summary_all_day_update_interval">Defines how often the BG data would be synchronized. Leave empty to receive live data</string>
-    <string name="title_miband_category_device_advanced_settings">Device Advanced Settings</string>
-    <string name="title_miband_category_device_settings">Device Settings</string>
+    <string name="title_miband_category_device_advanced_settings">Advanced</string>
+    <string name="title_miband_category_device_settings">Device</string>
 </resources>

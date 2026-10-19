@@ -114,7 +114,6 @@
     <string name="supported_devices_desc">Dispositivi supportati:</string>
     <string name="about_version">Versione: %s, Data di creazione:\u0020</string>
     <string name="action_view_about">A riguardo</string>
-    <string name="Advanced">Avanzate</string>
     <string name="action_get_statistic">Ottieni statistiche</string>
     <string name="xdrip_app_no_response">Nessuna risposta dall\'app xDrip. Si prega di controllare le impostazioni di xDrip</string>
     <string name="watch_disconnected">Disconnesso</string>

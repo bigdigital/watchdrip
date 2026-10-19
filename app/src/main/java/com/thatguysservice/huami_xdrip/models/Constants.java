@@ -25,6 +25,9 @@ public class Constants {
 
     public static final int GARMIN_SERVICE_RETRY_ID = 1031;
 
+    public static final int TELINK_SERVICE_RETRY_ID = 1032;
+    public static final int TELINK_SERVICE_STALE_ID = 1033;
+
     public static final int REQUEST_ID_READ_WRITE_PERMISSIONS = 1023;
     public static final int REQUEST_ID_BLUETOOTH_PERMISSIONS = 1024;
 }

@@ -1,0 +1,63 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:key="miband_category_device_graph_settings"
+        android:title="@string/title_miband_category_device_graph_settings"
+        app:iconSpaceReserved="false">
+        <EditTextPreference
+            android:defaultValue="4"
+            android:digits="0123456789"
+            android:inputType="number"
+            android:key="miband_graph_hours"
+            android:summary="@string/summary_miband_graph_hours"
+            android:title="@string/title_miband_graph_hours"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="miband_graph_treatment_enable"
+            android:title="@string/title_miband_graph_treatment_enable"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="miband_category_update_interval_settings"
+        android:title="@string/title_miband_category_update_interval_settings"
+        app:iconSpaceReserved="false">
+        <EditTextPreference
+            android:defaultValue=""
+            android:digits="0123456789"
+            android:inputType="number"
+            android:key="miband_all_day_update_interval"
+            android:summary="@string/summary_all_day_update_interval"
+            android:title="@string/title_all_day_update_interval"
+            app:iconSpaceReserved="false" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="miband_nightmode_enabled"
+            android:summary="@string/summary_miband_nightmode_enabled"
+            android:title="@string/title_miband_nightmode_enabled"
+            app:iconSpaceReserved="false" />
+        <com.thatguysservice.huami_xdrip.utils.time.TimePreference
+            android:defaultValue="22"
+            android:dependency="miband_nightmode_enabled"
+            android:key="miband_nightmode_start"
+            android:title="@string/title_miband_nightmode_start"
+            app:allowDividerAbove="false"
+            app:iconSpaceReserved="false" />
+        <com.thatguysservice.huami_xdrip.utils.time.TimePreference
+            android:defaultValue="7"
+            android:dependency="miband_nightmode_enabled"
+            android:key="miband_nightmode_end"
+            android:title="@string/title_miband_nightmode_end"
+            app:allowDividerAbove="false"
+            app:iconSpaceReserved="false" />
+        <SeekBarPreference
+            android:defaultValue="10"
+            android:dependency="miband_nightmode_enabled"
+            android:key="miband_nightmode_interval"
+            android:max="23"
+            android:summary="@string/summary_miband_interval_in_nightmode"
+            android:title="@string/title_miband_interval_in_nightmode"
+            app:allowDividerAbove="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

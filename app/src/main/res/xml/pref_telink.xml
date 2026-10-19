@@ -1,0 +1,50 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="miband_enable_telink_service"
+        android:summary="@string/summary_enable_telink_service"
+        android:title="@string/title_enable_telink_service"
+        app:iconSpaceReserved="false" />
+    <PreferenceCategory
+        android:key="telink_category_thermometer"
+        android:title="@string/title_telink_category_thermometer"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            android:dependency="miband_enable_telink_service"
+            android:dialogTitle="@string/title_telink_selected"
+            android:key="telink_selected_list"
+            android:persistent="false"
+            android:summary="@string/summary_telink_selected"
+            android:title="@string/title_telink_selected"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:dependency="miband_enable_telink_service"
+            android:dialogMessage="@string/dialog_telink_mac"
+            android:key="telink_selected_mac"
+            android:persistent="false"
+            android:title="@string/title_telink_mac"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <SwitchPreference
+        android:defaultValue="false"
+        android:dependency="miband_enable_telink_service"
+        android:key="telink_alarm_beep"
+        android:summary="@string/summary_telink_alarm_beep"
+        android:title="@string/title_telink_alarm_beep"
+        app:iconSpaceReserved="false" />
+    <ListPreference
+        android:defaultValue="30"
+        android:dependency="telink_alarm_beep"
+        android:entries="@array/telink_snooze_entries"
+        android:entryValues="@array/telink_snooze_values"
+        android:key="telink_snooze_minutes"
+        android:title="@string/title_telink_snooze_minutes"
+        app:iconSpaceReserved="false"
+        app:useSimpleSummaryProvider="true" />
+    <Preference
+        android:dependency="telink_alarm_beep"
+        android:key="telink_snooze"
+        android:title="@string/title_telink_snooze"
+        app:iconSpaceReserved="false" />
+</PreferenceScreen>

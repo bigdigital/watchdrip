@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_add_thermometer"
+        android:orderInCategory="1"
+        android:title="@string/action_add_thermometer"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_rename_thermometer"
+        android:orderInCategory="1"
+        android:title="@string/action_rename_thermometer"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_remove_thermometer"
+        android:orderInCategory="1"
+        android:title="@string/action_remove_thermometer"
+        app:showAsAction="never" />
+</menu>

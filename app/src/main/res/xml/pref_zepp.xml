@@ -1,0 +1,18 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="miband_enable_web_server"
+        android:summary="@string/summary_enable_web_server"
+        android:title="@string/title_enable_web_server"
+        app:iconSpaceReserved="false" />
+    <Preference
+        android:icon="@drawable/ic_pref_link"
+        android:key="zepp_setup_guide"
+        android:summary="@string/url_zepp_setup"
+        android:title="@string/title_setup_guide">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="@string/url_zepp_setup" />
+    </Preference>
+</PreferenceScreen>

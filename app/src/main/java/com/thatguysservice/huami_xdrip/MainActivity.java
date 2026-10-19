@@ -414,15 +414,19 @@ public class MainActivity extends AppCompatActivity implements
     @AfterPermissionGranted(REQUEST_ID_READ_WRITE_PERMISSIONS)
     private void readWritePermissionsGranted() {
         Log.d(TAG, "readWritePermissionsGranted");
-        SettingsAdvancedFragment settingsFragment = (SettingsAdvancedFragment) getSupportFragmentManager().findFragmentById(R.id.settings_fragment);
-        settingsFragment.setWatchfacePref(true);
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.settings_fragment);
+        if (fragment instanceof SettingsMiBandFragment) {
+            ((SettingsMiBandFragment) fragment).setWatchfacePref(true);
+        }
     }
 
     @AfterPermissionGranted(REQUEST_ID_BLUETOOTH_PERMISSIONS)
     private void bluetoothPermissionsGranted() {
         Log.d(TAG, "bluetoothPermissionsGranted");
-        SettingsFragment settingsFragment = (SettingsFragment) getSupportFragmentManager().findFragmentById(R.id.settings_fragment);
-        settingsFragment.setDevicePref(true);
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.settings_fragment);
+        if (fragment instanceof BaseSettingsFragment) {
+            ((BaseSettingsFragment) fragment).onBluetoothPermissionsGranted();
+        }
     }
 
     @Override

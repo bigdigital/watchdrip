@@ -26,3 +26,5 @@ patches/
 *.log
 
 /app/release/
+
+keystore.properties

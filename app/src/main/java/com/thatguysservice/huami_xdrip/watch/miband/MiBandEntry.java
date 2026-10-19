@@ -32,6 +32,12 @@ public class MiBandEntry {
     public static final String PREF_ENABLE_WEB_SERVER = "miband_enable_web_server";
     public static final String PREF_ENABLE_XIAOMI_SERVICE = "miband_enable_xiaomi_service";
     public static final String PREF_ENABLE_GARMIN_SERVICE = "miband_enable_garmin_service";
+    public static final String PREF_ENABLE_TELINK_SERVICE = "miband_enable_telink_service";
+    public static final String PREF_TELINK_DEVICES = "telink_devices";
+    public static final String PREF_TELINK_SELECTED = "telink_selected";
+    public static final String PREF_TELINK_ALARM_BEEP = "telink_alarm_beep";
+    public static final String PREF_TELINK_SNOOZE_MINUTES = "telink_snooze_minutes";
+    public static final String PREF_TELINK_SNOOZE_UNTIL = "telink_snooze_until";
     public static final String PREF_MIBAND_SETTINGS = "miband_settings";
     public static final String PREF_MIBAND_PREFERENCES = "miband_preferences";
     public static final String PREF_MIBAND_UPDATE_BG = "update_miband_bg";
@@ -126,6 +132,34 @@ public class MiBandEntry {
 
     public static boolean isGarminServiceEnabled() {
         return isEnabled() && Pref.getBooleanDefaultFalse(PREF_ENABLE_GARMIN_SERVICE);
+    }
+
+    public static boolean isTelinkServiceEnabled() {
+        return isEnabled() && Pref.getBooleanDefaultFalse(PREF_ENABLE_TELINK_SERVICE);
+    }
+
+    public static boolean isTelinkAlarmBeepEnabled() {
+        return Pref.getBooleanDefaultFalse(PREF_TELINK_ALARM_BEEP);
+    }
+
+    public static int getTelinkSnoozeMinutes() {
+        return Pref.getStringToInt(PREF_TELINK_SNOOZE_MINUTES, 30);
+    }
+
+    public static long getTelinkSnoozeUntil() {
+        return Pref.getLong(PREF_TELINK_SNOOZE_UNTIL, 0);
+    }
+
+    public static void setTelinkSnoozeUntil(long time) {
+        Pref.setLong(PREF_TELINK_SNOOZE_UNTIL, time);
+    }
+
+    public static int getTelinkSelected() {
+        return Pref.getInt(PREF_TELINK_SELECTED, 0);
+    }
+
+    public static void setTelinkSelected(int index) {
+        Pref.setInt(PREF_TELINK_SELECTED, index);
     }
 
     public static boolean areAlertsEnabled() {

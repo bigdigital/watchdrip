@@ -1,0 +1,96 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="miband_enable_device"
+        android:summary="@string/summary_enable_device"
+        android:title="@string/title_enable_device"
+        app:iconSpaceReserved="false" />
+    <PreferenceCategory
+        android:key="miband_category_device"
+        android:title="@string/title_miband_category_device_settings"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            android:dialogTitle="@string/title_active_device"
+            android:key="miband_active_device"
+            android:summary="@string/summary_active_device"
+            android:title="@string/title_active_device"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:key="miband_data_mac"
+            android:summary="@string/summary_miband_mac"
+            android:title="@string/title_miband_mac"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:key="miband_data_authkey"
+            android:summary="@string/summary_miband_authkey"
+            android:title="@string/title_miband_authkey"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="miband_category_notifications"
+        android:title="@string/title_miband_category_notifications"
+        app:iconSpaceReserved="false">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:dependency="miband_enable_device"
+            android:key="miband_send_alarms"
+            android:summary="@string/summary_send_alarms"
+            android:title="@string/title_send_alarms"
+            app:iconSpaceReserved="false" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:dependency="miband_enable_device"
+            android:key="miband_send_alarms_other"
+            android:summary="@string/summary_miband_send_alarms_other"
+            android:title="@string/title_miband_send_alarms_other"
+            app:iconSpaceReserved="false" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:dependency="miband_enable_device"
+            android:key="miband_send_readings"
+            android:title="@string/title_send_readings"
+            app:iconSpaceReserved="false" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:dependency="miband_send_readings"
+            android:key="miband_vibrate_on_readings"
+            android:title="@string/title_vibrate_on_readings"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="miband_category_device_advanced_settings"
+        android:title="@string/title_miband_category_device_advanced_settings"
+        app:iconSpaceReserved="false">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:dependency="miband_enable_device"
+            android:key="debug_miband_use_custom_watchface"
+            android:summary="@string/use_custom_watcface_summary"
+            android:title="@string/use_custom_watchface_title"
+            app:iconSpaceReserved="false" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:dependency="miband_enable_device"
+            android:key="debug_miband_disable_high_mtu"
+            android:summary="@string/summary_disable_hight_mtu"
+            android:title="@string/title_disable_hight_mtu"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:defaultValue="90"
+            android:dependency="miband_enable_device"
+            android:digits="0123456789"
+            android:inputType="number"
+            android:key="advanced_rssi_threshold"
+            android:summary="@string/advanced_rssi_threshold_summary"
+            android:title="@string/advanced_rssi_threshold_title"
+            app:iconSpaceReserved="false" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:dependency="miband_enable_device"
+            android:key="debug_miband_force_new_protocol"
+            android:summary="@string/summary_force_new_protocol"
+            android:title="@string/title_force_new_protocol"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

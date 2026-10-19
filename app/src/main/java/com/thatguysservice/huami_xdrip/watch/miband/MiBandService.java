@@ -76,6 +76,7 @@ import com.thatguysservice.huami_xdrip.services.BaseBluetoothSequencer;
 import com.thatguysservice.huami_xdrip.services.BroadcastService;
 import com.thatguysservice.huami_xdrip.services.XiaomiWearService;
 import com.thatguysservice.huami_xdrip.services.GarminService;
+import com.thatguysservice.huami_xdrip.services.TelinkService;
 import com.thatguysservice.huami_xdrip.utils.Version;
 import com.thatguysservice.huami_xdrip.utils.bt.Subscription;
 import com.thatguysservice.huami_xdrip.utils.framework.PoorMansConcurrentLinkedDeque;
@@ -1817,7 +1818,7 @@ public class MiBandService extends BaseBluetoothSequencer {
             return;
         }
 
-        pushBgToWatches();
+        pushBgToWatches(forceXiaomiService);
     }
 
     // Re-pushes whatever bg data we already have
@@ -1825,13 +1826,15 @@ public class MiBandService extends BaseBluetoothSequencer {
         if (bgDataLatest == null) {
             return;
         }
-        pushBgToWatches();
+        pushBgToWatches(true);
     }
 
-    private void pushBgToWatches() {
+    // force: asked for (refresh), also send a reading the thermometers already have
+    private void pushBgToWatches(boolean force) {
         String jsonString = new WebServiceData(bgDataLatest, latestBgDataBundle, true, tirTracker.getLowRange(), tirTracker.getInRange(), tirTracker.getHighRange()).getGson();
         GarminService.bgForce(jsonString);
         XiaomiWearService.bgForce(jsonString);
+        TelinkService.bgForce(bgDataLatest, force);
     }
 
     private void updateBgData() {

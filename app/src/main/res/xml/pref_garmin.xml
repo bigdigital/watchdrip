@@ -1,0 +1,18 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="miband_enable_garmin_service"
+        android:summary="@string/summary_enable_garmin_service"
+        android:title="@string/title_enable_garmin_service"
+        app:iconSpaceReserved="false" />
+    <Preference
+        android:icon="@drawable/ic_pref_link"
+        android:key="garmin_setup_guide"
+        android:summary="@string/url_garmin_setup"
+        android:title="@string/title_setup_guide">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="@string/url_garmin_setup" />
+    </Preference>
+</PreferenceScreen>
