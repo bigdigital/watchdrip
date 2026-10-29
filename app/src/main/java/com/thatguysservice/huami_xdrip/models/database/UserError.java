@@ -2,7 +2,6 @@ package com.thatguysservice.huami_xdrip.models.database;
 
 import static com.thatguysservice.huami_xdrip.watch.miband.MiBandEntry.isLoggingEnabled;
 
-import android.os.AsyncTask;
 import android.provider.BaseColumns;
 
 import com.reactiveandroid.ReActiveAndroid;
@@ -119,21 +118,16 @@ public class UserError extends Model {
     }
 
 
-    public static void cleanup() {
-        new Cleanup().execute(deletable());
-    }
-
-    public static void cleanupByTimeAndClause(final long timestamp, final String clause) {
-        Delete.from(UserError.class)
-                .where("timestamp < ? AND ?%", timestamp, clause)
-                .execute();
-    }
-
-    public synchronized static void cleanupRaw() {
+    // Delete in SQL rather than loading every expired row as a model: on a large
+    // table that load alone outlasts the 10-minute WorkManager limit.
+    public synchronized static void cleanup() {
         final long timestamp = Helper.tsl();
-        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS, "severity < 3");
-        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 2, "severity = 3");
-        cleanupByTimeAndClause(timestamp - Constants.DAY_IN_MS * 2, "severity > 3");
+        Delete.from(UserError.class)
+                .where("severity < ? AND timestamp < ?", 3, timestamp - Constants.DAY_IN_MS)
+                .execute();
+        Delete.from(UserError.class)
+                .where("severity >= ? AND timestamp < ?", 3, timestamp - Constants.DAY_IN_MS * 2)
+                .execute();
         ReActiveAndroid.getModelAdapter(UserError.class).getModelCache().clear();
     }
 
@@ -233,21 +227,6 @@ public class UserError extends Model {
         } catch (Exception e) {
             Log.e(TAG, "getForTimestamp() Got exception on Select : " + e.toString());
             return null;
-        }
-    }
-
-    private static class Cleanup extends AsyncTask<List<UserError>, Integer, Boolean> {
-        @Override
-        protected Boolean doInBackground(List<UserError>... errors) {
-            try {
-                for (UserError userError : errors[0]) {
-                    userError.delete();
-                    userError.save();
-                }
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
         }
     }
 
